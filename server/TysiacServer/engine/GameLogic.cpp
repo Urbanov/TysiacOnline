@@ -779,7 +779,7 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {}
 
-req GameManager::doWork(std::string & message)
+req GameManager::doWork(const std::string & message)
 {
 	req vec;
 	json msg = json::parse(message);

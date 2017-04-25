@@ -150,12 +150,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="engine\GameLogic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="network\manager.cpp" />
     <ClCompile Include="network\server.cpp" />
     <ClCompile Include="network\session.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="engine\GameLogic.hpp" />
     <ClInclude Include="network\manager.h" />
     <ClInclude Include="network\server.h" />
     <ClInclude Include="network\session.h" />

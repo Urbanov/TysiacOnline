@@ -258,7 +258,7 @@ class GameManager {
 public:
 	GameManager();
 	~GameManager();
-	req doWork(std::string &);
+	req doWork(const std::string &);
 	void pushMessage(const request_type &);
 private:
 	std::vector<Croupier> active_games_;

@@ -12,9 +12,15 @@ void SessionManager::unregisterSession(std::size_t id)
 
 void SessionManager::interpret(const std::string& message)
 {
-	// at the moment server broadcasts received message to all connected clients
+	/*// at the moment server broadcasts received message to all connected clients
 	// just for presentation purposes
 	for(auto session : sessions_) {
 		session.second.lock()->write(message);
+	}*/
+	auto return_data = game_.doWork(message);
+	for (auto& msg : return_data) {
+		for(auto id : msg.second) {
+			sessions_[id].lock()->write(msg.first);
+		}
 	}
 }

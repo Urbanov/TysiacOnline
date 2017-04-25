@@ -3,11 +3,13 @@
 #include <unordered_map>
 #include <memory>
 
+#include "../engine/GameLogic.hpp"
 #include "session.h"
 
 class SessionManager {
 private:
 	std::unordered_map<std::size_t, std::weak_ptr<Session>> sessions_;
+	GameManager game_;
 
 public:
 	void registerSession(const std::shared_ptr<Session>& session);

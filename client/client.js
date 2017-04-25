@@ -3,6 +3,7 @@ var player_id;
 var ws = new WebSocket("ws://127.0.0.1:2137");
 
 ws.onmessage = function (event) {
+    alert(event.data);
     var msg = JSON.parse(event.data);
     switch (msg.action) {
         case "chat":
@@ -16,7 +17,7 @@ ws.onmessage = function (event) {
 
         case "add":
             room_id = msg.values;
-            $("#game_id").append(msg.values);
+            $("#game_id").append(msg.id);
             break;
     }
 }
@@ -24,7 +25,8 @@ ws.onmessage = function (event) {
 function joinRoom() {
     var msg = {
         action: "add",
-        player: player_id
+        player: player_id,
+        values: "placeholder"
     };
     ws.send(JSON.stringify(msg));
 }

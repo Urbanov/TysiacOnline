@@ -17,6 +17,7 @@ void SessionManager::interpret(const std::string& message)
 	for(auto session : sessions_) {
 		session.second.lock()->write(message);
 	}*/
+	std::cout << message;
 	auto return_data = game_.doWork(message);
 	for (auto& msg : return_data) {
 		for(auto id : msg.second) {

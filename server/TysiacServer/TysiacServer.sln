@@ -6,10 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TysiacServer", "TysiacServer.vcxproj", "{13944F2A-244B-4F42-987B-B3434289BC0E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32864FCC-E0D1-40B2-96D3-BAD29F837EDA}"
-	ProjectSection(SolutionItems) = preProject
-		engine\GameLogic.cpp = engine\GameLogic.cpp
-		engine\GameLogic.hpp = engine\GameLogic.hpp
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

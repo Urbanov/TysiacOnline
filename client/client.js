@@ -16,7 +16,7 @@ ws.onmessage = function (event) {
             break;
 
         case "add":
-            room_id = msg.values;
+            room_id = msg.id;
             $("#game_id").append(msg.id);
             break;
     }
@@ -35,7 +35,8 @@ function sendMessage() {
     var msg = {
         action: "chat",
         player: player_id,
-        values: $("#text_area").val()
+        values: $("#text_area").val(),
+        id: room_id
     };
     $("#text_area").val("");
     ws.send(JSON.stringify(msg));

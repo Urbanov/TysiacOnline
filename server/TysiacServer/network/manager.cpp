@@ -20,6 +20,7 @@ void SessionManager::interpret(const std::string& message)
 	std::cout << message;
 	auto return_data = game_.doWork(message);
 	for (auto& msg : return_data) {
+		std::cout << msg.first;
 		for(auto id : msg.second) {
 			sessions_[id].lock()->write(msg.first);
 		}

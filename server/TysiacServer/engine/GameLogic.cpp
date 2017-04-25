@@ -817,3 +817,4 @@ void GameManager::pushMessage(const request_type & msg)
 {
 	feedback_ = msg;
 }
+

@@ -1,6 +1,5 @@
 #include "GameLogic.hpp"
 
-
 // <Clas Card>
 
 Card::Card(figures fig, suits s) : figure_(fig), suit_(s), is_used_(false) {}

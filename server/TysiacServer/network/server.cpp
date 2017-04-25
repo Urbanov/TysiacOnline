@@ -37,7 +37,6 @@ void Server::acceptHandler(const boost::system::error_code& error_code)
 {
 	//TODO: handle errors
 	std::shared_ptr<Session> session = std::make_shared<Session>(manager_, std::move(socket_));
-	manager_.registerSession(session);
 	session->run();
 	acceptor_.async_accept(socket_, endpoint_, std::bind(&Server::acceptHandler, this, beast::asio::placeholders::error));
 }

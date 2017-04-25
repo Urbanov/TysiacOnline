@@ -13,6 +13,7 @@ private:
 	beast::streambuf buffer_;
 	std::size_t id_;
 	std::queue<std::string> queue_;
+	bool busy_;
 
 public:
 	Session(SessionManager& manager, boost::asio::ip::tcp::socket&& socket);
@@ -21,5 +22,6 @@ public:
 	void readHandler(const boost::system::error_code& error_code);
 	void write(const std::string& message);
 	void writeHandler(const boost::system::error_code& error_code);
+	void welcome();
 	std::size_t getId() const;
 };

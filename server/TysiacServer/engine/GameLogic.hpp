@@ -53,15 +53,6 @@ enum suits {
 	HEARTS = 100,
 	SPADES = 40
 };
-json command = {
-	{"add", ADD},
-	{"get", GET},
-	{"bid", BID},
-	{"play", PLAY},
-	{"chat", CHAT}
-};
-std::vector<figures> figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
-std::vector<suits> suit_ = { DIAMONDS, CLUBS, HEARTS, SPADES };
 class Card {
 public:
 	Card(figures, suits);

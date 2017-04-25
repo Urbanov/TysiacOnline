@@ -199,6 +199,8 @@ Deck::Deck(const std::vector<Card>& deck) : deck_(deck), deck_it_(deck_.begin())
 
 Deck::Deck()
 {
+	std::vector<figures> figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
+	std::vector<suits> suit_ = { DIAMONDS, CLUBS, HEARTS, SPADES };
 	for (auto i : figure_) {
 		for (auto j : suit_) {
 			deck_.emplace_back(i, j);
@@ -472,6 +474,9 @@ bool Croupier::runGame(const json & msg)
 
 int Croupier::parse(const std::string & str)
 {
+	json command = { { "add", ADD },{ "get", GET },{ "bid", BID },
+					 { "play", PLAY },{ "chat", CHAT } 
+	};
 	return command[str];
 }
 

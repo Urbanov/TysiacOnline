@@ -39,6 +39,7 @@ function sendMessage() {
         id: room_id
     };
     $("#text_area").val("");
+    $("#chatbox").append(msg.player + ": " + msg.values + "<br>");
     ws.send(JSON.stringify(msg));
 }
 

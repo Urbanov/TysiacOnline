@@ -364,13 +364,13 @@ void Tester::translateCard(const Card & card) const
 	case HEARTS:	s += "HEARTS"; break;
 	case SPADES:	s += "SPADES"; break;
 	}
-	//std::cout << s << std::endl;
+	std::cout << s << std::endl;
 }
 
 void Tester::doTests() const
 {
 	for (int i = 0; i < MAX_PLAYERS; ++i) {
-		//std::cout << "Player " << i << ":" << std::endl;
+		std::cout << "Player " << i << ":" << std::endl;
 		for (int j = 0; j < MAX_CARDS; ++j) {
 			translateCard(players_.getPlayer(i).getPlayerDeck().playCard(j));
 		}
@@ -415,7 +415,6 @@ void Croupier::changeStage(stage new_stage)
 
 bool Croupier::runGame(const json & msg)
 {
-	//std::cout << " ELKO " << std::endl;
 	bool ret_val = false;
 	request_type request;
 	json feedback;
@@ -492,8 +491,6 @@ json Croupier::chatMessage(const json & msg)
 			response["who"].push_back(i.getPlayerId());
 		}
 	}
-	std::string parsed = response.dump();
-	//std::cout << parsed << std::endl;
 	return response;
 }
 
@@ -813,6 +810,13 @@ req GameManager::doWork(const std::string & message)
 	}
 	else {
 		active_games_[msg["id"]].runGame(msg);
+		for (auto&& i : feedback_) {
+			std::vector<int> v;
+			for (auto a : i["who"]) {
+				v.push_back(static_cast<int>(a));
+			}
+			vec.emplace_back(std::make_pair(i.dump(), v));
+		}
 	}
 	return vec;
 }

@@ -254,6 +254,7 @@ public:
 private:
 	std::vector<Croupier> active_games_;
 	request_type feedback_;
+	unsigned croupier_counter_;
 };
 
 class Croupier {

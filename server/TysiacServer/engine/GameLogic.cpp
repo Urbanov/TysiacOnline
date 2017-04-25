@@ -415,6 +415,7 @@ void Croupier::changeStage(stage new_stage)
 
 bool Croupier::runGame(const json & msg)
 {
+	std::cout << " ELKO " << std::endl;
 	bool ret_val = false;
 	request_type request;
 	json feedback;
@@ -425,10 +426,10 @@ bool Croupier::runGame(const json & msg)
 		case ADD:
 			if (adder_.addPlayer(msg["player"], msg["values"])) {
 				ret_val = true;
-				for (auto i : players_.getArray()) {
-					players_ids.push_back(i.getPlayerId());
-				}
-				feedback["who"] = players_ids;
+				//for (auto i : players_.getArray()) {
+				//	players_ids.push_back(i.getPlayerId());
+				//}
+				feedback["who"] = msg["player"];//players_ids;
 				feedback["type"] = "update";
 				feedback["action"] = "add";
 				feedback["id"] = croupier_id_;
@@ -436,19 +437,19 @@ bool Croupier::runGame(const json & msg)
 				feedback["values"] = msg["values"];
 				request.push_back(feedback);
 				feedback.clear();
-				if (adder_.isFull()) {
-					feedback["type"] = "update";
-					feedback["action"] = "get";
-					for (auto i : players_.getArray()) {
-						feedback["who"] = i.getPlayerId();
-						for (auto j : i.getPlayerDeck().getDeck()) {
-							feedback["values"].push_back({ j.getSuit(), j.getFigure() });
-						}
-						request.push_back(feedback);
-						feedback.erase("who");
-						feedback.erase("values");
-					}
-				}
+				//if (adder_.isFull()) {
+				//	feedback["type"] = "update";
+				//	feedback["action"] = "get";
+				//	for (auto i : players_.getArray()) {
+				//		feedback["who"] = i.getPlayerId();
+				//		for (auto j : i.getPlayerDeck().getDeck()) {
+				//			feedback["values"].push_back({ j.getSuit(), j.getFigure() });
+				//		}
+				//		request.push_back(feedback);
+				//		feedback.erase("who");
+				//		feedback.erase("values");
+				//	}
+				//}
 			}
 			break;
 		case CHAT :
@@ -481,7 +482,6 @@ int Croupier::parse(const std::string & str)
 
 json Croupier::chatMessage(const json & msg)
 {
-	std::cout << " ELKO " << std::endl;
 	json response = {
 		{"action", "chat"},
 		{"player", msg["player"]},
@@ -777,7 +777,7 @@ void SumScore::resetPlayersAtributes()
 // </Class SumScore>
 
 
-GameManager::GameManager()
+GameManager::GameManager() : croupier_counter_(0)
 {}
 
 GameManager::~GameManager()
@@ -800,7 +800,7 @@ req GameManager::doWork(const std::string & message)
 				return vec;
 			}
 		}
-		active_games_.emplace_back(1, *this);
+		active_games_.emplace_back(croupier_counter_++, *this);
 		active_games_.back().runGame(msg);
 
 		for (auto&& i : feedback_) {

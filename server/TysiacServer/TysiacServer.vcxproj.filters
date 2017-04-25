@@ -18,5 +18,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="network\server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network\session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network\manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="network\server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="network\session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="network\manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="client.html">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -151,6 +151,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="network\manager.cpp" />
+    <ClCompile Include="network\server.cpp" />
+    <ClCompile Include="network\session.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="network\manager.h" />
+    <ClInclude Include="network\server.h" />
+    <ClInclude Include="network\session.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="client.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

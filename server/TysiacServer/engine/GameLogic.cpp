@@ -364,13 +364,13 @@ void Tester::translateCard(const Card & card) const
 	case HEARTS:	s += "HEARTS"; break;
 	case SPADES:	s += "SPADES"; break;
 	}
-	std::cout << s << std::endl;
+	//std::cout << s << std::endl;
 }
 
 void Tester::doTests() const
 {
 	for (int i = 0; i < MAX_PLAYERS; ++i) {
-		std::cout << "Player " << i << ":" << std::endl;
+		//std::cout << "Player " << i << ":" << std::endl;
 		for (int j = 0; j < MAX_CARDS; ++j) {
 			translateCard(players_.getPlayer(i).getPlayerDeck().playCard(j));
 		}
@@ -415,7 +415,7 @@ void Croupier::changeStage(stage new_stage)
 
 bool Croupier::runGame(const json & msg)
 {
-	std::cout << " ELKO " << std::endl;
+	//std::cout << " ELKO " << std::endl;
 	bool ret_val = false;
 	request_type request;
 	json feedback;
@@ -493,7 +493,7 @@ json Croupier::chatMessage(const json & msg)
 		}
 	}
 	std::string parsed = response.dump();
-	std::cout << parsed << std::endl;
+	//std::cout << parsed << std::endl;
 	return response;
 }
 

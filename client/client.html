@@ -1,0 +1,32 @@
+<div id="wrapper">
+    <div id="chatbox"></div>
+    <div>
+        <textarea id="txt"></textarea>
+        <button type="button" id="submit">send</button>
+    </div>
+    <button type="button" id="dc">disconnect</button>
+</div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+var ws = new WebSocket("ws://127.0.0.1:2137");
+
+$("#submit").click(function () {
+    var msg = $("#txt").val();
+    ws.send(msg);
+})
+
+$("#dc").click(function () {
+    ws.close();
+})
+
+ws.onmessage = function (event) {
+    $("#chatbox").append(event.data + "<br>");
+}
+
+</script>
+
+
+
+
+

@@ -110,13 +110,21 @@ BOOST_AUTO_TEST_CASE(HandOutCards)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(PlayersCollectionTest)
+BOOST_FIXTURE_TEST_SUITE(PlayersCollectionTest, PlayersCollection)
 BOOST_AUTO_TEST_CASE(AddNewPlayer)
 {
-	PlayersCollection col;
 	std::string s = "test";
-	BOOST_REQUIRE(col.getArray().size() == 0);
-	col.addPlayer(12, s);
-	BOOST_CHECK(col.getArray().size() == 1);
+	BOOST_REQUIRE(getArray().size() == 0);
+	addPlayer(12, s);
+	BOOST_CHECK(getArray().size() == 1);
 }
+
+BOOST_AUTO_TEST_CASE(GetNotExistingPlayer)
+{
+	BOOST_CHECK_THROW(getPlayer(0), std::out_of_range);
+}
+//
+//BOOST_AUTO_TEST_CASE()
 BOOST_AUTO_TEST_SUITE_END()
+
+//BOOST_AUTO_TEST_SUITE_()

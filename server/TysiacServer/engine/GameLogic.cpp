@@ -139,7 +139,8 @@ bool Score::setClaim(int claim)
 		claim_ = claim;
 		return true;
 	}
-	else throw std::logic_error("Trying to claim lower or equal");
+	return false;
+	//else throw std::logic_error("Trying to claim lower or equal");
 }
 
 int Score::getClaim() const
@@ -543,11 +544,11 @@ void Bidder::giveAddCards()
 // <Class Dealer>
 
 Dealer::Dealer(Deck & deck, PlayersCollection & players, Croupier & croup) : 
-											user_id_(-1), 
-											counter(0), 
-											deck_(deck), 
-											players_(players), 
-											croupier_(croup)
+										user_id_(-1), 
+										counter(0), 
+										deck_(deck), 
+										players_(players), 
+										croupier_(croup)
 {}
 
 Dealer::~Dealer()

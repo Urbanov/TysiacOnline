@@ -51,5 +51,72 @@ BOOST_AUTO_TEST_CASE( CheckIfThereIsPairAndPlayCard )
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-//BOOST_AUTO_TEST_SUITE( ScoreTests )
-//BOOST_AUTO_TEST_CASE( CreateScore)
+BOOST_AUTO_TEST_SUITE( ScoreTests )
+BOOST_AUTO_TEST_CASE(GetAndSetOverallScore)
+{
+	Score s1;
+	BOOST_REQUIRE(s1.getScore() == 0);
+	s1.addScore(200);
+	BOOST_CHECK(s1.getScore() == 200);
+}
+
+BOOST_AUTO_TEST_CASE(GetAndSetTurnScore)
+{
+	Score s1;
+	BOOST_REQUIRE(s1.getTurnScore() == 0);
+	s1.addToTurnScore(15);
+	BOOST_REQUIRE(s1.getTurnScore() == 15);
+	s1.clearTurnScore();
+	BOOST_CHECK(s1.getTurnScore() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(GetAndSetClaim)
+{
+	Score s1;
+	BOOST_REQUIRE(s1.getClaim() == 0);
+	BOOST_REQUIRE(s1.setClaim(-10) == false);
+	BOOST_REQUIRE(s1.setClaim(100) == true);
+	BOOST_REQUIRE(s1.getClaim() == 100);
+	s1.resetClaim();
+	BOOST_CHECK(s1.getClaim() == 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( PlayerTests )
+BOOST_AUTO_TEST_CASE(CreatePlayerAndCheckItsParameters)
+{
+	std::string str = "test";
+	Player p1(12, str);
+	BOOST_CHECK(p1.getPlayersNick() == "test");
+	BOOST_CHECK(p1.getPlayerId() == 12);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( DeckTests )
+BOOST_AUTO_TEST_CASE(HandOutCards)
+{
+	Deck d1;
+	std::string s = "test";
+	Player p1(1, s);
+	std::vector<Player> players;
+	for (int i = 0; i < 3; ++i) {
+		players.push_back(p1);
+	}
+	BOOST_REQUIRE(players[0].getPlayerDeck().getDeck().size() == 0);
+	d1.dealCards(players);
+	BOOST_REQUIRE(players[0].getPlayerDeck().getDeck().size() == 7);
+	d1.addBonusCards(players[0]);
+	BOOST_CHECK(players[0].getPlayerDeck().getDeck().size() == 10);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(PlayersCollectionTest)
+BOOST_AUTO_TEST_CASE(AddNewPlayer)
+{
+	PlayersCollection col;
+	std::string s = "test";
+	BOOST_REQUIRE(col.getArray().size() == 0);
+	col.addPlayer(12, s);
+	BOOST_CHECK(col.getArray().size() == 1);
+}
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,10 +1,18 @@
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE game_engine_test
+
 #include <boost/test/unit_test.hpp>
 #include "../engine/GameLogic.hpp"
 
 BOOST_AUTO_TEST_SUITE( CardTests )
-BOOST_AUTO_TEST_CASE( CreateCardAndGetMemberValues )
+
+BOOST_AUTO_TEST_CASE(TestShouldFail)
+{
+	Card c1(NINE, CLUBS);
+	BOOST_CHECK(c1.getFigure() == TEN); //here
+	BOOST_CHECK(c1.getSuit() == CLUBS);
+}
+
+BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
 {
 	Card c1(NINE, CLUBS);
 	BOOST_CHECK(c1.getFigure() == NINE);

@@ -23,7 +23,7 @@ void SessionManager::interpret(const std::string& message)
 	for (auto& msg : return_data) {
 		//std::cout << msg.first;
 		for(auto id : msg.second) {
-			std::cout << id << ": " << msg.first << std::endl;
+			//std::cout << id << ": " << msg.first << std::endl;
 			sessions_[id].lock()->write(msg.first);
 		}
 	}

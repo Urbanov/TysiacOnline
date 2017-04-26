@@ -196,6 +196,11 @@ Score & Player::getScoreClass()
 
 Deck::Deck(const std::vector<Card>& deck) : deck_(deck), deck_it_(deck_.begin()) {}
 
+Deck::Deck(const Deck & other) :
+										deck_(other.deck_),
+										deck_it_(deck_.begin())
+{}
+
 Deck::Deck()
 {
 	std::vector<figures> figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
@@ -245,6 +250,13 @@ PlayersCollection::PlayersCollection() :
 										highest_claimer_(players_.begin()),
 										players_it_(players_.begin()),
 										compulsory_claimer_(players_.begin())
+{}
+
+PlayersCollection::PlayersCollection(const PlayersCollection & other) :
+											players_(other.players_),
+											highest_claimer_(players_.end()),
+											players_it_(players_.end()),
+											compulsory_claimer_(players_.end())
 {}
 
 PlayersCollection::~PlayersCollection()
@@ -397,6 +409,8 @@ Croupier::Croupier(int croupier_id, GameManager & man) :
 Croupier::Croupier(const Croupier & other) :
 										man_(other.man_),
 										croupier_id_(other.croupier_id_),
+										deck_(other.deck_),
+										players_(other.players_),
 										stage_(other.stage_),
 										adder_(other.adder_),
 										bidder_(other.bidder_),
@@ -460,8 +474,8 @@ bool Croupier::runGame(const json & msg)
 	case BIDDING:
 		switch (parse(msg["action"])) {
 		case CHAT:
-			request.push_back(chatMessage(msg)); break;
-			ret_val = true;
+			request.push_back(chatMessage(msg));
+			ret_val = true; break;
 		default: break;
 		}
 		break;
@@ -487,6 +501,7 @@ json Croupier::chatMessage(const json & msg)
 		{"values", msg["values"]},
 	};
 	for (auto i : players_.getArray()) {
+		//std::cout << i.getPlayerId() << std::endl;
 		if (i.getPlayerId() != msg["player"]) {
 			response["who"].push_back(i.getPlayerId());
 		}
@@ -786,7 +801,7 @@ req GameManager::doWork(const std::string & message)
 	json msg = json::parse(message);
 	if (msg["action"] == "add") {
 		for (auto&& i : active_games_) {
-			if (i.runGame(msg)) {
+			if (i->runGame(msg)) {
 				for (auto j : feedback_) {
 					std::vector<int> v;
 					for (auto a : j["who"]) {
@@ -797,9 +812,9 @@ req GameManager::doWork(const std::string & message)
 				return vec;
 			}
 		}
-		active_games_.emplace_back(croupier_counter_++, *this);
-		active_games_.back().runGame(msg);
-
+		//active_games_.emplace_back(croupier_counter_++, *this);
+		active_games_.push_back(new Croupier(croupier_counter_++, *this));
+		active_games_.back()->runGame(msg);
 		for (auto&& i : feedback_) {
 			std::vector<int> v;
 			for (auto a : i["who"]) {
@@ -809,10 +824,11 @@ req GameManager::doWork(const std::string & message)
 		}
 	}
 	else {
-		active_games_[msg["id"]].runGame(msg);
+		active_games_[msg["id"]]->runGame(msg);
 		for (auto&& i : feedback_) {
 			std::vector<int> v;
 			for (auto a : i["who"]) {
+				//std::cout << a << std::endl;
 				v.push_back(static_cast<int>(a));
 			}
 			vec.emplace_back(std::make_pair(i.dump(), v));

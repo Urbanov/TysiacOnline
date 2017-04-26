@@ -16,7 +16,7 @@ using request_type = std::vector<json>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
 
 const int MAX_TURNS = 8;
-const int MAX_PLAYERS = 3;
+const int MAX_PLAYERS = 2;
 const int MAX_CARDS = 7;
 const int TWO_CARDS = 2;
 const int POINTS_WINNING_CAP = 1000;
@@ -123,6 +123,7 @@ private:
 class Deck {
 public:
 	Deck(const std::vector<Card>&);
+	Deck(const Deck& other);
 	Deck();
 	~Deck();
 	void dealCards(std::vector<Player>&);
@@ -137,6 +138,7 @@ private:
 class PlayersCollection {
 public:
 	PlayersCollection();
+	PlayersCollection(const PlayersCollection &);
 	~PlayersCollection();
 	bool addPlayer(int, std::string &);
 	bool getNextPlayer();
@@ -252,7 +254,7 @@ public:
 	req doWork(const std::string &);
 	void pushMessage(const request_type &);
 private:
-	std::vector<Croupier> active_games_;
+	std::vector<Croupier*> active_games_;
 	request_type feedback_;
 	unsigned croupier_counter_;
 };
@@ -267,7 +269,6 @@ public:
 	int parse(const std::string &);
 private:
 	json chatMessage(const json & msg);
-
 	GameManager & man_;
 	int croupier_id_;
 	Deck deck_;

@@ -3,7 +3,6 @@ var player_id;
 var ws = new WebSocket("ws://127.0.0.1:2137");
 
 ws.onmessage = function (event) {
-    //alert(event.data);
     var msg = JSON.parse(event.data);
     switch (msg.action) {
         case "chat":

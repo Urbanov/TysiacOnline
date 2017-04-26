@@ -1,10 +1,17 @@
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE game_engine_test
+
 #include <boost/test/unit_test.hpp>
 #include "../engine/GameLogic.hpp"
 
-BOOST_AUTO_TEST_SUITE( CardTests )
-BOOST_AUTO_TEST_CASE( CreateCardAndGetMemberValues )
+BOOST_AUTO_TEST_SUITE(CardTests)
+BOOST_AUTO_TEST_CASE(TestShouldFail)
+{
+	Card c1(NINE, CLUBS);
+	BOOST_CHECK(c1.getFigure() == TEN); //here
+	BOOST_CHECK(c1.getSuit() == CLUBS);
+}
+
+BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
 {
 	Card c1(NINE, CLUBS);
 	BOOST_CHECK(c1.getFigure() == NINE);
@@ -28,7 +35,7 @@ BOOST_AUTO_TEST_CASE(CreateCardAndSetIfUsed)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( PlayerDeckTests )
+BOOST_AUTO_TEST_SUITE(PlayerDeckTests)
 BOOST_AUTO_TEST_CASE(AddCardCheckDeckLengthAndClearDeck)
 {
 	PlayerDeck p1;
@@ -39,7 +46,7 @@ BOOST_AUTO_TEST_CASE(AddCardCheckDeckLengthAndClearDeck)
 	BOOST_CHECK(p1.getDeck().size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE( CheckIfThereIsPairAndPlayCard )
+BOOST_AUTO_TEST_CASE(CheckIfThereIsPairAndPlayCard)
 {
 	PlayerDeck p1;
 	Card c1(NINE, CLUBS), c2(QUEEN, DIAMONDS), c3(KING, DIAMONDS);
@@ -51,7 +58,7 @@ BOOST_AUTO_TEST_CASE( CheckIfThereIsPairAndPlayCard )
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( ScoreTests )
+BOOST_AUTO_TEST_SUITE(ScoreTests)
 BOOST_AUTO_TEST_CASE(GetAndSetOverallScore)
 {
 	Score s1;
@@ -82,7 +89,7 @@ BOOST_AUTO_TEST_CASE(GetAndSetClaim)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( PlayerTests )
+BOOST_AUTO_TEST_SUITE(PlayerTests)
 BOOST_AUTO_TEST_CASE(CreatePlayerAndCheckItsParameters)
 {
 	std::string str = "test";
@@ -92,7 +99,7 @@ BOOST_AUTO_TEST_CASE(CreatePlayerAndCheckItsParameters)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( DeckTests )
+BOOST_AUTO_TEST_SUITE(DeckTests)
 BOOST_AUTO_TEST_CASE(HandOutCards)
 {
 	Deck d1;

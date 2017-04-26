@@ -16,7 +16,7 @@ using request_type = std::vector<json>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
 
 const int MAX_TURNS = 8;
-const int MAX_PLAYERS = 2;
+const int MAX_PLAYERS = 3;
 const int MAX_CARDS = 7;
 const int TWO_CARDS = 2;
 const int POINTS_WINNING_CAP = 1000;

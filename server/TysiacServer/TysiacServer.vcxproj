@@ -155,6 +155,7 @@
     <ClCompile Include="network\manager.cpp" />
     <ClCompile Include="network\server.cpp" />
     <ClCompile Include="network\session.cpp" />
+    <ClCompile Include="tests\boost_unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\GameLogic.hpp" />

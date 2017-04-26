@@ -82,7 +82,6 @@ public:
 	bool doesHavePair(suits);
 private:
 	bool findCard(figures figure, suits suit) const;
-
 	std::vector<Card> deck_;
 };
 
@@ -156,17 +155,6 @@ private:
 	std::vector<Player>::iterator highest_claimer_;
 	std::vector<Player>::iterator players_it_;
 	std::vector<Player>::iterator compulsory_claimer_;
-};
-
-class Tester {
-public:
-	Tester(Deck & deck, PlayersCollection & players);
-	~Tester();
-	void translateCard(const Card&) const;
-	void doTests() const;
-private:
-	Deck  & deck_;
-	PlayersCollection & players_;
 };
 
 class Adder;

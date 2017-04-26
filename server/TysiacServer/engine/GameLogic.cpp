@@ -348,51 +348,6 @@ Player PlayersCollection::getPlayer(int player_id) const
 
 
 
-// <Class Tester>
-Tester::Tester(Deck & deck, PlayersCollection  & players) : 
-										deck_(deck), 
-										players_(players)
-{}
-
-Tester::~Tester()
-{}
-
-void Tester::translateCard(const Card & card) const
-{
-	std::string s;
-	switch (card.getFigure()) {
-	case NINE:	s = "NINE"; break;
-	case TEN:	s = "TEN"; break;
-	case JACK:	s = "JACK"; break;
-	case QUEEN:	s = "QUEEN"; break;
-	case KING:	s = "KING"; break;
-	case ACE:	s = "ACE"; break;
-	default: break;
-	}
-	s += "	OF	";
-	switch (card.getSuit()) {
-	case DIAMONDS:	s += "DIAMONDS"; break;
-	case CLUBS:		s += "CLUBS"; break;
-	case HEARTS:	s += "HEARTS"; break;
-	case SPADES:	s += "SPADES"; break;
-	}
-	std::cout << s << std::endl;
-}
-
-void Tester::doTests() const
-{
-	for (int i = 0; i < MAX_PLAYERS; ++i) {
-		std::cout << "Player " << i << ":" << std::endl;
-		for (int j = 0; j < MAX_CARDS; ++j) {
-			translateCard(players_.getPlayer(i).getPlayerDeck().playCard(j));
-		}
-	}
-}
-
-// </Class Tester>
-
-
-
 // <Class Croupier>
 
 Croupier::Croupier(int croupier_id, GameManager & man) : 

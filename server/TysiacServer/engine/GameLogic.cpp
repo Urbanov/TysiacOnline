@@ -67,11 +67,8 @@ void PlayerDeck::addCard(const Card & card)
 	deck_[deck_.size() - 1].setIsUsed(false);
 }
 
-const Card & PlayerDeck::playCard(unsigned card_number) const
+const Card & PlayerDeck::playCard(int card_number) const
 {
-	if (card_number >= deck_.size()) {
-		throw std::out_of_range("No card with such index in player's deck");
-	}
 	if (deck_[card_number].getIsUsed()) {
 		throw std::logic_error("Card has already been used, non existing");
 	}
@@ -142,7 +139,8 @@ bool Score::setClaim(int claim)
 		claim_ = claim;
 		return true;
 	}
-	else throw std::logic_error("Trying to claim lower or equal");
+	return false;
+	//else throw std::logic_error("Trying to claim lower or equal");
 }
 
 int Score::getClaim() const
@@ -249,17 +247,17 @@ void Deck::shuffle()
 
 // <Class PlayersCollection>
 
-PlayersCollection::PlayersCollection() :
-	players_it_(players_.begin()),
-	highest_claimer_(players_.begin()),
-	compulsory_claimer_(players_.begin())
+PlayersCollection::PlayersCollection() : 
+										highest_claimer_(players_.begin()),
+										players_it_(players_.begin()),
+										compulsory_claimer_(players_.begin())
 {}
 
 PlayersCollection::PlayersCollection(const PlayersCollection & other) :
-	players_(other.players_),
-	highest_claimer_(players_.end()),
-	players_it_(players_.end()),
-	compulsory_claimer_(players_.end())
+											players_(other.players_),
+											highest_claimer_(players_.end()),
+											players_it_(players_.end()),
+											compulsory_claimer_(players_.end())
 {}
 
 PlayersCollection::~PlayersCollection()
@@ -274,13 +272,11 @@ players & PlayersCollection::getArray()
 bool PlayersCollection::addPlayer(int player_id, std::string & nick)
 {
 	if (players_.size() < MAX_PLAYERS) {
-		players_.push_back(Player(player_id, nick));
-		highest_claimer_ = players_.begin();
-		players_it_ = players_.begin();
-		compulsory_claimer_ = players_.begin();
-		if (players_.size() == 1) {
-			++players_it_;
-			(*highest_claimer_).getScoreClass().setClaim(100);
+		players_.emplace_back(Player(player_id, nick));
+		if (players_.size() == MAX_PLAYERS) {
+			highest_claimer_ = players_.begin();
+			players_it_ = players_.begin();
+			compulsory_claimer_ = players_.begin();
 		}
 		return true;
 	}
@@ -290,34 +286,25 @@ bool PlayersCollection::addPlayer(int player_id, std::string & nick)
 
 bool PlayersCollection::getNextPlayer()
 {
-	if (players_.size() != 0) {
 		if (++players_it_ == players_.end()) {
 			players_it_ = players_.begin();
 		}
-		if (players_it_ == highest_claimer_) {
-			return false;
-		}
-		return true;
+	if (players_it_ == highest_claimer_) {
+		return false;
 	}
-	else throw std::logic_error("No players registered");
+	return true;
 }
 
 void PlayersCollection::getNextCompulsoryClaimer()
 {
-	if (players_.size() != 0) {
-		if (++compulsory_claimer_ == players_.end()) {
-			compulsory_claimer_ = players_.begin();
-		}
+	if (++compulsory_claimer_ == players_.end()) {
+		compulsory_claimer_ = players_.begin();
 	}
-	else throw std::logic_error("No players registered");
 }
 
 players_it & PlayersCollection::getCurrentPlayer()
 {
-	if (players_.size() != 0) {
-		return players_it_;
-	}
-	else throw std::logic_error("No players registered");
+	return players_it_;
 }
 
 players_it & PlayersCollection::setCurrentPlayer(int player_id)
@@ -334,18 +321,12 @@ players_it & PlayersCollection::setCurrentPlayer(int player_id)
 
 players_it & PlayersCollection::getHighestClaimer()
 {
-	if (players_.size() != 0) {
-		return highest_claimer_;
-	}
-	else throw std::logic_error("No players registered");
+	return highest_claimer_;
 }
 
 players_it & PlayersCollection::getCompulsoryClaimer()
 {
-	if (players_.size() != 0) {
-		return compulsory_claimer_;
-	}
-	else throw std::logic_error("No players registered");
+	return compulsory_claimer_;
 }
 
 void PlayersCollection::setHighestClaimer(Player & highest_claimer)
@@ -353,9 +334,9 @@ void PlayersCollection::setHighestClaimer(Player & highest_claimer)
 	highest_claimer_ = std::find(players_.begin(), players_.end(), highest_claimer);
 }
 
-Player & PlayersCollection::getPlayer(int player_id)
+Player & PlayersCollection::getPlayer(int player_id) const
 {
-	for (auto& i : players_) {
+	for (auto i : players_) {
 		if (i.getPlayerId() == player_id)
 			return i;
 	}
@@ -369,27 +350,27 @@ Player & PlayersCollection::getPlayer(int player_id)
 // <Class Croupier>
 
 Croupier::Croupier(int croupier_id, GameManager & man) : 
-	man_(man),
-	croupier_id_(croupier_id), 
-	stage_(ADDING), 
-	adder_(deck_, players_, *this), 
-	bidder_(deck_, players_, *this),
-	dealer_(deck_, players_, *this),
-	game_(deck_, players_, *this),
-	score_(deck_, players_, *this)
+										man_(man),
+										croupier_id_(croupier_id), 
+										stage_(ADDING), 
+										adder_(deck_, players_, *this), 
+										bidder_(deck_, players_, *this),
+										dealer_(deck_, players_, *this),
+										game_(deck_, players_, *this),
+										score_(deck_, players_, *this)
 {}
 
 Croupier::Croupier(const Croupier & other) :
-	man_(other.man_),
-	croupier_id_(other.croupier_id_),
-	deck_(other.deck_),
-	players_(other.players_),
-	stage_(other.stage_),
-	adder_(other.adder_),
-	bidder_(other.bidder_),
-	dealer_(other.dealer_),
-	game_(other.game_),
-	score_(other.score_)
+										man_(other.man_),
+										croupier_id_(other.croupier_id_),
+										deck_(other.deck_),
+										players_(other.players_),
+										stage_(other.stage_),
+										adder_(other.adder_),
+										bidder_(other.bidder_),
+										dealer_(other.dealer_),
+										game_(other.game_),
+										score_(other.score_)
 {}
 
 Croupier::~Croupier()
@@ -486,24 +467,13 @@ json Croupier::chatMessage(const json & msg)
 // </Class Croupier>
 
 
-// <Class Controller>
-Controller::Controller(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	deck_(deck),
-	players_(players),
-	croupier_(croup)
-{}
-
-Controller::~Controller()
-{}
-
-// </Class Controller>
-
-
 
 // <Class Adder>
 
 Adder::Adder(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	Controller(deck, players, croup)
+										deck_(deck),
+										players_(players),
+										croupier_(croup)
 {}
 
 Adder::~Adder()
@@ -535,7 +505,9 @@ bool Adder::isFull() const
 // <Class Bidder>
 
 Bidder::Bidder(Deck & deck, PlayersCollection & players, Croupier & croup) :  
-	Controller(deck, players, croup)
+										deck_(deck), 
+										players_(players), 
+										croupier_(croup)
 {}
 
 Bidder::~Bidder()
@@ -546,11 +518,7 @@ bool Bidder::Bid(int player_id, int new_amount)
 	if ((*players_.getCurrentPlayer()).getPlayerId() != player_id) {
 		throw std::logic_error("Player trying to bid not at his turn");
 	}
-	if ((*players_.getHighestClaimer()).getScoreClass().getClaim() >= new_amount) {
-		throw std::logic_error("Player bids less than current highest bid");
-	}
 	(*players_.getCurrentPlayer()).getScoreClass().setClaim(new_amount);
-	players_.setHighestClaimer((*players_.getCurrentPlayer()));
 	while ((*players_.getCurrentPlayer()).getScoreClass().getClaim() == -1) {
 		players_.getNextPlayer();
 	}
@@ -574,23 +542,27 @@ void Bidder::giveAddCards()
 // <Class Dealer>
 
 Dealer::Dealer(Deck & deck, PlayersCollection & players, Croupier & croup) : 
-	user_id_(-1), 
-	counter(0), 
-	Controller(deck, players, croup)
+										user_id_(-1), 
+										counter(0), 
+										deck_(deck), 
+										players_(players), 
+										croupier_(croup)
 {}
 
 Dealer::~Dealer()
 {}
 
-void Dealer::giveCardToPeer(int player_id, unsigned card_number)
+void Dealer::giveCardToPeer(int player_id, int card_number)
 {
-	if ( player_id == (*players_.getHighestClaimer()).getPlayerId() || (player_id == user_id_ &&
-		counter == 1)) {
+	if (card_number > MAX_CARDS) {
+		throw std::out_of_range("No card found");
+	}
+	if ( counter == 1 && (player_id == user_id_ || player_id == 
+		(*players_.getHighestClaimer()).getPlayerId()) ) {
 		throw std::logic_error("Giving card to the wrong player");
-	}	
+	}
 	players_.getPlayer(player_id).getPlayerDeck().addCard(
 		(*players_.getHighestClaimer()).getPlayerDeck().playCard(card_number));
-	user_id_ = players_.getPlayer(player_id).getPlayerId();
 	if (++counter == TWO_CARDS) {
 		croupier_.changeStage(PLAYING);
 	}
@@ -609,15 +581,17 @@ void Dealer::reset()
 // <Class Game>
 
 Game::Game(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	turn_counter_(0), 
-	super_suit_(NONE), 
-	Controller(deck, players, croup)
+									turn_counter_(0), 
+									super_suit_(NONE), 
+									deck_(deck),
+									players_(players),
+									croupier_(croup)
 {}
 
 Game::~Game()
 {}
 
-auto Game::playTurn(int player, unsigned card)
+auto Game::playTurn(int player, int card)
 {
 	return players_.getPlayer(player).getPlayerDeck().playCard(card);
 }
@@ -721,7 +695,9 @@ void Game::reset()
 // <Class SumScore>
 
 SumScore::SumScore(Deck & deck, PlayersCollection & players, Croupier & croup) : 
-	Controller(deck, players, croup)
+								deck_(deck), 
+								players_(players), 
+								croupier_(croup)
 {}
 
 SumScore::~SumScore()

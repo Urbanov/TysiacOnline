@@ -95,7 +95,7 @@ public:
 	std::vector<Card> & getDeck();
 	void clearDeck();
 	void addCard(const Card&);
-	const Card & playCard(unsigned) const;
+	const Card & playCard(int) const;
 	bool doesHavePair(suits);
 private:
 	bool findCard(figures figure, suits suit) const;
@@ -165,7 +165,7 @@ public:
 	players_it & getHighestClaimer();
 	players_it & getCompulsoryClaimer();
 	players_it & setCurrentPlayer(int);
-	Player & getPlayer(int);
+	Player & getPlayer(int) const;
 
 private:
 	players players_;
@@ -174,50 +174,48 @@ private:
 	players_it compulsory_claimer_;
 };
 
-class Controller {
-public:
-	Controller(Deck & deck, PlayersCollection & players, Croupier & croup);
-	~Controller();
-
-protected:
-	Deck & deck_;
-	PlayersCollection & players_;
-	Croupier & croupier_;
-};
-
-
-class Adder : public Controller {
+class Adder {
 public:
 	Adder(Deck &, PlayersCollection &, Croupier &);
 	~Adder();
 	bool addPlayer(int, std::string);
 	bool isFull() const;
+private:
+	Deck & deck_;
+	PlayersCollection & players_;
+	Croupier & croupier_;
 };
 
-class Bidder : public Controller{
+class Bidder {
 public:
 	Bidder(Deck &, PlayersCollection &, Croupier &);
 	~Bidder();
 	bool Bid(int, int);
 	void giveAddCards();
+private:
+	Deck & deck_;
+	PlayersCollection & players_;
+	Croupier & croupier_;
 };
-
-class Dealer : public Controller {
+class Dealer {
 public:
 	Dealer(Deck &, PlayersCollection &, Croupier &);
 	~Dealer();
-	void giveCardToPeer(int player_id, unsigned card_number);
+	void giveCardToPeer(int player_id, int card_number);
 	void reset();
 private:
 	int user_id_;
 	int counter;
+	Deck & deck_;
+	PlayersCollection & players_;
+	Croupier & croupier_;
 };
 
-class Game : public Controller {
+class Game {
 public:
 	Game(Deck &, PlayersCollection &, Croupier &);
 	~Game();
-	auto playTurn(int, unsigned);
+	auto playTurn(int, int);
 	void manageTurn(int, int);
 	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();
@@ -228,14 +226,21 @@ private:
 	int turn_counter_;
 	int current_starting_player_;
 	suits super_suit_;
+	Deck & deck_;
+	PlayersCollection & players_;
+	Croupier & croupier_;
 };
 
-class SumScore : public Controller {
+class SumScore {
 public:
 	SumScore(Deck &, PlayersCollection &, Croupier &);
 	~SumScore();
 	void sumUpScore();
 	void resetPlayersAtributes();
+private:
+	Deck & deck_;
+	PlayersCollection & players_;
+	Croupier & croupier_;
 };
 
 class GameManager {

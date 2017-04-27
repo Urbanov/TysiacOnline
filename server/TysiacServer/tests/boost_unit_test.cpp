@@ -124,8 +124,20 @@ BOOST_AUTO_TEST_CASE(SetNonExistingPlayer)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+//BOOST_AUTO_TEST_SUITE(DealerTest)
+//BOOST_AUTO_TEST_CASE(DealerGiveCardToPeer)
+//{
+//	GameManager man;
+//	Deck deck;
+//	PlayersCollection players;
+//	std::string s = "tester";
+//	Player p(0, s);
+//	Croupier croupier(0, man);
+//	Dealer d(deck, players, croupier);
+//	players.addPlayer(1, s);
+//	players.addPlayer(3, s);
+//	BOOST_CHECK_THROW(d.giveCardToPeer(2, 0), std::out_of_range);
+//}
 //
-//BOOST_AUTOO_TEST_SUITE()
-
-
-//BOOST_AUTO_TEST_SUITE_()
+//BOOST_AUTO_TEST_SUITE_END()

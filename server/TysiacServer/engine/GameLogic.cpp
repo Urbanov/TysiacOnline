@@ -554,6 +554,9 @@ Dealer::~Dealer()
 
 void Dealer::giveCardToPeer(int player_id, int card_number)
 {
+	if (card_number > MAX_CARDS) {
+		throw std::out_of_range("No card found");
+	}
 	if ( counter == 1 && (player_id == user_id_ || player_id == 
 		(*players_.getHighestClaimer()).getPlayerId()) ) {
 		throw std::logic_error("Giving card to the wrong player");

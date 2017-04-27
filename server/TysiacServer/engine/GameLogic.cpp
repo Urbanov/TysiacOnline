@@ -217,7 +217,7 @@ Deck::Deck()
 Deck::~Deck() {}
 
 //clear player's decks and deal out new cards after shuffling the deck
-void Deck::dealCards(std::vector<Player>& players)
+void Deck::dealCards(players& players)
 {
 	shuffle();
 	for (auto&& i : players) {
@@ -264,7 +264,7 @@ PlayersCollection::~PlayersCollection()
 {}
 
 
-std::vector<Player> & PlayersCollection::getArray()
+players & PlayersCollection::getArray()
 {
 	return players_;
 }
@@ -289,9 +289,9 @@ bool PlayersCollection::getNextPlayer()
 		if (++players_it_ == players_.end()) {
 			players_it_ = players_.begin();
 		}
-	/*if ((*players_it_).getPlayerId() == (*highest_claimer_).getPlayerId()) {
+	if (players_it_ == highest_claimer_) {
 		return false;
-	}*/
+	}
 	return true;
 }
 
@@ -302,31 +302,29 @@ void PlayersCollection::getNextCompulsoryClaimer()
 	}
 }
 
-std::vector<Player>::iterator & PlayersCollection::getCurrentPlayer()
+players_it & PlayersCollection::getCurrentPlayer()
 {
 	return players_it_;
 }
 
-bool PlayersCollection::setCurrentPlayer(int player_id)
+players_it & PlayersCollection::setCurrentPlayer(int player_id)
 {
-	std::vector<Player>::iterator tmp = players_it_;
-	players_it_ = players_.begin();
-	while (players_it_ != players_.cend()) {
-		if ((*players_it_).getPlayerId() == player_id) {
-			return true;
+	players_it end_it = players_.end();
+	for (players_it tmp = players_.begin(); tmp != end_it; ++tmp) {
+		if ((*tmp).getPlayerId() == player_id) {
+			players_it_ = tmp;
+			return players_it_;
 		}
-		++players_it_;
 	}
-	players_it_ = tmp;
-	return false;
+	throw std::out_of_range("No player with given id exists in current game");
 }
 
-std::vector<Player>::iterator & PlayersCollection::getHighestClaimer()
+players_it & PlayersCollection::getHighestClaimer()
 {
 	return highest_claimer_;
 }
 
-std::vector<Player>::iterator & PlayersCollection::getCompulsoryClaimer()
+players_it & PlayersCollection::getCompulsoryClaimer()
 {
 	return compulsory_claimer_;
 }
@@ -336,7 +334,7 @@ void PlayersCollection::setHighestClaimer(Player & highest_claimer)
 	highest_claimer_ = std::find(players_.begin(), players_.end(), highest_claimer);
 }
 
-Player PlayersCollection::getPlayer(int player_id) const
+Player & PlayersCollection::getPlayer(int player_id) const
 {
 	for (auto i : players_) {
 		if (i.getPlayerId() == player_id)

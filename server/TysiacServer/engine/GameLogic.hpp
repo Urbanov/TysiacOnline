@@ -11,9 +11,26 @@
 #include <exception>
 #include <json.hpp>
 
+class Adder;
+class Bidder;
+class Card;
+class Croupier;
+class Dealer;
+class Deck;
+class Game;
+class GameManager;
+class Player;
+class PlayersCollection;
+class PlayerDeck;
+class Score;
+class SumScore;
+
+
 using json = nlohmann::json;
 using request_type = std::vector<json>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
+using players = std::vector<Player>;
+using players_it = std::vector<Player>::iterator;
 
 const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
@@ -125,7 +142,7 @@ public:
 	Deck(const Deck& other);
 	Deck();
 	~Deck();
-	void dealCards(std::vector<Player>&);
+	void dealCards(players&);
 	void addBonusCards(Player &);
 	void shuffle();
 private:
@@ -142,29 +159,20 @@ public:
 	bool addPlayer(int, std::string &);
 	bool getNextPlayer();
 	void getNextCompulsoryClaimer();
-	std::vector<Player> & getArray();
-	std::vector<Player>::iterator & getCurrentPlayer();
-	std::vector<Player>::iterator & getHighestClaimer();
-	std::vector<Player>::iterator & getCompulsoryClaimer();
 	void setHighestClaimer(Player &);
-	bool setCurrentPlayer(int);
-	Player getPlayer(int) const;
+	players & getArray();
+	players_it & getCurrentPlayer();
+	players_it & getHighestClaimer();
+	players_it & getCompulsoryClaimer();
+	players_it & setCurrentPlayer(int);
+	Player & getPlayer(int) const;
 
 private:
-	std::vector<Player> players_;
-	std::vector<Player>::iterator highest_claimer_;
-	std::vector<Player>::iterator players_it_;
-	std::vector<Player>::iterator compulsory_claimer_;
+	players players_;
+	players_it highest_claimer_;
+	players_it players_it_;
+	players_it compulsory_claimer_;
 };
-
-class Adder;
-class Bidder;
-class Dealer;
-class Game;
-class Score;
-class Croupier;
-class GameManager;
-
 
 class Adder {
 public:

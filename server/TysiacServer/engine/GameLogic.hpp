@@ -217,7 +217,7 @@ class Game : public Controller {
 public:
 	Game(Deck &, PlayersCollection &, Croupier &);
 	~Game();
-	auto playTurn(int, unsigned);
+	const Card & playTurn(int, unsigned);
 	void manageTurn(int, int);
 	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();

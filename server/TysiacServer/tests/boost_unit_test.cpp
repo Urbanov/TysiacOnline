@@ -199,3 +199,27 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 	BOOST_CHECK_THROW(bid.Bid(3, 90), std::logic_error);
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(AdderCroupierTests)
+BOOST_AUTO_TEST_CASE(CroupierAddNewPlayer)
+{
+	json add_request = {
+		{ "action", "add" }
+		,{ "player" , 0 }
+		,{ "values" , "test_nick" }
+		,{ "id", 0 }
+	};
+	json expected_response;
+	expected_response["who"] = 0;
+	expected_response["type"] = "update";
+	expected_response["action"] = "add";
+	expected_response["id"] = 0;
+	expected_response["player"] = 0;
+	expected_response["values"] = "test_nick";
+	std::string req_msg = expected_response.dump();
+	std::string add_msg = add_request.dump();
+	GameManager man;
+	Croupier croupier(0, man);
+	BOOST_CHECK_EQUAL(man.doWork(add_msg)[0].first, req_msg);
+}
+BOOST_AUTO_TEST_SUITE_END()

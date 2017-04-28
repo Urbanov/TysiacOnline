@@ -638,7 +638,7 @@ Game::Game(Deck & deck, PlayersCollection & players, Croupier & croup)
 Game::~Game()
 {}
 
-auto Game::playTurn(int player, unsigned card)
+const Card & Game::playTurn(int player, unsigned card)
 {
 	return players_.getPlayer(player).getPlayerDeck().playCard(card);
 }
@@ -799,7 +799,12 @@ GameManager::GameManager()
 {}
 
 GameManager::~GameManager()
-{}
+{
+	for (Croupier* c: active_games_) {
+		delete c;
+	}
+	active_games_.clear();
+}
 
 req GameManager::doWork(const std::string & message)
 {

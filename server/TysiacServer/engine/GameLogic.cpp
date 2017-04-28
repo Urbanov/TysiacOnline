@@ -425,7 +425,7 @@ bool Croupier::runGame(const json & msg)
 	json feedback;
 	std::vector<int> players_ids;
 	switch (stage_) {
-	case ADDING :
+	case ADDING:
 		switch (parse(msg["action"])) {
 		case ADD:
 			if (adder_.addPlayer(msg["player"], msg["values"])) {
@@ -458,6 +458,9 @@ bool Croupier::runGame(const json & msg)
 			break;
 		case CHAT :
 			request.push_back(chatMessage(msg)); break;
+			for (json i : request) {
+				i.clear();
+			}
 			ret_val = true;
 		default: break;
 		}

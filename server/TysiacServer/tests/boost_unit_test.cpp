@@ -177,9 +177,7 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsNotAtHisTurn)
 	Deck deck;
 	PlayersCollection players;
 	std::string s = "test";
-	Player p(0, s);
 	Croupier croupier(0, man);
-	Dealer d(deck, players, croupier);
 	Bidder bid(deck, players, croupier);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
@@ -193,9 +191,7 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 	Deck deck;
 	PlayersCollection players;
 	std::string s = "test";
-	Player p(0, s);
 	Croupier croupier(0, man);
-	Dealer d(deck, players, croupier);
 	Bidder bid(deck, players, croupier);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);

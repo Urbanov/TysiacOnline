@@ -625,7 +625,7 @@ auto Game::playTurn(int player, unsigned card)
 void Game::manageTurn(int player, int card)
 {
 	if ((*players_.getCurrentPlayer()).getPlayerId() != player) {
-		throw std::exception("Not player's turn to play a card");
+		throw std::logic_error("Not player's turn to play a card");
 	}
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
 	players_.getNextPlayer();

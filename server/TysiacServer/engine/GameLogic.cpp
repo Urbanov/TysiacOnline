@@ -2,11 +2,23 @@
 
 // <Clas Card>
 
-Card::Card(figures fig, suits s) : figure_(fig), suit_(s), is_used_(false) {}
+Card::Card(figures fig, suits s)
+	: figure_(fig)
+	, suit_(s)
+	, is_used_(false)
+{}
 
-Card::Card(const Card & other) : figure_(other.figure_), suit_(other.suit_), is_used_(other.is_used_) {}
+Card::Card(const Card & other)
+	: figure_(other.figure_)
+	, suit_(other.suit_)
+	, is_used_(other.is_used_)
+{}
 
-Card::Card(Card && other) : figure_(std::move(other.figure_)), suit_(std::move(other.suit_)), is_used_(std::move(other.is_used_)) {}
+Card::Card(Card && other)
+	: figure_(std::move(other.figure_))
+	, suit_(std::move(other.suit_))
+	, is_used_(std::move(other.is_used_))
+{}
 
 Card Card::operator=(const Card & card)
 {
@@ -105,7 +117,10 @@ void PlayerDeck::clearDeck()
 
 // <Class Score>
 
-Score::Score() : score_(0), temp_score_(0), claim_(0)
+Score::Score()
+	: score_(0)
+	, temp_score_(0)
+	, claim_(0)
 {}
 
 Score::~Score()

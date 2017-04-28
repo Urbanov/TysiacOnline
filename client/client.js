@@ -41,16 +41,15 @@ function sendMessage() {
     $("#chatbox").append(msg.player + ": " + msg.values + "<br>");
     ws.send(JSON.stringify(msg));
 }
+
 $("#submit").click(sendMessage);
 
 $("#text_area").keypress(function (event) {
-    if (event.keyCode == 13 /*&& !event.shiftKey*/) {
+    if (event.keyCode == 13) {
         event.preventDefault();
         sendMessage();
     }
 });
-
-
 
 $("#connect").click(function () {
     $(this).attr("disabled", true);

@@ -2,22 +2,22 @@
 
 // <Clas Card>
 
-Card::Card(figures fig, suits s) : 
-	figure_(fig), 
-	suit_(s), 
-	is_used_(false) 
+Card::Card(figures fig, suits s)
+	: figure_(fig)
+	, suit_(s)
+	, is_used_(false) 
 {}
 
-Card::Card(const Card & other) : 
-	figure_(other.figure_), 
-	suit_(other.suit_), 
-	is_used_(other.is_used_) 
+Card::Card(const Card & other)
+	: figure_(other.figure_) 
+	, suit_(other.suit_)
+	, is_used_(other.is_used_) 
 {}
 
-Card::Card(Card && other) : 
-	figure_(std::move(other.figure_)), 
-	suit_(std::move(other.suit_)), 
-	is_used_(std::move(other.is_used_)) 
+Card::Card(Card && other)
+	: figure_(std::move(other.figure_)) 
+	, suit_(std::move(other.suit_))
+	, is_used_(std::move(other.is_used_)) 
 {}
 
 Card Card::operator=(const Card & card)
@@ -117,10 +117,10 @@ void PlayerDeck::clearDeck()
 
 // <Class Score>
 
-Score::Score() : 
-	score_(0), 
-	temp_score_(0), 
-	claim_(0)
+Score::Score() 
+	: score_(0)
+	, temp_score_(0)
+	, claim_(0)
 {}
 
 Score::~Score()
@@ -175,9 +175,9 @@ void Score::resetClaim()
 
 // <Class Player>
 
-Player::Player(int player_id, std::string & nick) :
-	player_id_(player_id),
-	nick_(nick)
+Player::Player(int player_id, std::string & nick)
+	: player_id_(player_id)
+	, nick_(nick)
 {}
 
 Player::~Player() {}
@@ -212,14 +212,14 @@ Score & Player::getScoreClass()
 
 // <Class Deck>
 
-Deck::Deck(const std::vector<Card>& deck) : 
-	deck_(deck), 
-	deck_it_(deck_.begin()) 
+Deck::Deck(const std::vector<Card>& deck)
+	: deck_(deck) 
+	, deck_it_(deck_.begin()) 
 {}
 
-Deck::Deck(const Deck & other) :
-	deck_(other.deck_),
-	deck_it_(deck_.begin())
+Deck::Deck(const Deck & other)
+	: deck_(other.deck_)
+	, deck_it_(deck_.begin())
 {}
 
 Deck::Deck()
@@ -267,17 +267,17 @@ void Deck::shuffle()
 
 // <Class PlayersCollection>
 
-PlayersCollection::PlayersCollection() :
-	players_it_(players_.begin()),
-	highest_claimer_(players_.begin()),
-	compulsory_claimer_(players_.begin())
+PlayersCollection::PlayersCollection()
+	: players_it_(players_.begin())
+	, highest_claimer_(players_.begin())
+	, compulsory_claimer_(players_.begin())
 {}
 
-PlayersCollection::PlayersCollection(const PlayersCollection & other) :
-	players_(other.players_),
-	highest_claimer_(players_.end()),
-	players_it_(players_.end()),
-	compulsory_claimer_(players_.end())
+PlayersCollection::PlayersCollection(const PlayersCollection & other)
+	: players_(other.players_)
+	, highest_claimer_(players_.end())
+	, players_it_(players_.end())
+	, compulsory_claimer_(players_.end())
 {}
 
 PlayersCollection::~PlayersCollection()
@@ -386,28 +386,28 @@ Player & PlayersCollection::getPlayer(int player_id)
 
 // <Class Croupier>
 
-Croupier::Croupier(int croupier_id, GameManager & man) : 
-	man_(man),
-	croupier_id_(croupier_id), 
-	stage_(ADDING), 
-	adder_(deck_, players_, *this), 
-	bidder_(deck_, players_, *this),
-	dealer_(deck_, players_, *this),
-	game_(deck_, players_, *this),
-	score_(deck_, players_, *this)
+Croupier::Croupier(int croupier_id, GameManager & man)
+	: man_(man)
+	, croupier_id_(croupier_id) 
+	, stage_(ADDING) 
+	, adder_(deck_, players_, *this) 
+	, bidder_(deck_, players_, *this)
+	, dealer_(deck_, players_, *this)
+	, game_(deck_, players_, *this)
+	, score_(deck_, players_, *this)
 {}
 
-Croupier::Croupier(const Croupier & other) :
-	man_(other.man_),
-	croupier_id_(other.croupier_id_),
-	deck_(other.deck_),
-	players_(other.players_),
-	stage_(other.stage_),
-	adder_(other.adder_),
-	bidder_(other.bidder_),
-	dealer_(other.dealer_),
-	game_(other.game_),
-	score_(other.score_)
+Croupier::Croupier(const Croupier & other)
+	: man_(other.man_)
+	, croupier_id_(other.croupier_id_)
+	, deck_(other.deck_)
+    , players_(other.players_)
+	, stage_(other.stage_)
+	, adder_(other.adder_)
+	, bidder_(other.bidder_)
+	, dealer_(other.dealer_)
+	, game_(other.game_)
+	, score_(other.score_)
 {}
 
 Croupier::~Croupier()
@@ -505,10 +505,10 @@ json Croupier::chatMessage(const json & msg)
 
 
 // <Class Controller>
-Controller::Controller(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	deck_(deck),
-	players_(players),
-	croupier_(croup)
+Controller::Controller(Deck & deck, PlayersCollection & players, Croupier & croup)
+	: deck_(deck)
+	, players_(players)
+	, croupier_(croup)
 {}
 
 Controller::~Controller()
@@ -520,8 +520,8 @@ Controller::~Controller()
 
 // <Class Adder>
 
-Adder::Adder(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	Controller(deck, players, croup)
+Adder::Adder(Deck & deck, PlayersCollection & players, Croupier & croup)
+	: Controller(deck, players, croup)
 {}
 
 Adder::~Adder()
@@ -552,8 +552,8 @@ bool Adder::isFull() const
 
 // <Class Bidder>
 
-Bidder::Bidder(Deck & deck, PlayersCollection & players, Croupier & croup) :  
-	Controller(deck, players, croup)
+Bidder::Bidder(Deck & deck, PlayersCollection & players, Croupier & croup)  
+	: Controller(deck, players, croup)
 {}
 
 Bidder::~Bidder()
@@ -591,10 +591,10 @@ void Bidder::giveAddCards()
 
 // <Class Dealer>
 
-Dealer::Dealer(Deck & deck, PlayersCollection & players, Croupier & croup) : 
-	user_id_(-1), 
-	counter(0), 
-	Controller(deck, players, croup)
+Dealer::Dealer(Deck & deck, PlayersCollection & players, Croupier & croup) 
+	: user_id_(-1) 
+	, counter(0)
+	, Controller(deck, players, croup)
 {}
 
 Dealer::~Dealer()
@@ -626,10 +626,10 @@ void Dealer::reset()
 
 // <Class Game>
 
-Game::Game(Deck & deck, PlayersCollection & players, Croupier & croup) :
-	turn_counter_(0), 
-	super_suit_(NONE), 
-	Controller(deck, players, croup)
+Game::Game(Deck & deck, PlayersCollection & players, Croupier & croup) 
+	: turn_counter_(0) 
+	, super_suit_(NONE) 
+	, Controller(deck, players, croup)
 {}
 
 Game::~Game()
@@ -738,8 +738,8 @@ void Game::reset()
 
 // <Class SumScore>
 
-SumScore::SumScore(Deck & deck, PlayersCollection & players, Croupier & croup) : 
-	Controller(deck, players, croup)
+SumScore::SumScore(Deck & deck, PlayersCollection & players, Croupier & croup) 
+	: Controller(deck, players, croup)
 {}
 
 SumScore::~SumScore()
@@ -788,7 +788,11 @@ void SumScore::resetPlayersAtributes()
 // </Class SumScore>
 
 
-GameManager::GameManager() : croupier_counter_(0)
+
+// <Class GameManager>
+
+GameManager::GameManager() 
+	: croupier_counter_(0)
 {}
 
 GameManager::~GameManager()
@@ -841,3 +845,4 @@ void GameManager::pushMessage(const request_type & msg)
 	feedback_ = msg;
 }
 
+// </Class GameManager>

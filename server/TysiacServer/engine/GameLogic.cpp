@@ -652,7 +652,7 @@ void Game::manageTurn(int player, int card)
 		vec_.clear();
 		if (++turn_counter_ == MAX_TURNS) {
 			croupier_.changeStage(SUMMING_UP);
-			reset();
+			reset(); 
 		}
 	}
 }

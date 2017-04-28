@@ -203,4 +203,3 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 	BOOST_CHECK_THROW(bid.Bid(3, 90), std::logic_error);
 }
 BOOST_AUTO_TEST_SUITE_END()
-//BOOST_AUTO_TEST_SUITE()

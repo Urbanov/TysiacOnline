@@ -19,7 +19,7 @@ Server::~Server()
 	thread_.join();
 }
 
-void Server::run(const std::string& address, int port)
+void Server::run(const std::string& address, size_t port)
 {
 	boost::system::error_code error_code;
 

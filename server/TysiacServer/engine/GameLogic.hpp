@@ -281,10 +281,3 @@ private:
 
 #endif // _GAME_LOGIC_HPP_
 
-//->Dodawanie graczy
-//->Licytacja
-//->Musik, oddanie po karcie kolegom
-//->Wygrywanie lew (+ kozyry i chwalonki czy jak im tam)
-//->punktacja
-
-

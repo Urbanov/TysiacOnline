@@ -32,7 +32,6 @@ using req = std::vector<std::pair<std::string, std::vector<int> > >;
 using players = std::vector<Player>;
 using players_it = std::vector<Player>::iterator;
 using PCroupier = std::shared_ptr<Croupier>;
-using WPCroupier = std::weak_ptr<Croupier>;
 
 const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
@@ -73,11 +72,6 @@ enum suits {
 	HEARTS = 100,
 	SPADES = 40
 };
-
-template<class T> std::weak_ptr<T> weak_from_this(T*p)
-{
-	return{ p->shared_from_this() };
-}
 
 class Card {
 public:
@@ -191,7 +185,6 @@ public:
 protected:
 	Deck & deck_;
 	PlayersCollection & players_;
-	WPCroupier croupier_;
 };
 
 
@@ -264,7 +257,6 @@ public:
 	Croupier(int, GameManager&);
 	Croupier(const Croupier &);
 	~Croupier();
-	auto create_weakptr();
 	void changeStage(stage);
 	bool runGame(const json &);
 	int parse(const std::string &);

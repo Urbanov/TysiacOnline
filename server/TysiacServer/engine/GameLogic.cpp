@@ -802,12 +802,7 @@ GameManager::GameManager()
 {}
 
 GameManager::~GameManager()
-{
-	for (auto c: active_games_) {
-		c.reset();
-	}
-	active_games_.clear();
-}
+{}
 
 req GameManager::doWork(const std::string & message)
 {

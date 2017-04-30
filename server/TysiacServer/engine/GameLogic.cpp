@@ -413,11 +413,6 @@ Croupier::Croupier(const Croupier & other)
 Croupier::~Croupier()
 {}
 
-auto Croupier::create_weakptr()
-{
-	return weak_from_this(this);
-}
-
 void Croupier::changeStage(stage new_stage)
 {
 	stage_ = new_stage;
@@ -808,8 +803,8 @@ GameManager::GameManager()
 
 GameManager::~GameManager()
 {
-	for (Croupier* c: active_games_) {
-		delete c;
+	for (auto c: active_games_) {
+		c.reset();
 	}
 	active_games_.clear();
 }

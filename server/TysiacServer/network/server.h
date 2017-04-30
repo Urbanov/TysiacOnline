@@ -7,6 +7,13 @@
 #include "manager.h"
 
 class Server {
+public:
+	Server();
+	~Server();
+	Server(const Server& server) = delete;
+	Server& operator=(const Server& server) = delete;
+	void run(const std::string& address, size_t port);
+
 private:
 	boost::asio::io_service ios_;
 	SessionManager manager_;
@@ -16,11 +23,5 @@ private:
 	boost::optional<boost::asio::io_service::work> work_;
 	std::thread thread_;
 
-public:
-	Server();
-	~Server();
-	Server(const Server& server) = delete;
-	Server& operator=(const Server& server) = delete;
-	void run(const std::string& address, int port);
 	void acceptHandler(const boost::system::error_code& error_code);
 };

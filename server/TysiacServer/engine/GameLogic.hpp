@@ -31,8 +31,6 @@ using request_type = std::vector<json>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
 using players = std::vector<Player>;
 using players_it = std::vector<Player>::iterator;
-using PCroupier = std::shared_ptr<Croupier>;
-using WPCroupier = std::weak_ptr<Croupier>;
 
 const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
@@ -49,7 +47,6 @@ enum commands {
 };
 
 enum stage {
-	FAIL,
 	ADDING,
 	BIDDING,
 	DEALING,
@@ -73,12 +70,6 @@ enum suits {
 	HEARTS = 100,
 	SPADES = 40
 };
-
-template<class T> std::weak_ptr<T> weak_from_this(T*p)
-{
-	return{ p->shared_from_this() };
-}
-
 class Card {
 public:
 	Card(figures, suits);
@@ -185,37 +176,37 @@ private:
 
 class Controller {
 public:
-	Controller(Deck & deck, PlayersCollection & players);
+	Controller(Deck & deck, PlayersCollection & players, Croupier & croup);
 	~Controller();
 
 protected:
 	Deck & deck_;
 	PlayersCollection & players_;
-	WPCroupier croupier_;
+	Croupier & croupier_;
 };
 
 
 class Adder : public Controller {
 public:
-	Adder(Deck &, PlayersCollection &);
+	Adder(Deck &, PlayersCollection &, Croupier &);
 	~Adder();
-	stage addPlayer(int, std::string);
+	bool addPlayer(int, std::string);
 	bool isFull() const;
 };
 
 class Bidder : public Controller{
 public:
-	Bidder(Deck &, PlayersCollection &);
+	Bidder(Deck &, PlayersCollection &, Croupier &);
 	~Bidder();
-	stage Bid(int, int);
+	bool Bid(int, int);
 	void giveAddCards();
 };
 
 class Dealer : public Controller {
 public:
-	Dealer(Deck &, PlayersCollection &);
+	Dealer(Deck &, PlayersCollection &, Croupier &);
 	~Dealer();
-	stage giveCardToPeer(int player_id, unsigned card_number);
+	void giveCardToPeer(int player_id, unsigned card_number);
 	void reset();
 private:
 	int user_id_;
@@ -224,10 +215,10 @@ private:
 
 class Game : public Controller {
 public:
-	Game(Deck &, PlayersCollection &);
+	Game(Deck &, PlayersCollection &, Croupier &);
 	~Game();
-	auto playTurn(int, unsigned);
-	stage manageTurn(int, int);
+	const Card & playTurn(int, unsigned);
+	void manageTurn(int, int);
 	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();
 	void setStartingPlayer(int);
@@ -241,9 +232,9 @@ private:
 
 class SumScore : public Controller {
 public:
-	SumScore(Deck &, PlayersCollection &);
+	SumScore(Deck &, PlayersCollection &, Croupier &);
 	~SumScore();
-	stage sumUpScore();
+	void sumUpScore();
 	void resetPlayersAtributes();
 };
 
@@ -254,17 +245,16 @@ public:
 	req doWork(const std::string &);
 	void pushMessage(const request_type &);
 private:
-	std::vector<PCroupier> active_games_;
+	std::vector<Croupier*> active_games_;
 	request_type feedback_;
-	std::size_t croupier_counter_;
+	unsigned croupier_counter_;
 };
 
-class Croupier : public std::enable_shared_from_this<Croupier> {
+class Croupier {
 public:
 	Croupier(int, GameManager&);
 	Croupier(const Croupier &);
 	~Croupier();
-	auto create_weakptr();
 	void changeStage(stage);
 	bool runGame(const json &);
 	int parse(const std::string &);

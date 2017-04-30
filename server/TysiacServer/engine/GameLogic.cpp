@@ -430,7 +430,7 @@ bool Croupier::runGame(const json & msg)
 	json feedback;
 	std::vector<int> players_ids;
 	switch (stage_) {
-	case ADDING :
+	case ADDING:
 		switch (parse(msg["action"])) {
 		case ADD:
 			if (adder_.addPlayer(msg["player"], msg["values"])) {
@@ -463,6 +463,9 @@ bool Croupier::runGame(const json & msg)
 			break;
 		case CHAT :
 			request.push_back(chatMessage(msg)); break;
+			for (json i : request) {
+				i.clear();
+			}
 			ret_val = true;
 		default: break;
 		}
@@ -642,7 +645,7 @@ Game::Game(Deck & deck, PlayersCollection & players)
 Game::~Game()
 {}
 
-auto Game::playTurn(int player, unsigned card)
+const Card & Game::playTurn(int player, unsigned card)
 {
 	return players_.getPlayer(player).getPlayerDeck().playCard(card);
 }
@@ -804,7 +807,12 @@ GameManager::GameManager()
 {}
 
 GameManager::~GameManager()
-{}
+{
+	for (Croupier* c: active_games_) {
+		delete c;
+	}
+	active_games_.clear();
+}
 
 req GameManager::doWork(const std::string & message)
 {

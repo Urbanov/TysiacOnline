@@ -39,7 +39,7 @@ void Session::readHandler(const boost::system::error_code& error_code)
 	auto message = beast::to_string(buffer_.data());
 	const std::string msg(message);
 	buffer_.consume(buffer_.size());
-	manager_.interpret(message);
+	manager_.interpret(id_, message);
 }
 
 void Session::write(const std::string& message)

@@ -390,11 +390,11 @@ Croupier::Croupier(int croupier_id, GameManager & man)
 	: man_(man)
 	, croupier_id_(croupier_id) 
 	, stage_(ADDING) 
-	, adder_(deck_, players_, *this) 
-	, bidder_(deck_, players_, *this)
-	, dealer_(deck_, players_, *this)
-	, game_(deck_, players_, *this)
-	, score_(deck_, players_, *this)
+	, adder_(deck_, players_)
+	, bidder_(deck_, players_)
+	, dealer_(deck_, players_)
+	, game_(deck_, players_)
+	, score_(deck_, players_)
 {}
 
 Croupier::Croupier(const Croupier & other)
@@ -412,6 +412,11 @@ Croupier::Croupier(const Croupier & other)
 
 Croupier::~Croupier()
 {}
+
+auto Croupier::create_weakptr()
+{
+	return weak_from_this(this);
+}
 
 void Croupier::changeStage(stage new_stage)
 {
@@ -500,15 +505,14 @@ json Croupier::chatMessage(const json & msg)
 	return response;
 }
 
-
 // </Class Croupier>
 
 
+
 // <Class Controller>
-Controller::Controller(Deck & deck, PlayersCollection & players, Croupier & croup)
+Controller::Controller(Deck & deck, PlayersCollection & players)
 	: deck_(deck)
 	, players_(players)
-	, croupier_(croup)
 {}
 
 Controller::~Controller()
@@ -520,25 +524,28 @@ Controller::~Controller()
 
 // <Class Adder>
 
-Adder::Adder(Deck & deck, PlayersCollection & players, Croupier & croup)
-	: Controller(deck, players, croup)
+Adder::Adder(Deck & deck, PlayersCollection & players)
+	: Controller(deck, players)
 {}
 
 Adder::~Adder()
 {}
 
-bool Adder::addPlayer(int player_id, std::string nick)
+stage Adder::addPlayer(int player_id, std::string nick)
 {
-	bool ret_value = players_.addPlayer(player_id, nick);
+	bool is_added = players_.addPlayer(player_id, nick);
 	if (isFull()) {
 		players_.getNextPlayer();
 		for (int i = 0; i < 10; ++i) {
 			players_.getNextPlayer();
 		}
-		croupier_.changeStage(BIDDING);
 		deck_.dealCards(players_.getArray());
+		return BIDDING;
 	}
-	return ret_value;
+	if (!is_added) {
+		return FAIL;
+	}
+	return ADDING;
 }
 
 bool Adder::isFull() const
@@ -552,14 +559,14 @@ bool Adder::isFull() const
 
 // <Class Bidder>
 
-Bidder::Bidder(Deck & deck, PlayersCollection & players, Croupier & croup)  
-	: Controller(deck, players, croup)
+Bidder::Bidder(Deck & deck, PlayersCollection & players)  
+	: Controller(deck, players)
 {}
 
 Bidder::~Bidder()
 {}
 
-bool Bidder::Bid(int player_id, int new_amount)
+stage Bidder::Bid(int player_id, int new_amount)
 {
 	if ((*players_.getCurrentPlayer()).getPlayerId() != player_id) {
 		throw std::logic_error("Player trying to bid not at his turn");
@@ -574,10 +581,9 @@ bool Bidder::Bid(int player_id, int new_amount)
 	}
 	if ((*players_.getCurrentPlayer()).getScoreClass().getClaim() ==
 		(*players_.getHighestClaimer()).getScoreClass().getClaim()) {
-		croupier_.changeStage(DEALING);
-		return false;
+		return DEALING;
 	}
-	return true;
+	return BIDDING;
 }
 
 void Bidder::giveAddCards()
@@ -591,16 +597,16 @@ void Bidder::giveAddCards()
 
 // <Class Dealer>
 
-Dealer::Dealer(Deck & deck, PlayersCollection & players, Croupier & croup) 
+Dealer::Dealer(Deck & deck, PlayersCollection & players) 
 	: user_id_(-1) 
 	, counter(0)
-	, Controller(deck, players, croup)
+	, Controller(deck, players)
 {}
 
 Dealer::~Dealer()
 {}
 
-void Dealer::giveCardToPeer(int player_id, unsigned card_number)
+stage Dealer::giveCardToPeer(int player_id, unsigned card_number)
 {
 	if ( player_id == (*players_.getHighestClaimer()).getPlayerId() || (player_id == user_id_ &&
 		counter == 1)) {
@@ -610,8 +616,9 @@ void Dealer::giveCardToPeer(int player_id, unsigned card_number)
 		(*players_.getHighestClaimer()).getPlayerDeck().playCard(card_number));
 	user_id_ = players_.getPlayer(player_id).getPlayerId();
 	if (++counter == TWO_CARDS) {
-		croupier_.changeStage(PLAYING);
+		return PLAYING;
 	}
+	return DEALING;
 }
 
 void Dealer::reset()
@@ -626,10 +633,10 @@ void Dealer::reset()
 
 // <Class Game>
 
-Game::Game(Deck & deck, PlayersCollection & players, Croupier & croup) 
+Game::Game(Deck & deck, PlayersCollection & players)
 	: turn_counter_(0) 
 	, super_suit_(NONE) 
-	, Controller(deck, players, croup)
+	, Controller(deck, players)
 {}
 
 Game::~Game()
@@ -640,7 +647,7 @@ auto Game::playTurn(int player, unsigned card)
 	return players_.getPlayer(player).getPlayerDeck().playCard(card);
 }
 
-void Game::manageTurn(int player, int card)
+stage Game::manageTurn(int player, int card)
 {
 	if ((*players_.getCurrentPlayer()).getPlayerId() != player) {
 		throw std::logic_error("Not player's turn to play a card");
@@ -651,10 +658,11 @@ void Game::manageTurn(int player, int card)
 		players_.setCurrentPlayer(compareCardsAndPassToWinner());
 		vec_.clear();
 		if (++turn_counter_ == MAX_TURNS) {
-			croupier_.changeStage(SUMMING_UP);
 			reset(); 
+			return SUMMING_UP;
 		}
 	}
+	return PLAYING;
 }
 
 int Game::setSuperiorSuit()
@@ -738,14 +746,14 @@ void Game::reset()
 
 // <Class SumScore>
 
-SumScore::SumScore(Deck & deck, PlayersCollection & players, Croupier & croup) 
-	: Controller(deck, players, croup)
+SumScore::SumScore(Deck & deck, PlayersCollection & players)
+	: Controller(deck, players)
 {}
 
 SumScore::~SumScore()
 {}
 
-void SumScore::sumUpScore()
+stage SumScore::sumUpScore()
 {
 	for (auto i : players_.getArray()) {
 		if (i.getPlayerId() == (*players_.getHighestClaimer()).getPlayerId()) {
@@ -760,10 +768,11 @@ void SumScore::sumUpScore()
 			i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
 		}
 		if (i.getScoreClass().getScore() >= POINTS_WINNING_CAP) {
-			croupier_.changeStage(ENDING);
+			return ENDING;
 		}
 	}
 	resetPlayersAtributes();
+	return BIDDING;
 }
 
 void SumScore::resetPlayersAtributes()
@@ -782,7 +791,6 @@ void SumScore::resetPlayersAtributes()
 	}
 	deck_.shuffle();
 	deck_.dealCards(players_.getArray());
-	croupier_.changeStage(BIDDING);
 }
 
 // </Class SumScore>
@@ -815,8 +823,7 @@ req GameManager::doWork(const std::string & message)
 				return vec;
 			}
 		}
-		//active_games_.emplace_back(croupier_counter_++, *this);
-		active_games_.push_back(new Croupier(croupier_counter_++, *this));
+		active_games_.push_back(std::make_shared<Croupier>(croupier_counter_++, *this));
 		active_games_.back()->runGame(msg);
 		for (auto&& i : feedback_) {
 			std::vector<int> v;

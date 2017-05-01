@@ -76,10 +76,10 @@ std::vector<Card>& PlayerDeck::getDeck()
 void PlayerDeck::addCard(const Card & card)
 {
 	deck_.push_back(card);
-	deck_[deck_.size() - 1].setIsUsed(false);
+	deck_.back().setIsUsed(false);
 }
 
-const Card & PlayerDeck::playCard(unsigned card_number) const
+const Card & PlayerDeck::playCard(std::size_t card_number) const
 {
 	if (card_number >= deck_.size()) {
 		throw std::out_of_range("No card with such index in player's deck");
@@ -96,9 +96,46 @@ bool PlayerDeck::doesHavePair(suits suit)
 	return (findCard(KING, suit) || findCard(QUEEN, suit));
 }
 
+std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits superior)
+{
+	Card card = vec[0];
+	if (vec.size() == 2 && isHigher(vec[0], vec[1], superior)) {
+		card = vec[1];
+	}
+	std::vector<int> correct_cards;
+	for (size_t i = 0; i < deck_.size(); ++i) {
+		if (isHigher(card, deck_[i], superior)) {
+			for (size_t j = i; j < deck_.size(); ++j) {
+				if (isHigher(card, deck_[j], superior)) {
+					correct_cards.push_back(j);
+				}
+			}
+			return correct_cards;
+		}
+	}
+	for (size_t i = 0; i < deck_.size(); ++i) {
+		if (!deck_[i].getIsUsed() && (deck_[i].getSuit() == card.getSuit() || card.getSuit() == superior)) {
+			correct_cards.push_back(i);
+		}
+	}
+	if (correct_cards.empty()) {
+		for (size_t i = 0; i < deck_.size(); ++i) {
+			if (!deck_[i].getIsUsed()) {
+				correct_cards.push_back(i);
+			}
+		}
+	}
+	return correct_cards;
+}
+
+std::size_t PlayerDeck::getMaxValue() const
+{
+	return max_value_;
+}
+
 bool PlayerDeck::findCard(figures figure, suits suit) const
 {
-	for (auto i : deck_) {
+	for (auto& i : deck_) {
 		if (i.getFigure() == figure && i.getSuit() == suit && i.getIsUsed() == false) {
 			return true;
 		}
@@ -106,9 +143,27 @@ bool PlayerDeck::findCard(figures figure, suits suit) const
 	return false;
 }
 
+bool PlayerDeck::isHigher(const Card & played, const Card deck_card, suits superior)
+{
+	if (deck_card.getIsUsed()) {
+		return false;
+	}
+	if (played.getSuit() == deck_card.getSuit()) {
+		return (played.getFigure() < deck_card.getFigure());
+	}
+	if (played.getSuit() == superior) {
+		return false;
+	}
+	if (deck_card.getSuit() == superior) {
+		return true;
+	}
+	return false;
+}
+
 void PlayerDeck::clearDeck()
 {
 	deck_.clear();
+	max_value_ = 0;
 }
 
 // </Class PlayerDeck>
@@ -176,9 +231,28 @@ void Score::resetClaim()
 // <Class Player>
 
 Player::Player(int player_id, std::string & nick)
-	: player_id_(player_id)
+	: ready_(false)
+	, player_id_(player_id)
 	, nick_(nick)
 {}
+
+Player::Player(const Player & other)
+	: ready_(other.ready_)
+	, score_(other.score_)
+	, player_id_(other.player_id_)
+	, nick_(other.nick_)
+	, player_deck_(other.player_deck_)
+{}
+
+Player& Player::operator=(const Player & other)
+{
+	ready_ = other.ready_;
+	score_ = other.score_;
+	player_id_ = other.player_id_;
+	nick_ = other.nick_;
+	player_deck_ = other.player_deck_;
+	return *this;
+}
 
 Player::~Player() {}
 
@@ -206,6 +280,17 @@ Score & Player::getScoreClass()
 {
 	return score_;
 }
+
+bool Player::getReady() const
+{
+	return ready_;
+}
+
+void Player::setReady(bool ready)
+{
+	ready_ = ready;
+}
+
 // </class Player> 
 
 
@@ -226,8 +311,8 @@ Deck::Deck()
 {
 	std::vector<figures> figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
 	std::vector<suits> suit_ = { DIAMONDS, CLUBS, HEARTS, SPADES };
-	for (auto i : figure_) {
-		for (auto j : suit_) {
+	for (auto& i : figure_) {
+		for (auto& j : suit_) {
 			deck_.emplace_back(i, j);
 		}
 	}
@@ -240,12 +325,22 @@ Deck::~Deck() {}
 void Deck::dealCards(players& players)
 {
 	shuffle();
-	for (auto&& i : players) {
+	for (auto& i : players) {
 		i.getPlayerDeck().clearDeck();
 		for (int j = 0; j < MAX_CARDS; ++j) {
 			i.getPlayerDeck().addCard(*deck_it_++);
 		}
 	}
+}
+
+std::vector<Card> Deck::showBonusCards() const
+{
+	std::vector<Card> temp;
+	std::vector<Card>::const_iterator it = deck_it_;
+	while (it != deck_.end()) {
+		temp.push_back(*it);
+	}
+	return temp;
 }
 
 void Deck::addBonusCards(Player & player)
@@ -296,10 +391,12 @@ bool PlayersCollection::addPlayer(int player_id, std::string & nick)
 		highest_claimer_ = players_.begin();
 		players_it_ = players_.begin();
 		compulsory_claimer_ = players_.begin();
+		// DO WYMIANY
 		if (players_.size() == 1) {
 			++players_it_;
 			(*highest_claimer_).getScoreClass().setClaim(100);
 		}
+		// DO WYMIANY
 		return true;
 	}
 	return false;
@@ -371,6 +468,18 @@ void PlayersCollection::setHighestClaimer(Player & highest_claimer)
 	highest_claimer_ = std::find(players_.begin(), players_.end(), highest_claimer);
 }
 
+request_type PlayersCollection::getPlayerInfo() const
+{
+	request_type vec;
+	for (auto& i : players_) {
+		json tmp;
+		tmp["id"] = i.getPlayerId();
+		tmp["nick"] = i.getPlayersNick();
+		vec.push_back(tmp);
+	}
+	return vec;
+}
+
 Player & PlayersCollection::getPlayer(int player_id)
 {
 	for (auto& i : players_) {
@@ -384,11 +493,11 @@ Player & PlayersCollection::getPlayer(int player_id)
 
 
 
-// <Class Croupier>
+// <Class Room>
 
-Croupier::Croupier(int croupier_id, GameManager & man)
+Room::Room(int room_id, GameManager & man)
 	: man_(man)
-	, croupier_id_(croupier_id) 
+	, room_id_(room_id) 
 	, stage_(ADDING) 
 	, adder_(deck_, players_)
 	, bidder_(deck_, players_)
@@ -397,9 +506,9 @@ Croupier::Croupier(int croupier_id, GameManager & man)
 	, score_(deck_, players_)
 {}
 
-Croupier::Croupier(const Croupier & other)
+Room::Room(const Room & other)
 	: man_(other.man_)
-	, croupier_id_(other.croupier_id_)
+	, room_id_(other.room_id_)
 	, deck_(other.deck_)
     , players_(other.players_)
 	, stage_(other.stage_)
@@ -410,50 +519,80 @@ Croupier::Croupier(const Croupier & other)
 	, score_(other.score_)
 {}
 
-Croupier::~Croupier()
+Room::~Room()
 {}
 
-void Croupier::changeStage(stage new_stage)
+void Room::changeStage(stage new_stage)
 {
 	stage_ = new_stage;
 }
 
-bool Croupier::runGame(const json & msg)
+bool Room::runGame(const json & msg)
 {
 	bool ret_val = false;
 	request_type request;
 	json feedback;
 	std::vector<int> players_ids;
+	if (parse(msg["action"]) == DISCONNECT || parse(msg["action"]) == LEAVE) {
+		for (players_it it = players_.getArray().begin(); it != players_.getArray().end(); ++it) {
+			if ((*it).getPlayerId() == msg["player"]) {
+				players_.getArray().erase(it);
+			}
+		}
+		feedback["action"] = "leave";
+		feedback["player"] = msg["player"];
+		for (auto& i : players_.getArray()) {
+			feedback["who"].push_back(i.getPlayerId());
+		}
+		request.push_back(feedback);
+		if (stage_ != ADDING || stage_ != ENDING) {
+			feedback.erase("action");
+			feedback["action"] = "end";
+			request.push_back(feedback);
+		}
+		return true;
+	}
+	stage temp_stage = FAIL;
 	switch (stage_) {
 	case ADDING:
 		switch (parse(msg["action"])) {
 		case ADD:
-			if (adder_.addPlayer(msg["player"], msg["values"])) {
+			temp_stage = adder_.addPlayer(msg["player"], msg["data"]);
+			if (temp_stage != FAIL) {
 				ret_val = true;
-				//for (auto i : players_.getArray()) {
-				//	players_ids.push_back(i.getPlayerId());
-				//}
-				feedback["who"] = msg["player"];//players_ids;
-				feedback["type"] = "update";
+				for (auto& i : players_.getArray()) {
+					players_ids.push_back(i.getPlayerId());
+				}
+				request_type player_info = players_.getPlayerInfo();
+				feedback["who"] = msg["player"];
 				feedback["action"] = "add";
-				feedback["id"] = croupier_id_;
-				feedback["player"] = msg["player"];
-				feedback["values"] = msg["values"];
+				feedback["error"] = false;
+				for (auto& i : player_info) {
+					feedback["data"].push_back(i);
+				}
 				request.push_back(feedback);
-				feedback.clear();
-				//if (adder_.isFull()) {
-				//	feedback["type"] = "update";
-				//	feedback["action"] = "get";
-				//	for (auto i : players_.getArray()) {
-				//		feedback["who"] = i.getPlayerId();
-				//		for (auto j : i.getPlayerDeck().getDeck()) {
-				//			feedback["values"].push_back({ j.getSuit(), j.getFigure() });
-				//		}
-				//		request.push_back(feedback);
-				//		feedback.erase("who");
-				//		feedback.erase("values");
-				//	}
-				//}
+				if (player_info.size() < 1) {
+					feedback.erase("data");
+					feedback.erase("who");
+					for (auto& i : player_info) {
+						if (i["id"] != msg["player"]) {
+							feedback["who"].push_back(i["id"]);
+						}
+						else {
+							feedback["data"].push_back(i);
+						}
+					}
+				}
+				request.push_back(feedback);
+				if (temp_stage == BIDDING) {
+					stage_ = temp_stage;
+				}
+			}
+			else {
+				feedback["action"] = "add";
+				feedback["error"] = true;
+				feedback["who"] = msg["player"];
+				request.push_back(feedback);
 			}
 			break;
 		case CHAT :
@@ -479,23 +618,43 @@ bool Croupier::runGame(const json & msg)
 	 return ret_val;
 }
 
-int Croupier::parse(const std::string & str)
+int Room::parse(const std::string & str)
 {
-	json command = { { "add", ADD },{ "get", GET },{ "bid", BID },
-					 { "play", PLAY },{ "chat", CHAT } 
+	json command = { { "add", ADD },{ "get", GET },{ "bid", BID },{ "play", PLAY },
+					 { "chat", CHAT },{"disconnect", DISCONNECT}, {"leave", LEAVE}
 	};
 	return command[str];
 }
 
-json Croupier::chatMessage(const json & msg)
+bool Room::isEmpty()
+{
+	return players_.getArray().empty();
+}
+
+size_t Room::getRoomId() const
+{
+	return room_id_;
+}
+
+json Room::getPlayersInfo() const
+{
+	json players;
+	players["id"] = room_id_;
+	request_type info = players_.getPlayerInfo();
+	for (auto& i : info) {
+			players["nick"].push_back(i["nick"]);
+	}
+	return players;
+}
+
+json Room::chatMessage(const json & msg)
 {
 	json response = {
 		{"action", "chat"},
 		{"player", msg["player"]},
-		{"values", msg["values"]},
+		{"data", msg["data"]},
 	};
-	for (auto i : players_.getArray()) {
-		//std::cout << i.getPlayerId() << std::endl;
+	for (auto& i : players_.getArray()) {
 		if (i.getPlayerId() != msg["player"]) {
 			response["who"].push_back(i.getPlayerId());
 		}
@@ -503,7 +662,7 @@ json Croupier::chatMessage(const json & msg)
 	return response;
 }
 
-// </Class Croupier>
+// </Class Room>
 
 
 
@@ -531,17 +690,13 @@ Adder::~Adder()
 
 stage Adder::addPlayer(int player_id, std::string nick)
 {
-	bool is_added = players_.addPlayer(player_id, nick);
+	if (!players_.addPlayer(player_id, nick)) {
+		return FAIL;
+	}
 	if (isFull()) {
 		players_.getNextPlayer();
-		for (int i = 0; i < 10; ++i) {
-			players_.getNextPlayer();
-		}
 		deck_.dealCards(players_.getArray());
 		return BIDDING;
-	}
-	if (!is_added) {
-		return FAIL;
 	}
 	return ADDING;
 }
@@ -604,7 +759,7 @@ Dealer::Dealer(Deck & deck, PlayersCollection & players)
 Dealer::~Dealer()
 {}
 
-stage Dealer::giveCardToPeer(int player_id, unsigned card_number)
+stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 {
 	if ( player_id == (*players_.getHighestClaimer()).getPlayerId() || (player_id == user_id_ &&
 		counter == 1)) {
@@ -640,7 +795,7 @@ Game::Game(Deck & deck, PlayersCollection & players)
 Game::~Game()
 {}
 
-const Card & Game::playTurn(int player, unsigned card)
+const Card & Game::playTurn(int player, std::size_t card)
 {
 	return players_.getPlayer(player).getPlayerDeck().playCard(card);
 }
@@ -666,7 +821,7 @@ stage Game::manageTurn(int player, int card)
 int Game::setSuperiorSuit()
 {
 	int score = 0;
-	for (auto i : vec_) {
+	for (auto& i : vec_) {
 		if (i.first == current_starting_player_) {
 			if (i.second.getFigure() == KING || i.second.getFigure() == QUEEN) {
 				if (players_.getPlayer(current_starting_player_).getPlayerDeck().doesHavePair(
@@ -695,7 +850,7 @@ int Game::compareCardsAndPassToWinner()
 	int score = setSuperiorSuit();
 
 	if (super_suit_ != NONE) {
-		for (auto i : vec_) {
+		for (auto& i : vec_) {
 			if (i.second.getSuit() == super_suit_) {
 				if (superior_suit_figure < i.second.getFigure()) {
 					superior_suit_figure = i.second.getFigure();
@@ -705,13 +860,13 @@ int Game::compareCardsAndPassToWinner()
 		}
 	}
 	if (superior_suit_figure == NOT_A_FIGURE) {
-		for (auto i : vec_) {
+		for (auto& i : vec_) {
 			if (i.first == current_starting_player_) {
 				superior_suit_figure = i.second.getFigure();
 				current_suit = i.second.getSuit();
 			}
 		}
-		for (auto i : vec_) {
+		for (auto& i : vec_) {
 			if (i.second.getSuit() == current_suit && 
 				i.second.getFigure() == superior_suit_figure) {
 				superior_suit_figure = i.second.getFigure();
@@ -719,7 +874,7 @@ int Game::compareCardsAndPassToWinner()
 			}
 		}
 	}
-	for (auto i : vec_) {
+	for (auto& i : vec_) {
 		score += i.second.getFigure();
 	}
 	players_.getPlayer(winning_player).getScoreClass().addToTurnScore(score);
@@ -753,7 +908,7 @@ SumScore::~SumScore()
 
 stage SumScore::sumUpScore()
 {
-	for (auto i : players_.getArray()) {
+	for (auto& i : players_.getArray()) {
 		if (i.getPlayerId() == (*players_.getHighestClaimer()).getPlayerId()) {
 			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
 				i.getScoreClass().addScore(-1 * i.getScoreClass().getClaim());
@@ -775,7 +930,7 @@ stage SumScore::sumUpScore()
 
 void SumScore::resetPlayersAtributes()
 {
-	for (auto i : players_.getArray()) {
+	for (auto& i : players_.getArray()) {
 		i.getScoreClass().clearTurnScore();
 		i.getScoreClass().resetClaim();
 		i.getPlayerDeck().clearDeck();
@@ -784,7 +939,7 @@ void SumScore::resetPlayersAtributes()
 	players_.setHighestClaimer(*players_.getCompulsoryClaimer());
 	players_.setCurrentPlayer((*players_.getCompulsoryClaimer()).getPlayerId());
 	players_.getNextPlayer();
-	for (auto i : players_.getArray()) {
+	for (auto& i : players_.getArray()) {
 		i.getPlayerDeck().clearDeck();
 	}
 	deck_.shuffle();
@@ -795,54 +950,78 @@ void SumScore::resetPlayersAtributes()
 
 
 
+// <Class AddManager>
+AddManager::AddManager(std::vector<PRoom> & active_games)
+	: active_games_(active_games)
+{}
+
+
+AddManager::~AddManager()
+{}
+
+req AddManager::addPlayer(const json & msg)
+{
+	return req();
+}
+
+
+// </Class AddManager>
+
+
+
 // <Class GameManager>
 
 GameManager::GameManager() 
-	: croupier_counter_(0)
+	: room_counter_(0)
 {}
 
 GameManager::~GameManager()
 {}
 
-req GameManager::doWork(const std::string & message)
+req GameManager::doWork(std::size_t player_id, const std::string & message)
 {
-	req vec;
+	server_response_.clear();
+	feedback_.clear();
 	json msg = json::parse(message);
+	msg["player"] = player_id;
 	if (msg["action"] == "add") {
-		for (auto&& i : active_games_) {
-			if (i->runGame(msg)) {
-				for (auto j : feedback_) {
-					std::vector<int> v;
-					for (auto a : j["who"]) {
-						v.push_back(static_cast<int>(a));
-					}
-					vec.emplace_back(std::make_pair(j.dump(), v));
-				}
-				return vec;
-			}
-		}
-		active_games_.push_back(std::make_shared<Croupier>(croupier_counter_++, *this));
-		active_games_.back()->runGame(msg);
-		for (auto&& i : feedback_) {
-			std::vector<int> v;
-			for (auto a : i["who"]) {
-				v.push_back(static_cast<int>(a));
-			}
-			vec.emplace_back(std::make_pair(i.dump(), v));
+		addPlayer(msg);
+		return server_response_;
+	}
+	if (msg["action"] == "show") {
+		returnExistingRooms(msg);
+		return server_response_;
+	}
+	active_games_[msg["id"]]->runGame(msg);
+	attachClientIdsToMessage();
+	return server_response_;
+}
+
+void GameManager::returnExistingRooms(const json & msg)
+{
+	json resp = {
+		  {"action", "show"}
+		, {"who", msg["player"]}
+	};
+	for (auto& i : active_games_) {
+		if (!i->isEmpty()) {
+			resp["data"].push_back(i->getPlayersInfo());
 		}
 	}
-	else {
-		active_games_[msg["id"]]->runGame(msg);
-		for (auto&& i : feedback_) {
-			std::vector<int> v;
-			for (auto a : i["who"]) {
-				//std::cout << a << std::endl;
-				v.push_back(static_cast<int>(a));
-			}
-			vec.emplace_back(std::make_pair(i.dump(), v));
+	feedback_.push_back(resp);
+	attachClientIdsToMessage();
+}
+
+void GameManager::attachClientIdsToMessage()
+{
+	for (auto& i : feedback_) {
+		std::vector<int> v;
+		for (auto& a : i["who"]) {
+			v.push_back(static_cast<int>(a));
 		}
+		i.erase("who");
+		server_response_.emplace_back(std::make_pair(i.dump(), v));
 	}
-	return vec;
 }
 
 void GameManager::pushMessage(const request_type & msg)
@@ -850,4 +1029,47 @@ void GameManager::pushMessage(const request_type & msg)
 	feedback_ = msg;
 }
 
+int GameManager::findGameId(size_t player_id) const
+{
+	for (size_t i = 0; i < players_.size(); ++i) {
+		for (auto& j : players_[i]) {
+			if (j == player_id) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+void GameManager::addPlayer(json & msg)
+{
+	if (msg["id"] == -1) {
+		for (size_t i = 0; i < active_games_.size(); ++i) {
+			if (active_games_[i]->isEmpty()) {
+				active_games_[i]->runGame(msg);
+				players_[i].push_back(msg["player"]);
+				attachClientIdsToMessage();
+				return;
+			}
+		}
+		active_games_.emplace_back(std::make_shared<Room>(room_counter_++, *this));
+		if (active_games_.back()->runGame(msg)) {
+			players_.emplace_back();
+			players_.back().push_back(msg["player"]);
+		}
+		attachClientIdsToMessage();
+		return;
+	}
+	if (static_cast<size_t>(msg["id"]) < active_games_.size()) {
+		if (active_games_[msg["id"]]->runGame(msg)) {
+			players_[msg["id"]].push_back(msg["player"]);
+		}
+		attachClientIdsToMessage();
+	}
+	return;
+	 //Tutaj mo¿e byæ ró¿nie w zale¿noœci od tego
+	 //jak bêdzie na poziomie Roomu obs³ugiwany brak dodania
+}
+
 // </Class GameManager>
+

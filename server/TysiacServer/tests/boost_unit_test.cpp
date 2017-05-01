@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(DealerGiveCardToPeer)
 	PlayersCollection players;
 	std::string s = "test";
 	Player p(0, s);
-	PCroupier croupier = std::make_shared<Croupier>(0, man);
+	PRoom croupier = std::make_shared<Room>(0, man);
 	Dealer d(deck, players);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(IfBidsBecomesHighestBidder)
 	Deck deck;
 	PlayersCollection players;
 	std::string s = "test";
-	PCroupier croupier = std::make_shared<Croupier>(0, man);
+	PRoom croupier = std::make_shared<Room>(0, man);
 	Dealer d(deck, players);
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsNotAtHisTurn)
 	PlayersCollection players;
 	std::string s = "test";
 	Player p(0, s);
-	PCroupier croupier = std::make_shared<Croupier>(0, man);
+	PRoom croupier = std::make_shared<Room>(0, man);
 	Dealer d(deck, players);
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 	PlayersCollection players;
 	std::string s = "test";
 	Player p(0, s);
-	PCroupier croupier = std::make_shared<Croupier>(0, man);
-	//croupier = std::make_shared<Croupier>(0, man, croupier);
+	PRoom croupier = std::make_shared<Room>(0, man);
+	//croupier = std::make_shared<Room>(0, man, croupier);
 	Dealer d(deck, players);
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
@@ -205,26 +205,71 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(AdderCroupierTests)
-BOOST_AUTO_TEST_CASE(CroupierAddNewPlayer)
+BOOST_AUTO_TEST_SUITE(AdderRoomTests)
+BOOST_AUTO_TEST_CASE(RoomAddNewPlayer)
 {
 	json add_request = {
-		{ "action", "add" }
-		,{ "player" , 0 }
-		,{ "values" , "test_nick" }
-		,{ "id", 0 }
+		 { "action", "add" }
+		,{ "data" , "test_nick" }
+		,{ "id", -1 }
 	};
-	json expected_response;
-	expected_response["who"] = 0;
-	expected_response["type"] = "update";
-	expected_response["action"] = "add";
-	expected_response["id"] = 0;
-	expected_response["player"] = 0;
-	expected_response["values"] = "test_nick";
-	std::string req_msg = expected_response.dump();
+	json res0 = {
+		 { "action", "add" }
+		,{"error", false}
+	};
+	json player = {
+		 { "id", 0 }
+		,{ "nick", "test_nick" }
+	};
+	res0["data"].push_back(player);
+	std::string req_msg = res0.dump();
 	std::string add_msg = add_request.dump();
 	GameManager man;
-	Croupier croupier(0, man);
-	BOOST_CHECK_EQUAL(man.doWork(add_msg)[0].first, req_msg);
+	Room croupier(0, man);
+	BOOST_CHECK_EQUAL(man.doWork(0, add_msg)[0].first, req_msg);
+}
+
+BOOST_AUTO_TEST_CASE(RoomAddAtLeastFourPlayersSoMultipleRoomsAreCreated)
+{
+	json req0 = {
+		 { "action", "add" }
+		,{ "data" , "test_nick" }
+	};
+	json req1 = req0, req2 = req0, req3 = req0;
+	req0["id"] = -1;
+	req1["id"] = 0;
+	req2["id"] = 0;
+	req3["id"] = -1;
+	json res0 = {
+		 { "action", "add" }
+		,{"error", false}
+	};
+	json res1 = res0, res2 = res0, res3 = res0;
+	json player = {
+		 { "id", 0 }
+		,{ "nick", "test_nick" }
+	};
+	res0["data"].push_back(player);
+	res1["data"].push_back(player);
+	res2["data"].push_back(player);
+	player.erase("id");
+	player["id"] = 1;
+	res1["data"].push_back(player);
+	res2["data"].push_back(player);
+	player.erase("id");
+	player["id"] = 2;
+	res2["data"].push_back(player);
+	player.erase("id");
+	player["id"] = 3;
+	res3["data"].push_back(player);
+	GameManager man;
+	Room croupier(0, man);
+	std::string msg0 = req0.dump(), msg1 = req1.dump(), msg2 = req2.dump(), msg3 = req3.dump();
+	std::string ans0 = res0.dump(), ans1 = res1.dump(), ans2 = res2.dump(), ans3 = res3.dump();
+	BOOST_CHECK_EQUAL(man.doWork(0, msg0)[0].first, ans0);
+	BOOST_CHECK_EQUAL(man.doWork(1, msg1)[0].first, ans1);
+	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
+	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].first, ans3);
 }
 BOOST_AUTO_TEST_SUITE_END()
+

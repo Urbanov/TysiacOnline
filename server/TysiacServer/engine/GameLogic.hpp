@@ -14,7 +14,7 @@
 class Adder;
 class Bidder;
 class Card;
-class Croupier;
+class Room;
 class Dealer;
 class Deck;
 class Game;
@@ -31,7 +31,8 @@ using request_type = std::vector<json>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
 using players = std::vector<Player>;
 using players_it = std::vector<Player>::iterator;
-using PCroupier = std::shared_ptr<Croupier>;
+using PRoom = std::shared_ptr<Room>;
+//using player_info = std::vector<std::pair<int, std::string> >;
 
 const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
@@ -40,6 +41,8 @@ const int TWO_CARDS = 2;
 const int POINTS_WINNING_CAP = 1000;
 
 enum commands {
+	LEAVE,
+	DISCONNECT,
 	ADD,
 	GET,
 	BID,
@@ -98,11 +101,15 @@ public:
 	std::vector<Card> & getDeck();
 	void clearDeck();
 	void addCard(const Card&);
-	const Card & playCard(unsigned) const;
+	const Card & playCard(std::size_t) const;
 	bool doesHavePair(suits);
+	std::vector<int> getAllValidCards(std::vector<Card> &, suits);
+	std::size_t getMaxValue() const;
 private:
 	bool findCard(figures figure, suits suit) const;
+	bool isHigher(const Card &, const Card, suits);
 	std::vector<Card> deck_;
+	std::size_t max_value_;
 };
 
 class Score {
@@ -126,16 +133,21 @@ private:
 class Player {
 public:
 	Player(int, std::string &);
+	Player(const Player& other);
+	Player & operator=(const Player & other);
 	~Player();
 	bool operator==(const Player &) const;
 	PlayerDeck & getPlayerDeck();
 	int getPlayerId() const;
 	const std::string & getPlayersNick() const;
 	Score & getScoreClass();
+	bool getReady() const;
+	void setReady(bool);
 private:
+	bool ready_;
 	Score score_;
 	int player_id_;
-	const std::string nick_;
+	std::string nick_;
 	PlayerDeck player_deck_;
 };
 
@@ -146,6 +158,7 @@ public:
 	Deck();
 	~Deck();
 	void dealCards(players&);
+	std::vector<Card> showBonusCards() const;
 	void addBonusCards(Player &);
 	void shuffle();
 private:
@@ -163,6 +176,7 @@ public:
 	bool getNextPlayer();
 	void getNextCompulsoryClaimer();
 	void setHighestClaimer(Player &);
+	request_type getPlayerInfo() const;
 	players & getArray();
 	players_it & getCurrentPlayer();
 	players_it & getHighestClaimer();
@@ -208,7 +222,7 @@ class Dealer : public Controller {
 public:
 	Dealer(Deck &, PlayersCollection &);
 	~Dealer();
-	stage giveCardToPeer(int player_id, unsigned card_number);
+	stage giveCardToPeer(int player_id, std::size_t card_number);
 	void reset();
 private:
 	int user_id_;
@@ -219,7 +233,7 @@ class Game : public Controller {
 public:
 	Game(Deck &, PlayersCollection &);
 	~Game();
-	const Card & playTurn(int, unsigned);
+	const Card & playTurn(int, std::size_t);
 	stage manageTurn(int, int);
 	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();
@@ -240,30 +254,50 @@ public:
 	void resetPlayersAtributes();
 };
 
+class AddManager
+{
+public:
+	AddManager(std::vector<PRoom> &);
+	~AddManager();
+	req addPlayer(const json &);
+private:
+	std::vector<PRoom> & active_games_;
+};
+
 class GameManager {
 public:
 	GameManager();
 	~GameManager();
-	req doWork(const std::string &);
+	req doWork(std::size_t, const std::string &);
 	void pushMessage(const request_type &);
 private:
-	std::vector<PCroupier> active_games_;
+	void returnExistingRooms(const json &);
+	void attachClientIdsToMessage();
+	int findGameId(size_t) const;
+	void addPlayer(json &);
+
+	std::vector<std::vector<size_t> > players_;
+	std::vector<PRoom> active_games_;
 	request_type feedback_;
-	std::size_t croupier_counter_;
+	req server_response_;
+	std::size_t room_counter_;
 };
 
-class Croupier : public std::enable_shared_from_this<Croupier> {
+class Room : public std::enable_shared_from_this<Room> {
 public:
-	Croupier(int, GameManager&);
-	Croupier(const Croupier &);
-	~Croupier();
+	Room(int, GameManager&);
+	Room(const Room &);
+	~Room();
 	void changeStage(stage);
 	bool runGame(const json &);
 	int parse(const std::string &);
+	bool isEmpty();
+	size_t getRoomId() const;
+	json getPlayersInfo() const;
 private:
 	json chatMessage(const json & msg);
 	GameManager & man_;
-	int croupier_id_;
+	size_t room_id_;
 	Deck deck_;
 	PlayersCollection players_;
 	stage stage_;
@@ -274,17 +308,4 @@ private:
 	SumScore score_;
 };
 
-
-
-
-
-
 #endif // _GAME_LOGIC_HPP_
-
-//->Dodawanie graczy
-//->Licytacja
-//->Musik, oddanie po karcie kolegom
-//->Wygrywanie lew (+ kozyry i chwalonki czy jak im tam)
-//->punktacja
-
-

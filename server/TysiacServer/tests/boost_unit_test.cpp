@@ -313,5 +313,47 @@ BOOST_AUTO_TEST_CASE(AddToRoomMoreThan3)
 	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
 	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].second[0], 3);
 }
+
+
+BOOST_AUTO_TEST_CASE(AddTwoAndGetAllMessageBack)
+{
+	json req0 = {
+		{ "action", "add" }
+		,{ "data" , "test_nick" }
+		,{"id", -1}
+	};
+	json req1 = {
+		{ "action", "add" }
+		,{ "data" , "test_nick" }
+		,{ "id", 0 }
+	};
+	json res0 = {
+		{ "action", "add" }
+		,{ "error", false }
+	};
+	//json res0 = {
+	//	{"action", "add"}
+	//};
+	json res1 = {
+		 {"action", "new_player"}
+	};
+	json tmp = {
+		 {"id", 0}
+		,{"nick", "test_nick"}
+	};
+	res0["data"].push_back(tmp);
+	tmp.erase("id");
+	tmp["id"] = 1;
+	res0["data"].push_back(tmp);
+	res1["data"].push_back(tmp);
+	GameManager man;
+	std::string msg0 = req0.dump(), msg1 = req1.dump();
+	std::string ans0 = res0.dump(), ans1 = res1.dump();
+	man.doWork(0, msg0);
+	req feedback2 = man.doWork(1, msg1);
+	BOOST_CHECK_EQUAL(feedback2[0].first, ans0);
+	BOOST_CHECK_EQUAL(feedback2[1].first, ans1);
+
+}
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -563,9 +563,6 @@ bool Room::runGame(const json & msg)
 			temp_stage = adder_.addPlayer(msg["player"], msg["data"]);
 			if (temp_stage != FAIL) {
 				ret_val = true;
-				for (auto& i : players_.getArray()) {
-					players_ids.push_back(i.getPlayerId());
-				}
 				request_type player_info = players_.getPlayerInfo();
 				feedback["who"] = msg["player"];
 				feedback["action"] = "add";
@@ -574,7 +571,7 @@ bool Room::runGame(const json & msg)
 					feedback["data"].push_back(i);
 				}
 				request.push_back(feedback);
-				if (player_info.size() < 1) {
+				if (players_.getArray().size() > 1) {
 					feedback.clear();
 					feedback["action"] = "new_player";
 					for (auto& i : player_info) {

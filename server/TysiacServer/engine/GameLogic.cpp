@@ -582,8 +582,8 @@ bool Room::runGame(const json & msg)
 							feedback["data"].push_back(i);
 						}
 					}
+					request.push_back(feedback);
 				}
-				request.push_back(feedback);
 				if (temp_stage == BIDDING) {
 					stage_ = temp_stage;
 				}

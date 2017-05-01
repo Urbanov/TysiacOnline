@@ -638,8 +638,9 @@ bool Room::runGame(const json & msg)
 
 int Room::parse(const std::string & str)
 {
-	json command = { { "add", ADD },{ "get", GET },{ "bid", BID },{ "play", PLAY },
-					 { "chat", CHAT },{"disconnect", DISCONNECT}, {"leave", LEAVE}, {"ready", READY}
+	json command = { { "add", ADD }, { "get", GET }, { "bid", BID },
+					{ "play", PLAY }, { "chat", CHAT }, { "ready", READY },
+					{"leave", LEAVE}, { "disconnect", DISCONNECT },
 	};
 	return command[str];
 }
@@ -1019,6 +1020,7 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 		returnExistingRooms(msg);
 		return server_response_;
 	}
+	msg["id"] = findGameId(player_id);
 	active_games_[msg["id"]]->runGame(msg);
 	attachClientIdsToMessage();
 	return server_response_;

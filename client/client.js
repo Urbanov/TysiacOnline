@@ -46,14 +46,18 @@ $(document).ready(function () {
 				break;
 
 			case "add":
-				alert(JSON.stringify(msg));
 				if (!msg.error) {
+					$("#join_error").hide();
 					joinRoom(msg.data);
 				}
 				else {
 					$("#join_error").show();
+					requestRefresh();	
 				}
 				break;
+
+			case "chat":
+				addMessage(msg.data);
 		}
 	}
 
@@ -77,9 +81,15 @@ function leaveRoom() {
 }
 
 function sendMessage() {
-	var msg = $("#text_area").val();
+	var text = player_nick + ": " + $("#text_area").val();
 	$("#text_area").val("");
-	addMessage(msg);
+	addMessage(text);
+	var msg = {
+		action: "chat",
+		data: text
+	}
+	alert(JSON.stringify(msg));
+	ws.send(JSON.stringify(msg));
 }
 
 function addMessage(msg) {
@@ -163,7 +173,12 @@ function loadRooms(data) {
 			text: players,
 			class: "room btn btn-block btn-default"
 		});
-		elem.click( {id: room.id }, requestRoom)
+		if (room.nick.length < 3) {
+			elem.click({ id: room.id }, requestRoom);
+		}
+		else {
+			elem.prop("disabled", true);
+		}
 		$("#room_list").append(elem);
 	}
 }

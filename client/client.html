@@ -26,7 +26,7 @@
 						<h4 class="modal-title bid">Login</h4>
 					</div>
 					<div class="modal-body">
-						<div class="alert alert-danger">
+						<div id="login_error" class="alert alert-danger">
 							<strong>Error:</strong> cannot login without a nickname
 						</div>
 						<div class="login">
@@ -40,6 +40,11 @@
 		</div>
 		<div class="panel panel-default">
 			<div id="lobby" class="panel-body lobby">
+
+				<div id="join_error" class="alert alert-danger">
+					<strong>Error:</strong> cannot login without a nickname
+				</div>
+
 				<div class="row">
 					<div class="col-md-6">
 						<button type="button" id="create_room" class="btn btn-default btn-lg btn-block">Create new room</button>

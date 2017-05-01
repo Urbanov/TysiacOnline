@@ -6,12 +6,11 @@ class Player {
 
 var room_id;
 var player_id;
+var player_nick;
 var ws;
 
 $(document).ready(function () {
 	ws = new WebSocket("ws://127.0.0.1:2137");
-	var js = [{ "id": 0, "nicks": ["1", "2", "3"] }];
-	loadRooms(js);
 
 	$("#create_room").click({ id: -1 }, requestRoom);
 	$("#refresh_list").click(requestRefresh);
@@ -28,6 +27,10 @@ $(document).ready(function () {
 	$("#login").click(login);
 	$("#ready").click(sendReady);
 
+
+	/* on open */
+	//requestRefresh();
+
 	/*ZMIENIC*/
 	ws.onmessage = function (event) {
 		var msg = JSON.parse(event.data);
@@ -36,9 +39,20 @@ $(document).ready(function () {
 				player_id = msg.values;
 				break;
 
+			case "show":
+				if (msg.hasOwnProperty("data")) {
+					loadRooms(msg.data);
+				}
+				break;
+
 			case "add":
-				room_id = msg.id;
-				joinRoom();
+				alert(JSON.stringify(msg));
+				if (!msg.error) {
+					joinRoom(msg.data);
+				}
+				else {
+					$("#join_error").show();
+				}
 				break;
 		}
 	}
@@ -48,11 +62,11 @@ $(document).ready(function () {
 function login() {
 	var nick = $("#nickname").val();
 	if (!nick.length) {
-		$(".alert").show();
+		$("#login_error").show();
 	}
 	else {
 		$("#login_modal").modal("hide");
-		alert(nick);
+		player_nick = nick;
 	}
 }
 
@@ -75,29 +89,25 @@ function addMessage(msg) {
 }
 
 function requestRefresh() {
-	//ws.send(refresh);
-	var js = [{ "id": 0, "nicks": ["1", "2", "3"] }, { "id": 1, "nicks": ["4", "5", "6"] }];
-	loadRooms(js);
+	var msg = {
+		action: "show"
+	};
+	ws.send(JSON.stringify(msg));
 }
 
 function requestRoom(event) {
-	//alert(event.data.id);
-
-	/*ZMIENIC*/
 	var msg = {
 		action: "add",
-		player: player_id,
-		values: "placeholder"
+		data: player_nick,
+		id: event.data.id
 	};
+	alert(JSON.stringify(msg));
 	ws.send(JSON.stringify(msg));
-
-	//ws.send(id);
 }
 
-function joinRoom() {
+function joinRoom(data) {
 	$("#lobby").hide();
 	$("#game_panel").show();
-	//showModal();
 }
 
 function showBids(min, max) {
@@ -148,7 +158,7 @@ function sendBid(event) {
 function loadRooms(data) {
 	$("#room_list").html("");
 	for (room of data) {
-		var players = room.nicks.join(", ");
+		var players = room.nick.join(", ");
 		var elem = $("<button/>", {
 			text: players,
 			class: "room btn btn-block btn-default"

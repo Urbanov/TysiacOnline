@@ -639,7 +639,7 @@ bool Room::runGame(const json & msg)
 int Room::parse(const std::string & str)
 {
 	json command = { { "add", ADD },{ "get", GET },{ "bid", BID },{ "play", PLAY },
-					 { "chat", CHAT },{"disconnect", DISCONNECT}, {"leave", LEAVE}
+					 { "chat", CHAT },{"disconnect", DISCONNECT}, {"leave", LEAVE}, {"ready", READY}
 	};
 	return command[str];
 }

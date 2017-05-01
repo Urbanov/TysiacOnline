@@ -43,6 +43,7 @@ const int POINTS_WINNING_CAP = 1000;
 enum commands {
 	LEAVE,
 	DISCONNECT,
+	READY,
 	ADD,
 	GET,
 	BID,
@@ -207,6 +208,7 @@ public:
 	Adder(Deck &, PlayersCollection &);
 	~Adder();
 	stage addPlayer(int, std::string);
+	stage setPlayerReady(int , bool);
 	bool isFull() const;
 };
 

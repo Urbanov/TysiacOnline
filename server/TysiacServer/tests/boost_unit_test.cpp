@@ -271,5 +271,47 @@ BOOST_AUTO_TEST_CASE(RoomAddAtLeastFourPlayersSoMultipleRoomsAreCreated)
 	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
 	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].first, ans3);
 }
+
+BOOST_AUTO_TEST_CASE(AddToRoomMoreThan3)
+{
+	json req0 = {
+		{ "action", "add" }
+		,{ "data" , "test_nick" }
+	};
+	json req1 = req0, req2 = req0, req3 = req0;
+	req0["id"] = -1;
+	req1["id"] = 0;
+	req2["id"] = 0;
+	req3["id"] = 0;
+	json res0 = {
+		{ "action", "add" }
+		,{ "error", false }
+	};
+	json res1 = res0, res2 = res0, res3 = res0;
+	json player = {
+		{ "id", 0 }
+		,{ "nick", "test_nick" }
+	};
+	res0["data"].push_back(player);
+	res1["data"].push_back(player);
+	res2["data"].push_back(player);
+	player.erase("id");
+	player["id"] = 1;
+	res1["data"].push_back(player);
+	res2["data"].push_back(player);
+	player.erase("id");
+	player["id"] = 2;
+	res2["data"].push_back(player);
+	res3.erase("error");
+	res3["error"] = true;
+	GameManager man;
+	Room croupier(0, man);
+	std::string msg0 = req0.dump(), msg1 = req1.dump(), msg2 = req2.dump(), msg3 = req3.dump();
+	std::string ans0 = res0.dump(), ans1 = res1.dump(), ans2 = res2.dump(), ans3 = res3.dump();
+	BOOST_CHECK_EQUAL(man.doWork(0, msg0)[0].first, ans0);
+	BOOST_CHECK_EQUAL(man.doWork(1, msg1)[0].first, ans1);
+	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
+	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].second[0], 3);
+}
 BOOST_AUTO_TEST_SUITE_END()
 

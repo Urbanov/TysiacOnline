@@ -24,8 +24,8 @@ ws.onmessage = function (event) {
 function joinRoom() {
     var msg = {
         action: "add",
-        player: player_id,
-        values: "placeholder"
+        id : -1,
+        data: "placeholder"
     };
     ws.send(JSON.stringify(msg));
 }

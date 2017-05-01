@@ -537,6 +537,9 @@ bool Room::runGame(const json & msg)
 		for (players_it it = players_.getArray().begin(); it != players_.getArray().end(); ++it) {
 			if ((*it).getPlayerId() == msg["player"]) {
 				players_.getArray().erase(it);
+				for (auto i : players_.getArray()) {
+					i.setReady(false);
+				}
 			}
 		}
 		feedback["action"] = "leave";
@@ -572,8 +575,8 @@ bool Room::runGame(const json & msg)
 				}
 				request.push_back(feedback);
 				if (player_info.size() < 1) {
-					feedback.erase("data");
-					feedback.erase("who");
+					feedback.clear();
+					feedback["action"] = "new_player";
 					for (auto& i : player_info) {
 						if (i["id"] != msg["player"]) {
 							feedback["who"].push_back(i["id"]);
@@ -594,6 +597,21 @@ bool Room::runGame(const json & msg)
 				feedback["who"] = msg["player"];
 				request.push_back(feedback);
 			}
+			break;
+		case READY:
+			temp_stage = adder_.setPlayerReady(msg["player"], true);
+			feedback["action"] = "ready";
+			feedback["player"] = msg["player"];
+			for (auto i : players_.getArray()) {
+				feedback["who"].push_back(i.getPlayerId());
+			}
+			request.push_back(feedback);
+			if (temp_stage == ADDING) {
+				break;
+			}
+			feedback.clear();
+			players_.getNextPlayer();
+
 			break;
 		case CHAT :
 			request.push_back(chatMessage(msg)); break;
@@ -693,9 +711,18 @@ stage Adder::addPlayer(int player_id, std::string nick)
 	if (!players_.addPlayer(player_id, nick)) {
 		return FAIL;
 	}
-	if (isFull()) {
-		players_.getNextPlayer();
-		deck_.dealCards(players_.getArray());
+	return ADDING;
+}
+
+stage Adder::setPlayerReady(int player_id, bool isReady)
+{
+	players_.getPlayer(player_id).setReady(isReady);
+	if (players_.getArray().size() == MAX_PLAYERS) {
+		for (auto i : players_.getArray()) {
+			if (!i.getReady()) {
+				return ADDING;
+			}
+		}
 		return BIDDING;
 	}
 	return ADDING;

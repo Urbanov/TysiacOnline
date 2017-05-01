@@ -46,6 +46,7 @@ $(document).ready(function () {
 				break;
 
 			case "add":
+				alert("add: " + JSON.stringify(msg.data));
 				if (!msg.error) {
 					$("#join_error").hide();
 					joinRoom(msg.data);
@@ -56,8 +57,13 @@ $(document).ready(function () {
 				}
 				break;
 
+			case "new_player":
+				alert("new_player: " + JSON.stringify(msg.data));
+				break;
+
 			case "chat":
 				addMessage(msg.data);
+				break;
 		}
 	}
 
@@ -88,7 +94,6 @@ function sendMessage() {
 		action: "chat",
 		data: text
 	}
-	alert(JSON.stringify(msg));
 	ws.send(JSON.stringify(msg));
 }
 
@@ -111,7 +116,6 @@ function requestRoom(event) {
 		data: player_nick,
 		id: event.data.id
 	};
-	alert(JSON.stringify(msg));
 	ws.send(JSON.stringify(msg));
 }
 

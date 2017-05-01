@@ -1,0 +1,103 @@
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+body {
+	margin-bottom: 60px;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 40px;
+	padding: 10px;
+	color: #999;
+	background-color: #444;
+}
+
+.banner {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.game_panel {
+	display: none;
+}
+
+.room {
+	background-color: #ddd;
+	font-weight: bold;
+}
+
+.panel_no_margin {
+	margin-bottom: 0px;
+}
+
+.game_canvas {
+	width: 800px;
+	height: 600px;
+	border: 1px solid black;
+}
+
+.chatbox {
+	border-color: #aaa;
+	font-weight: bold;
+}
+
+.chat_header {
+	background-color: #444;
+	color: #999;
+}
+
+.chat_body {
+	height: 458px;
+	overflow: auto;
+}
+
+.chat_footer {
+	background-color: #777;
+	color: #999;
+	font-weight: normal;
+}
+
+.game {
+	position: relative;
+	height: 600px;
+	max-width: 800px;
+}
+ 
+.game_modal {
+    position: absolute !important;
+}
+
+.bid_button {
+	background-color: #ddd;
+	font-weight: bold;
+	width: 11.11%;
+}
+
+.btn-danger {
+	font-weight: bold;
+	width: 11.11%;
+}
+
+.btn-success {
+	font-weight: bold;
+}
+
+.spacer { 
+	margin: 0;
+	padding: 0;
+	height: 10px; 
+}
+
+.login {
+	margin: 0 auto;
+	width: 80%;
+}
+
+.alert {
+	display: none;
+}

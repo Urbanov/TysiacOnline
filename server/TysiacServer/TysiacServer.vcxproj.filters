@@ -55,5 +55,8 @@
     <None Include="..\..\client\client.js">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\client\styles.css">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

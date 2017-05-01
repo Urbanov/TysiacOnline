@@ -1,63 +1,179 @@
-var room_id;
-var player_id;
-var ws = new WebSocket("ws://127.0.0.1:2137");
-
-ws.onmessage = function (event) {
-    var msg = JSON.parse(event.data);
-    switch (msg.action) {
-        case "chat":
-            $("#chatbox").append(msg.player + ": " + msg.values + "<br>");
-            break;
-
-        case "welcome":
-            player_id = msg.values;
-            $("#player_id").append(msg.values);
-            break;
-
-        case "add":
-            room_id = msg.id;
-            $("#game_id").append(msg.id);
-            break;
-    }
+class Player {
+	constructor(id) {
+		this.id = id;
+	}
 }
 
-function joinRoom() {
-    var msg = {
-        action: "add",
-        id : -1,
-        data: "placeholder"
-    };
-    ws.send(JSON.stringify(msg));
+var room_id;
+var player_id;
+var player_nick;
+var ws;
+
+$(document).ready(function () {
+	ws = new WebSocket("ws://127.0.0.1:2137");
+
+	$("#create_room").click({ id: -1 }, requestRoom);
+	$("#refresh_list").click(requestRefresh);
+	$("#send").click(sendMessage);
+	$("#text_area").keypress(function (event) {
+		if (event.keyCode == 13) {
+			event.preventDefault();
+			sendMessage();
+		}
+	});
+	$("#leave").click(leaveRoom);
+
+	$("#login_modal").modal({ backdrop: "static" });
+	$("#login").click(login);
+	$("#ready").click(sendReady);
+
+
+	/* on open */
+	//requestRefresh();
+
+	/*ZMIENIC*/
+	ws.onmessage = function (event) {
+		var msg = JSON.parse(event.data);
+		switch (msg.action) {
+			case "welcome":
+				player_id = msg.values;
+				break;
+
+			case "show":
+				if (msg.hasOwnProperty("data")) {
+					loadRooms(msg.data);
+				}
+				break;
+
+			case "add":
+				alert(JSON.stringify(msg));
+				if (!msg.error) {
+					joinRoom(msg.data);
+				}
+				else {
+					$("#join_error").show();
+				}
+				break;
+		}
+	}
+
+});
+
+function login() {
+	var nick = $("#nickname").val();
+	if (!nick.length) {
+		$("#login_error").show();
+	}
+	else {
+		$("#login_modal").modal("hide");
+		player_nick = nick;
+	}
+}
+
+function leaveRoom() {
+	alert("xD");
+	$("#lobby").show();
+	$("#game_panel").hide();
 }
 
 function sendMessage() {
-    var msg = {
-        action: "chat",
-        player: player_id,
-        values: $("#text_area").val(),
-        id: room_id
-    };
-    $("#text_area").val("");
-    $("#chatbox").append(msg.player + ": " + msg.values + "<br>");
-    ws.send(JSON.stringify(msg));
+	var msg = $("#text_area").val();
+	$("#text_area").val("");
+	addMessage(msg);
 }
 
-$("#submit").click(sendMessage);
+function addMessage(msg) {
+	$('#chatbox').append($("<div>", {
+		text: msg
+	}));
+}
 
-$("#text_area").keypress(function (event) {
-    if (event.keyCode == 13) {
-        event.preventDefault();
-        sendMessage();
-    }
-});
+function requestRefresh() {
+	var msg = {
+		action: "show"
+	};
+	ws.send(JSON.stringify(msg));
+}
 
-$("#connect").click(function () {
-    $(this).attr("disabled", true);
-    joinRoom();
-})
+function requestRoom(event) {
+	var msg = {
+		action: "add",
+		data: player_nick,
+		id: event.data.id
+	};
+	alert(JSON.stringify(msg));
+	ws.send(JSON.stringify(msg));
+}
 
-$("#disconnect").click(function () {
-    ws.close();
-})
+function joinRoom(data) {
+	$("#lobby").hide();
+	$("#game_panel").show();
+}
 
+function showBids(min, max) {
+	$("#bids_modal").modal({ backdrop: false });
+	$(".modal-backdrop").appendTo(".game");
 
+	var elem = $("<button/>", {
+		text: "pass",
+		class: "btn btn-default btn-danger"
+	});
+	elem.click({ value: -1 }, sendBid);
+	$("#bids").append(elem);
+
+	var bid = 110;
+
+	for (; bid < min; bid += 10) {
+		var elem = $("<button/>", {
+			text: bid,
+			class: "btn btn-default bid_button disabled"
+		});
+		$("#bids").append(elem);
+	}
+
+	for (; bid <= max; bid += 10) {
+		var elem = $("<button/>", {
+			text: bid,
+			class: "btn btn-default bid_button"
+		});
+		elem.click({ value: bid }, sendBid);
+		$("#bids").append(elem);
+	}
+
+	for (; bid <= 360; bid += 10) {
+		var elem = $("<button/>", {
+			text: bid,
+			class: "btn btn-default bid_button disabled"
+		});
+		$("#bids").append(elem);
+	}
+}
+
+function sendBid(event) {
+	$("#bids").html("");
+	$('#bids_modal').modal("hide");
+	alert(event.data.value);
+}
+
+function loadRooms(data) {
+	$("#room_list").html("");
+	for (room of data) {
+		var players = room.nick.join(", ");
+		var elem = $("<button/>", {
+			text: players,
+			class: "room btn btn-block btn-default"
+		});
+		elem.click( {id: room.id }, requestRoom)
+		$("#room_list").append(elem);
+	}
+}
+
+function askReady() {
+	$("#ready_modal").modal({ backdrop: false });
+	$(".modal-backdrop").appendTo(".game");
+}
+
+function sendReady() {
+	$('#ready_modal').modal("hide");
+	alert("ready");
+}

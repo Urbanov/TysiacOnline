@@ -223,6 +223,112 @@ BOOST_AUTO_TEST_CASE(DealerGiveCardToPeer)
 	players.setPlayer(HIGHEST, players.getArray()[0].getPlayerId());
 	BOOST_CHECK_THROW(d.giveCardToPeer(2, 0), std::out_of_range);
 }
+
+BOOST_AUTO_TEST_CASE(Return120MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, SPADES),
+		c4(ACE, SPADES);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 120);
+}
+
+BOOST_AUTO_TEST_CASE(Return160MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, SPADES),
+		c4(QUEEN, SPADES);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 160);
+}
+
+BOOST_AUTO_TEST_CASE(Return180MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, SPADES),
+		c4(ACE, SPADES),
+		c5(KING, CLUBS),
+		c6(QUEEN, CLUBS);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	p.getPlayerDeck().addCard(c5);
+	p.getPlayerDeck().addCard(c6);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 180);
+}
+
+BOOST_AUTO_TEST_CASE(Return200MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, SPADES),
+		c4(ACE, SPADES),
+		c5(KING, CLUBS),
+		c6(KING, DIAMONDS);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	p.getPlayerDeck().addCard(c5);
+	p.getPlayerDeck().addCard(c6);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 200);
+}
+
+BOOST_AUTO_TEST_CASE(Return220MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, SPADES),
+		c4(ACE, SPADES),
+		c5(KING, HEARTS),
+		c6(QUEEN, CLUBS);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	p.getPlayerDeck().addCard(c5);
+	p.getPlayerDeck().addCard(c6);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 220);
+}
+
+BOOST_AUTO_TEST_CASE(Return300MaxValue)
+{
+	std::string test = "test";
+	Player p(0, test);
+	Card c1(QUEEN, HEARTS),
+		c2(QUEEN, DIAMONDS),
+		c3(KING, DIAMONDS),
+		c4(ACE, SPADES),
+		c5(KING, HEARTS),
+		c6(QUEEN, CLUBS);
+	p.getPlayerDeck().addCard(c1);
+	p.getPlayerDeck().addCard(c2);
+	p.getPlayerDeck().addCard(c3);
+	p.getPlayerDeck().addCard(c4);
+	p.getPlayerDeck().addCard(c5);
+	p.getPlayerDeck().addCard(c6);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 300);
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(BidderTest)

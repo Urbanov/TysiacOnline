@@ -64,7 +64,9 @@ const suits Card::getSuit() const
 
 // <Clas PlayerDeck>
 
-PlayerDeck::PlayerDeck() {}
+PlayerDeck::PlayerDeck()
+	: max_value_(0)
+{}
 
 PlayerDeck::~PlayerDeck() {}
 
@@ -134,17 +136,21 @@ std::size_t PlayerDeck::getMaxValue()
 		return max_value_;
 	}
 	max_value_ += MIN_VALUE;
-	std::vector<suits> vec = { DIAMONDS, CLUBS, HEARTS,	SPADES };
+	std::vector <std::pair<suits, figures> > vec = { 
+		{DIAMONDS, NOT_A_FIGURE}, 
+		{CLUBS, NOT_A_FIGURE}, 
+		{HEARTS,NOT_A_FIGURE},
+		{SPADES, NOT_A_FIGURE} 
+	};
 	for (auto i : deck_) {
 		if (i.getFigure() == QUEEN || i.getFigure() == KING) {
-			for (auto j : deck_) {
-				if (j.getSuit() == i.getSuit() && i.getFigure() != j.getFigure() && 
-					(j.getFigure() == QUEEN || j.getFigure() == KING)) {
-					for (auto k : vec) {
-						if (k == i.getSuit()) {
-							max_value_ += i.getSuit();
-							k = NONE;
-						}
+			for (auto& j : vec) {
+				if (j.first == i.getSuit()) {
+					if (j.second != NOT_A_FIGURE) {
+						max_value_ += j.first;
+					}
+					else {
+						j.second = i.getFigure();
 					}
 				}
 			}

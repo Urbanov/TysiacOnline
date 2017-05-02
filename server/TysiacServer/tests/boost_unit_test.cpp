@@ -73,6 +73,25 @@ std::string createReadyMessage(int player_id = -1)
 	return ready.dump();
 }
 
+std::string createBidMessage(size_t bid)
+{
+	json msg = {
+		{"action", "bid"},
+		{"data", bid}
+	};
+	return msg.dump();
+}
+
+std::string createBidAnswer(size_t prev_id, size_t value, size_t curr_id)
+{
+	json msg = {
+		{"action", "bid"},
+		{"data", {{"value", value},{ "id", prev_id } }},
+		{"player", curr_id}
+	};
+	return msg.dump();
+}
+
 BOOST_AUTO_TEST_SUITE(CardTests)
 BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
 {
@@ -449,7 +468,28 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndGetMessageBack)
 
 BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBid)
 {
+	GameManager man;
+	man.doWork(0, createAddRequest(-1));
+	man.doWork(1, createAddRequest(0));
+	man.doWork(2, createAddRequest(0));
+	man.doWork(0, createReadyMessage());
+	man.doWork(1, createReadyMessage());
+	man.doWork(2, createReadyMessage());
+	req feedback = man.doWork(1, createBidMessage(110));
+	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, 110, 2));
+}
 
+BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
+{
+	GameManager man;
+	man.doWork(0, createAddRequest(-1));
+	man.doWork(1, createAddRequest(0));
+	man.doWork(2, createAddRequest(0));
+	man.doWork(0, createReadyMessage());
+	man.doWork(1, createReadyMessage());
+	man.doWork(2, createReadyMessage());
+	req feedback = man.doWork(1, createBidMessage(-1));
+	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, -1, 2));
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -588,9 +588,6 @@ bool Room::runGame(const json & msg)
 					}
 					request.push_back(feedback);
 				}
-				if (temp_stage == BIDDING) {
-					stage_ = temp_stage;
-				}
 			}
 			else {
 				feedback["action"] = "add";
@@ -612,6 +609,7 @@ bool Room::runGame(const json & msg)
 			if (temp_stage == ADDING) {
 				break;
 			}
+			stage_ = temp_stage;
 			players_.prepareGame();
 			feedback.clear();
 			deck_.dealCards(players_.getArray());
@@ -645,7 +643,7 @@ bool Room::runGame(const json & msg)
 		case BID: 
 			bidder_.Bid(msg["player"], msg["data"]);
 			tmp = bidder_.produceMessages(msg);
-			for (auto i : tmp) {
+			for (auto& i : tmp) {
 				request.push_back(i);
 			}
 			break;
@@ -741,7 +739,7 @@ stage Adder::setPlayerReady(int player_id, bool isReady)
 {
 	players_.getPlayer(X, player_id).setReady(isReady);
 	if (players_.getArray().size() == MAX_PLAYERS) {
-		for (auto i : players_.getArray()) {
+		for (auto& i : players_.getArray()) {
 			if (!i.getReady()) {
 				return ADDING;
 			}
@@ -781,6 +779,7 @@ stage Bidder::Bid(int player_id, int new_amount)
 	if (new_amount != -1) {
 		players_.setPlayer(HIGHEST, player_id);
 	}
+	players_.getNextPlayer(CURRENT);
 	while (players_.getPlayer(CURRENT).getScoreClass().getClaim() == -1) {
 		players_.getNextPlayer(CURRENT);
 	}
@@ -808,8 +807,8 @@ request_type Bidder::produceMessages(const json & msg)
 	}
 	feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
 	feedback["data"] = {
+		{ "value", msg["data"] },
 		{ "id", msg["player"] }
-		,{ "value", msg["data"] }
 	};
 	request.push_back(feedback);
 	feedback.erase("who");

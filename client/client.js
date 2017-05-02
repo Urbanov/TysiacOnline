@@ -1,5 +1,13 @@
+class Card {
+	constructor(figure, suit) {
+		this.figure = figure;
+		this.suit = suit;
+		this.used = false;
+	}
+}
+
 class Identity {
-	constructor(id = -1, nick = "") {
+	constructor(id, nick) {
 		this.id = id;
 		this.nick = nick;
 	}
@@ -8,21 +16,46 @@ class Identity {
 class Player extends Identity {
 	constructor(id, nick) {
 		super(id, nick);
-		this.score = 0;
-		this.ready = false;
 		this.cards = [];
 	}
 }
 
+class PlayerInfo extends Identity {
+	constructor(id, nick) {
+		super(id, nick);
+		this.score = 0;
+		this.ready = false;
+		this.cards = 0;
+	}
+}
+
+var Figures = {
+	NINE: 0,
+	TEN: 10,
+	JACK: 2,
+	QUEEN: 3,
+	KING: 4,
+	ACE: 11
+};
+
+var Suits = {
+	SPADES: 40,
+	CLUBS: 60,
+	DIAMONDS: 80,
+	HEARTS: 100
+}
+
 // global variables
 var ws;
-var identity;
+var self;
 var game = [];
 
 $(document).ready(function () {
 
 	// create identity object
-	identity = new Identity();
+	self = new Player();
+
+	console.log(self);
 
 	// initial event listeners
 	$("#create_room").click({ id: -1 }, requestRoom);
@@ -52,7 +85,7 @@ $(document).ready(function () {
 		var msg = JSON.parse(event.data);
 		switch (msg.action) {
 			case "welcome":
-				identity.id = msg.values;
+				self.id = msg.values;
 				break;
 
 			case "show":
@@ -73,16 +106,25 @@ $(document).ready(function () {
 				break;
 
 			case "new_player":
-				addMessage(msg.data[0].nick + " has entered the room");
-				addPlayer(msg.data[0]); //FIXME
+				addMessage(msg.data.nick + " has entered the room");
+				addPlayer(msg.data);
 				break;
 
 			case "chat":
 				addMessage(msg.data);
 				break;
 
+			case "deal":
+				console.log(msg.data);
+				for (let card of msg.data) {
+					addCard(card);
+				}
+				break;
+
+
 			default:
-				console.log(JSON.stringify(msg.data));
+				// ready is unused for now
+				console.log(JSON.stringify(msg));
 				break;
 		}
 	}
@@ -95,7 +137,7 @@ function login() {
 	}
 	else {
 		$("#login_modal").modal("hide");
-		identity.nick = nick;
+		self.nick = nick;
 	}
 }
 
@@ -106,7 +148,7 @@ function leaveRoom() {
 }
 
 function sendMessage() {
-	var text = identity.nick + ": " + $("#text_area").val();
+	var text = self.nick + ": " + $("#text_area").val();
 	$("#text_area").val("");
 	addMessage(text);
 	var msg = {
@@ -132,7 +174,7 @@ function requestRefresh() {
 function requestRoom(event) {
 	var msg = {
 		action: "add",
-		data: identity.nick,
+		data: self.nick,
 		id: event.data.id
 	};
 	ws.send(JSON.stringify(msg));
@@ -228,9 +270,11 @@ function sendReady() {
 	var msg = {
 		action: "ready"
 	};
-	ws.send(msg);
+	ws.send(JSON.stringify(msg));
+}
 
-	debug(msg);
+function addCard(card) {
+	self.cards.push(new Card(card.figure, card.suit));
 }
 
 function debug(what) {

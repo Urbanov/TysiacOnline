@@ -12,115 +12,110 @@
 	<link rel="stylesheet" href="styles.css">
 	<script type="text/javascript" src="client.js"></script>
 </head>
-
 <body>
-	<div class="container-fluid">
-		<div class="jumbotron banner">
-			<h1>TysiacOnline</h1>      
-			<p>zagraj se w swietna gierke xDD</p>
-		</div>
-		<div id="login_modal" class="modal fade" role="dialog">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h4 class="modal-title bid">Login</h4>
-					</div>
-					<div class="modal-body">
-						<div id="login_error" class="alert alert-danger">
-							<strong>Error:</strong> cannot login without a nickname
-						</div>
-						<div class="login">
-							<input type="text" id="nickname" class="form-control" placeholder="Enter your nickname...">
-							<div class="spacer"></div>
-							<button id="login" class="btn btn btn-success btn-block" type="button">Login</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="panel panel-default">
-			<div id="lobby" class="panel-body lobby">
-
-				<div id="join_error" class="alert alert-danger alert-dismissable">
-					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-					<strong>Error:</strong> requested room is full, please choose a different one or create your own
-				</div>
-
-				<div class="row">
-					<div class="col-md-6">
-						<button type="button" id="create_room" class="btn btn-default btn-lg btn-block">Create new room</button>
-					</div>
-					<div class="col-md-6">
-						<button type="button" id="refresh_list" class="btn btn-default btn-lg btn-block">Refresh list</button>
-					</div>
-				</div>
-				<div class="panel panel-default panel_no_margin">
-					<div class="panel-heading"><h3>Available rooms <small>(click to join)</small></h3></div>
-					<div id="room_list" class="panel-body"></div>
-				</div>
-			</div>
-			<div id="game_panel" class="panel-body game_panel">
-				<div class="row">
-					<div class="col-md-8">
-						<div class="game">
-							<canvas id="game_canvas" class="img-responsive game_canvas"></canvas>
-							<div id="bids_modal" class="modal fade game_modal" role="dialog">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title bid">Make a bid</h4>
-										</div>
-										<div id="bids" class="modal-body"></div>
-									</div>
-								</div>
-							</div>
-
-							<div id="ready_modal" class="modal fade game_modal" role="dialog">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title bid">Press start when you are ready</h4>
-										</div>
-										<div class="modal-body">
-											<button id="ready" class="btn btn btn-success btn-block" type="button">Start</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-
-					</div>
-					<div class="col-md-4">
-						<div class="chat_wrapper">
-						<button type="button" id="leave" class="btn room btn-block">
-							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave room
-						</button>
-						<div class="spacer"></div>
-						<div class="panel chatbox panel_no_margin">
-							<div class="chat_header panel-heading">
-								<span class="glyphicon glyphicon glyphicon-user" aria-hidden="true"></span> Chat
-							</div>
-							<div id="chatbox" class="panel-body chat_body img-responsive"></div>
-							<div class="panel-footer chat_footer">
-								<div class="input-group">
-									<input type="text" id="text_area" class="form-control" placeholder="Type your message...">
-									<span class="input-group-btn">
-									<button id="send" class="btn btn-default" type="button">Send</button>
-									</span>
-								</div>
-							</div>
-						</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<footer class="footer">
+	<div class="page_wrapper">
 		<div class="container-fluid">
-			<p>Dawid Urbanowicz &amp; Jakub Antoniak</p>
+			<div class="jumbotron banner">
+				<h1>TysiacOnline</h1>      
+				<p>zagraj se w swietna gierke xDD</p>
+			</div>
+			<div id="login_modal" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title bid">Login</h4>
+						</div>
+						<div class="modal-body">
+							<div id="login_error" class="alert alert-danger">
+								<strong>Error:</strong> cannot login without a nickname
+							</div>
+							<div class="login">
+								<input type="text" id="nickname" class="form-control" placeholder="Enter your nickname...">
+								<div class="spacer"></div>
+								<button id="login" class="btn btn btn-success btn-block" type="button">Login</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div id="lobby" class="panel-body lobby">
+
+					<div id="join_error" class="alert alert-danger alert-dismissable">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						<strong>Error:</strong> requested room is full, please choose a different one or create your own
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<button type="button" id="create_room" class="btn btn-default btn-lg btn-block">Create new room</button>
+						</div>
+						<div class="col-md-6">
+							<button type="button" id="refresh_list" class="btn btn-default btn-lg btn-block">Refresh list</button>
+						</div>
+					</div>
+					<div class="panel panel-default panel_no_margin">
+						<div class="panel-heading"><h3>Available rooms <small>(click to join)</small></h3></div>
+						<div id="room_list" class="panel-body"></div>
+					</div>
+				</div>
+				<div id="game_panel" class="panel-body game_panel">
+					<div class="row">
+						<div class="col-md-8">
+							<div class="game">
+								<canvas id="game_canvas" class="game_canvas"></canvas>
+								<div id="bids_modal" class="modal fade game_modal" role="dialog">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h4 class="modal-title bid">Make a bid</h4>
+											</div>
+											<div id="bids" class="modal-body"></div>
+										</div>
+									</div>
+								</div>
+								<div id="ready_modal" class="modal fade game_modal" role="dialog">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h4 class="modal-title bid">Press start when you are ready</h4>
+											</div>
+											<div class="modal-body">
+												<button id="ready" class="btn btn btn-success btn-block" type="button">Start</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<button type="button" id="leave" class="btn room btn-block">
+								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave room
+							</button>
+							<div class="spacer"></div>
+							<div class="panel chatbox panel_no_margin">
+								<div class="chat_header panel-heading">
+									<span class="glyphicon glyphicon glyphicon-user" aria-hidden="true"></span> Chat
+								</div>
+								<div id="chatbox" class="panel-body chat_body img-responsive"></div>
+								<div class="panel-footer chat_footer">
+									<div class="input-group">
+										<input type="text" id="text_area" class="form-control" placeholder="Type your message...">
+										<span class="input-group-btn">
+										<button id="send" class="btn btn-default" type="button">Send</button>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-	</footer>
+		<footer class="footer">
+			<div class="container-fluid">
+				<p>Dawid Urbanowicz &amp; Jakub Antoniak</p>
+			</div>
+		</footer>
+	</div>
 </body>
 </html>

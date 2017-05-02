@@ -15,6 +15,7 @@ body {
 	padding: 10px;
 	color: #999;
 	background-color: #444;
+	max-width: 1400px;
 }
 
 .banner {
@@ -101,4 +102,10 @@ body {
 
 .alert {
 	display: none;
+}
+
+.page_wrapper {
+	max-width: 1400px;
+	margin: 0 auto;
+	height: 100%;
 }

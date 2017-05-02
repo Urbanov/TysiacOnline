@@ -39,6 +39,12 @@ const int MAX_PLAYERS = 3;
 const int MAX_CARDS = 7;
 const int TWO_CARDS = 2;
 const int POINTS_WINNING_CAP = 1000;
+enum iterators {
+	X = -1,
+	CURRENT = 0,
+	COMPULSORY = 1,
+	HIGHEST = 2,
+};
 
 enum commands {
 	LEAVE,
@@ -139,7 +145,7 @@ public:
 	~Player();
 	bool operator==(const Player &) const;
 	PlayerDeck & getPlayerDeck();
-	int getPlayerId() const;
+	size_t getPlayerId() const;
 	const std::string & getPlayersNick() const;
 	Score & getScoreClass();
 	bool getReady() const;
@@ -174,22 +180,15 @@ public:
 	PlayersCollection(const PlayersCollection &);
 	~PlayersCollection();
 	bool addPlayer(int, std::string &);
-	bool getNextPlayer();
-	void getNextCompulsoryClaimer();
-	void setHighestClaimer(Player &);
+	size_t getNextPlayer(iterators);
 	request_type getPlayerInfo() const;
 	players & getArray();
-	players_it & getCurrentPlayer();
-	players_it & getHighestClaimer();
-	players_it & getCompulsoryClaimer();
-	players_it & setCurrentPlayer(int);
-	Player & getPlayer(int);
-
+	Player & getPlayer(iterators, size_t = 0);
+	void setPlayer(iterators, size_t);
+	void prepareGame();
 private:
 	players players_;
-	players_it highest_claimer_;
-	players_it players_it_;
-	players_it compulsory_claimer_;
+	std::vector<size_t> it_;
 };
 
 class Controller {
@@ -272,7 +271,7 @@ public:
 	~GameManager();
 	req doWork(std::size_t, const std::string &);
 	void pushMessage(const request_type &);
-private:
+protected:
 	void returnExistingRooms(const json &);
 	void attachClientIdsToMessage();
 	int findGameId(size_t) const;

@@ -1,7 +1,14 @@
 #define BOOST_TEST_MODULE game_engine_test
-
 #include <boost/test/unit_test.hpp>
 #include "../engine/GameLogic.hpp"
+
+class TestingManager : public GameManager{
+	TestingManager();
+	~TestingManager();
+	
+};
+
+
 
 BOOST_AUTO_TEST_SUITE(CardTests)
 BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
@@ -127,12 +134,12 @@ BOOST_AUTO_TEST_CASE(AddNewPlayer)
 
 BOOST_AUTO_TEST_CASE(GetNotExistingPlayer)
 {
-	BOOST_CHECK_THROW(getPlayer(0), std::out_of_range);
+	BOOST_CHECK_THROW(getPlayer(X, 0), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(SetNonExistingPlayer)
 {
-	BOOST_CHECK_THROW(setCurrentPlayer(0), std::out_of_range);
+	BOOST_CHECK_THROW(setPlayer(CURRENT,0), std::out_of_range);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -148,7 +155,9 @@ BOOST_AUTO_TEST_CASE(DealerGiveCardToPeer)
 	Dealer d(deck, players);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
-	players.setHighestClaimer(players.getArray()[0]);
+	players.addPlayer(4, s);
+	players.prepareGame();
+	players.setPlayer(HIGHEST, players.getArray()[0].getPlayerId());
 	BOOST_CHECK_THROW(d.giveCardToPeer(2, 0), std::out_of_range);
 }
 BOOST_AUTO_TEST_SUITE_END()
@@ -165,11 +174,11 @@ BOOST_AUTO_TEST_CASE(IfBidsBecomesHighestBidder)
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
-	players.setCurrentPlayer(1);
-	players.getNextPlayer();
+	players.addPlayer(4, s);
+	players.prepareGame();
 	bid.Bid(3, 120);
-	BOOST_REQUIRE((*players.getHighestClaimer()).getPlayerId() == 3);
-	BOOST_CHECK((*players.getHighestClaimer()).getScoreClass().getClaim() == 120);
+	BOOST_CHECK_EQUAL(3, players.getPlayer(HIGHEST).getPlayerId());
+	BOOST_CHECK_EQUAL(players.getPlayer(HIGHEST).getScoreClass().getClaim(),120);
 }
 BOOST_AUTO_TEST_CASE(ThrowIfBidsNotAtHisTurn)
 {
@@ -183,7 +192,9 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsNotAtHisTurn)
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
-	players.getNextPlayer();
+	players.addPlayer(4, s);
+	players.prepareGame();
+	players.getNextPlayer(CURRENT);
 	BOOST_CHECK_THROW(bid.Bid(1, 110), std::logic_error);
 }
 
@@ -195,12 +206,13 @@ BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 	std::string s = "test";
 	Player p(0, s);
 	PRoom croupier = std::make_shared<Room>(0, man);
-	//croupier = std::make_shared<Room>(0, man, croupier);
 	Dealer d(deck, players);
 	Bidder bid(deck, players);
 	players.addPlayer(1, s);
 	players.addPlayer(3, s);
-	players.getNextPlayer();
+	players.addPlayer(4, s);
+	players.prepareGame();
+	players.getNextPlayer(CURRENT);
 	BOOST_CHECK_THROW(bid.Bid(3, 90), std::logic_error);
 }
 BOOST_AUTO_TEST_SUITE_END()

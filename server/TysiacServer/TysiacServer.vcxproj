@@ -242,6 +242,7 @@
     <ClInclude Include="network\manager.h" />
     <ClInclude Include="network\server.h" />
     <ClInclude Include="network\session.h" />
+    <ClInclude Include="tests\TestFeatures.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\client\client.html" />

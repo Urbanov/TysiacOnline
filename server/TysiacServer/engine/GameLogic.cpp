@@ -266,7 +266,7 @@ PlayerDeck & Player::getPlayerDeck()
 	return player_deck_;
 }
 
-int Player::getPlayerId() const
+size_t Player::getPlayerId() const
 {
 	return player_id_;
 }
@@ -363,16 +363,10 @@ void Deck::shuffle()
 // <Class PlayersCollection>
 
 PlayersCollection::PlayersCollection()
-	: players_it_(players_.begin())
-	, highest_claimer_(players_.begin())
-	, compulsory_claimer_(players_.begin())
 {}
 
 PlayersCollection::PlayersCollection(const PlayersCollection & other)
 	: players_(other.players_)
-	, highest_claimer_(players_.end())
-	, players_it_(players_.end())
-	, compulsory_claimer_(players_.end())
 {}
 
 PlayersCollection::~PlayersCollection()
@@ -388,84 +382,31 @@ bool PlayersCollection::addPlayer(int player_id, std::string & nick)
 {
 	if (players_.size() < MAX_PLAYERS) {
 		players_.push_back(Player(player_id, nick));
-		highest_claimer_ = players_.begin();
-		players_it_ = players_.begin();
-		compulsory_claimer_ = players_.begin();
-		// DO WYMIANY
-		if (players_.size() == 1) {
-			++players_it_;
-			(*highest_claimer_).getScoreClass().setClaim(100);
-		}
-		// DO WYMIANY
 		return true;
 	}
 	return false;
 }
 
 
-bool PlayersCollection::getNextPlayer()
+size_t PlayersCollection::getNextPlayer(iterators it)
 {
-	if (players_.size() != 0) {
-		if (++players_it_ == players_.end()) {
-			players_it_ = players_.begin();
-		}
-		if (players_it_ == highest_claimer_) {
-			return false;
-		}
-		return true;
+	if (players_.size() != MAX_PLAYERS) {
+		throw std::out_of_range("Game has not started");
 	}
-	else throw std::logic_error("No players registered");
-}
-
-void PlayersCollection::getNextCompulsoryClaimer()
-{
-	if (players_.size() != 0) {
-		if (++compulsory_claimer_ == players_.end()) {
-			compulsory_claimer_ = players_.begin();
+	if (it == X) {
+		throw std::logic_error("Non existing iterator called in getNextPlayer() method");
+	}
+	if (players_.back().getPlayerId() == it_[it]) {
+		it_[it] = players_.front().getPlayerId();
+		return it_[it];
+	}
+	for (size_t i = 0; i < players_.size(); ++i) {
+		if (players_[i].getPlayerId() == it_[it]) {
+			it_[it] = players_[i + 1].getPlayerId();
+			return it_[it];
 		}
 	}
-	else throw std::logic_error("No players registered");
-}
-
-players_it & PlayersCollection::getCurrentPlayer()
-{
-	if (players_.size() != 0) {
-		return players_it_;
-	}
-	else throw std::logic_error("No players registered");
-}
-
-players_it & PlayersCollection::setCurrentPlayer(int player_id)
-{
-	players_it end_it = players_.end();
-	for (players_it tmp = players_.begin(); tmp != end_it; ++tmp) {
-		if ((*tmp).getPlayerId() == player_id) {
-			players_it_ = tmp;
-			return players_it_;
-		}
-	}
-	throw std::out_of_range("No player with given id exists in current game");
-}
-
-players_it & PlayersCollection::getHighestClaimer()
-{
-	if (players_.size() != 0) {
-		return highest_claimer_;
-	}
-	else throw std::logic_error("No players registered");
-}
-
-players_it & PlayersCollection::getCompulsoryClaimer()
-{
-	if (players_.size() != 0) {
-		return compulsory_claimer_;
-	}
-	else throw std::logic_error("No players registered");
-}
-
-void PlayersCollection::setHighestClaimer(Player & highest_claimer)
-{
-	highest_claimer_ = std::find(players_.begin(), players_.end(), highest_claimer);
+	return -1;
 }
 
 request_type PlayersCollection::getPlayerInfo() const
@@ -480,13 +421,43 @@ request_type PlayersCollection::getPlayerInfo() const
 	return vec;
 }
 
-Player & PlayersCollection::getPlayer(int player_id)
+Player & PlayersCollection::getPlayer(iterators it, size_t player_id)
 {
+	if (players_.size() != MAX_PLAYERS) {
+		throw std::out_of_range("Game has not started");
+	}
+	size_t index;
+	if (it != X) {
+		index = it_[it];
+	}
+	else {
+		index = player_id;
+	}
 	for (auto& i : players_) {
-		if (i.getPlayerId() == player_id)
+		if (i.getPlayerId() == index)
 			return i;
 	}
 	throw std::out_of_range("No player found based on given player id");
+}
+
+void PlayersCollection::setPlayer(iterators it, size_t player_id)
+{
+	if (players_.size() != MAX_PLAYERS) {
+		throw std::out_of_range("Game has not started");
+	}
+	if (it == X) {
+		throw std::logic_error("Argument \"X\" passed to setPlayer");
+	}
+	it_[it] = player_id;
+}
+
+void PlayersCollection::prepareGame()
+{
+	it_.resize(MAX_PLAYERS);
+	it_[CURRENT] = players_[1].getPlayerId();
+	it_[COMPULSORY] = players_[0].getPlayerId();
+	it_[HIGHEST] = players_[0].getPlayerId();
+	players_[0].getScoreClass().setClaim(100);
 }
 
 // </Class PlayerCollection>
@@ -537,6 +508,7 @@ bool Room::runGame(const json & msg)
 		for (players_it it = players_.getArray().begin(); it != players_.getArray().end(); ++it) {
 			if ((*it).getPlayerId() == msg["player"]) {
 				players_.getArray().erase(it);
+				score_.resetPlayersAtributes();
 				for (auto i : players_.getArray()) {
 					i.setReady(false);
 				}
@@ -600,15 +572,29 @@ bool Room::runGame(const json & msg)
 			feedback["action"] = "ready";
 			feedback["player"] = msg["player"];
 			for (auto i : players_.getArray()) {
-				feedback["who"].push_back(i.getPlayerId());
+				if (i.getPlayerId() != msg["player"]) {
+					feedback["who"].push_back(i.getPlayerId());
+				}
 			}
 			request.push_back(feedback);
 			if (temp_stage == ADDING) {
 				break;
 			}
-			feedback.clear();
-			players_.getNextPlayer();
-
+			players_.prepareGame();
+			deck_.dealCards(players_.getArray());
+			for (auto i : players_.getArray()) {
+				feedback.erase("who");
+				feedback.erase("data");
+				feedback["who"] = i.getPlayerId();
+				for (auto j : i.getPlayerDeck().getDeck()) {
+					json tmp = {
+						 {"figure", j.getFigure()}
+						,{"suit", j.getSuit()}
+					};
+					feedback["data"].push_back(tmp);
+				}
+				request.push_back(feedback);
+			}
 			break;
 		case CHAT :
 			request.push_back(chatMessage(msg)); break;
@@ -714,7 +700,7 @@ stage Adder::addPlayer(int player_id, std::string nick)
 
 stage Adder::setPlayerReady(int player_id, bool isReady)
 {
-	players_.getPlayer(player_id).setReady(isReady);
+	players_.getPlayer(X, player_id).setReady(isReady);
 	if (players_.getArray().size() == MAX_PLAYERS) {
 		for (auto i : players_.getArray()) {
 			if (!i.getReady()) {
@@ -746,19 +732,21 @@ Bidder::~Bidder()
 
 stage Bidder::Bid(int player_id, int new_amount)
 {
-	if ((*players_.getCurrentPlayer()).getPlayerId() != player_id) {
+	if (players_.getPlayer(CURRENT).getPlayerId() != player_id) {
 		throw std::logic_error("Player trying to bid not at his turn");
 	}
-	if ((*players_.getHighestClaimer()).getScoreClass().getClaim() >= new_amount) {
+	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() >= new_amount && new_amount != -1) {
 		throw std::logic_error("Player bids less than current highest bid");
 	}
-	(*players_.getCurrentPlayer()).getScoreClass().setClaim(new_amount);
-	players_.setHighestClaimer((*players_.getCurrentPlayer()));
-	while ((*players_.getCurrentPlayer()).getScoreClass().getClaim() == -1) {
-		players_.getNextPlayer();
+	players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount);
+	if (new_amount != -1) {
+		players_.setPlayer(HIGHEST, player_id);
 	}
-	if ((*players_.getCurrentPlayer()).getScoreClass().getClaim() ==
-		(*players_.getHighestClaimer()).getScoreClass().getClaim()) {
+	while (players_.getPlayer(CURRENT).getScoreClass().getClaim() == -1) {
+		players_.getNextPlayer(CURRENT);
+	}
+	if (players_.getPlayer(CURRENT).getPlayerId() ==
+		players_.getPlayer(HIGHEST).getPlayerId()) {
 		return DEALING;
 	}
 	return BIDDING;
@@ -766,7 +754,7 @@ stage Bidder::Bid(int player_id, int new_amount)
 
 void Bidder::giveAddCards()
 {
-	deck_.addBonusCards((*players_.getHighestClaimer()));
+	deck_.addBonusCards(players_.getPlayer(HIGHEST));
 }
 
 // </Class Bidder>
@@ -786,13 +774,13 @@ Dealer::~Dealer()
 
 stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 {
-	if ( player_id == (*players_.getHighestClaimer()).getPlayerId() || (player_id == user_id_ &&
+	if ( player_id == (players_.getPlayer(HIGHEST)).getPlayerId() || (player_id == user_id_ &&
 		counter == 1)) {
 		throw std::logic_error("Giving card to the wrong player");
 	}	
-	players_.getPlayer(player_id).getPlayerDeck().addCard(
-		(*players_.getHighestClaimer()).getPlayerDeck().playCard(card_number));
-	user_id_ = players_.getPlayer(player_id).getPlayerId();
+	players_.getPlayer(X, player_id).getPlayerDeck().addCard(
+		players_.getPlayer(HIGHEST).getPlayerDeck().playCard(card_number));
+	user_id_ = players_.getPlayer(X, player_id).getPlayerId();
 	if (++counter == TWO_CARDS) {
 		return PLAYING;
 	}
@@ -822,18 +810,18 @@ Game::~Game()
 
 const Card & Game::playTurn(int player, std::size_t card)
 {
-	return players_.getPlayer(player).getPlayerDeck().playCard(card);
+	return players_.getPlayer(X, player).getPlayerDeck().playCard(card);
 }
 
 stage Game::manageTurn(int player, int card)
 {
-	if ((*players_.getCurrentPlayer()).getPlayerId() != player) {
+	if (players_.getPlayer(CURRENT).getPlayerId() != player) {
 		throw std::logic_error("Not player's turn to play a card");
 	}
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
-	players_.getNextPlayer();
+	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
-		players_.setCurrentPlayer(compareCardsAndPassToWinner());
+		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		vec_.clear();
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
@@ -849,7 +837,7 @@ int Game::setSuperiorSuit()
 	for (auto& i : vec_) {
 		if (i.first == current_starting_player_) {
 			if (i.second.getFigure() == KING || i.second.getFigure() == QUEEN) {
-				if (players_.getPlayer(current_starting_player_).getPlayerDeck().doesHavePair(
+				if (players_.getPlayer(X, current_starting_player_).getPlayerDeck().doesHavePair(
 					i.second.getSuit())) {
 					super_suit_ = i.second.getSuit();
 					switch (super_suit_) {
@@ -902,7 +890,7 @@ int Game::compareCardsAndPassToWinner()
 	for (auto& i : vec_) {
 		score += i.second.getFigure();
 	}
-	players_.getPlayer(winning_player).getScoreClass().addToTurnScore(score);
+	players_.getPlayer(X, winning_player).getScoreClass().addToTurnScore(score);
 	return winning_player;
 }
 
@@ -934,7 +922,7 @@ SumScore::~SumScore()
 stage SumScore::sumUpScore()
 {
 	for (auto& i : players_.getArray()) {
-		if (i.getPlayerId() == (*players_.getHighestClaimer()).getPlayerId()) {
+		if (i.getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
 			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
 				i.getScoreClass().addScore(-1 * i.getScoreClass().getClaim());
 			}
@@ -960,10 +948,9 @@ void SumScore::resetPlayersAtributes()
 		i.getScoreClass().resetClaim();
 		i.getPlayerDeck().clearDeck();
 	}
-	players_.getNextCompulsoryClaimer();
-	players_.setHighestClaimer(*players_.getCompulsoryClaimer());
-	players_.setCurrentPlayer((*players_.getCompulsoryClaimer()).getPlayerId());
-	players_.getNextPlayer();
+	players_.setPlayer(HIGHEST, players_.getNextPlayer(COMPULSORY));
+	players_.setPlayer(CURRENT, players_.getPlayer(COMPULSORY).getPlayerId());
+	players_.getNextPlayer(CURRENT);
 	for (auto& i : players_.getArray()) {
 		i.getPlayerDeck().clearDeck();
 	}

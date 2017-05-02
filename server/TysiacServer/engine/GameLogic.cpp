@@ -630,7 +630,7 @@ bool Room::runGame(const json & msg)
 			feedback.clear();
 			feedback["data"] = 100;
 			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
-			tmp = bidder_.produceMessages(feedback);
+			tmp = bidder_.produceMessages(feedback, stage_);
 			for (auto i : tmp) {
 				request.push_back(i);
 			}
@@ -641,8 +641,11 @@ bool Room::runGame(const json & msg)
 	case BIDDING:
 		switch (parse(msg["action"])) {
 		case BID: 
-			bidder_.Bid(msg["player"], msg["data"]);
-			tmp = bidder_.produceMessages(msg);
+			temp_stage = bidder_.Bid(msg["player"], msg["data"]);
+			if (temp_stage == DEALING) {
+				stage_ = temp_stage;
+			}
+			tmp = bidder_.produceMessages(msg, stage_);
 			for (auto& i : tmp) {
 				request.push_back(i);
 			}
@@ -795,27 +798,34 @@ void Bidder::giveAddCards()
 	deck_.addBonusCards(players_.getPlayer(HIGHEST));
 }
 
-request_type Bidder::produceMessages(const json & msg)
+request_type Bidder::produceMessages(const json & msg, stage stage_)
 {
 	request_type request;
 	json feedback;
 	feedback["action"] = "bid";
 	for (auto i : players_.getArray()) {
-		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
+		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId() || stage_ == DEALING) {
 			feedback["who"].push_back(i.getPlayerId());
 		}
 	}
-	feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
+	if (stage_ == BIDDING) {
+		feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
+	}
+	else {
+		feedback["player"] = -1;
+	}
 	feedback["data"] = {
 		{ "value", msg["data"] },
 		{ "id", msg["player"] }
 	};
 	request.push_back(feedback);
-	feedback.erase("who");
-	feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
-	feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
-	feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue();
-	request.push_back(feedback);
+	if (stage_ == ADDING) {
+		feedback.erase("who");
+		feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
+		feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
+		feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue();
+		request.push_back(feedback);
+	}
 	return request;
 }
 

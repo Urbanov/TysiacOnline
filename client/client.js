@@ -155,7 +155,7 @@ function leaveRoom() {
 }
 
 function sendMessage() {
-	var text = self.nick + ": " + $("#text_area").val();
+	var text = self.nick + ":\xa0" + $("#text_area").val();
 	$("#text_area").val("");
 	addMessage(text);
 	var msg = {

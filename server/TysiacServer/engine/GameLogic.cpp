@@ -138,7 +138,7 @@ std::size_t PlayerDeck::getMaxValue()
 	for (auto i : deck_) {
 		if (i.getFigure() == QUEEN || i.getFigure() == KING) {
 			for (auto j : deck_) {
-				if (j.getSuit() == i.getSuit() && (j.getFigure() == QUEEN || j.getFigure() == KING)) {
+				if (j.getSuit() == i.getSuit() && i.getFigure() != j.getFigure()) {
 					for (auto k : vec) {
 						if (k == i.getSuit()) {
 							max_value_ += i.getSuit();

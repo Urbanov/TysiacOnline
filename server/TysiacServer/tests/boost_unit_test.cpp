@@ -8,7 +8,64 @@ class TestingManager : public GameManager{
 	
 };
 
+std::string createAddRequest(int server_id)
+{
+	json req0 = {
+		 { "action", "add" }
+		,{ "data" , "test_nick" }
+		,{ "id", server_id }
+	};
+	return req0.dump();
+}
 
+std::string createAddAnswer(std::vector<int> server_id, bool is_add_or_new_player, bool if_failed)
+{
+	json res0;
+	if (if_failed) {
+		res0["error"] = true;
+	}
+	else {
+		res0["error"] = false;
+	}
+	if (is_add_or_new_player) {
+		res0["action"] = "add";
+	}
+	else {
+		res0["action"] = "new_player";
+		res0.erase("error");
+	}
+	for (auto i : server_id) {
+		json player = {
+			{ "id", i }
+			,{ "nick", "test_nick" }
+		};
+		res0["data"].push_back(player);
+	}
+	return res0.dump();
+}
+
+std::string createTextMessage(std::string& msg, int player_id = -1)
+{
+	json chat_message = {
+		 {"action", "chat"}
+		,{"data", msg }
+	};
+	if (player_id != -1) {
+		chat_message["player"] = player_id;
+	}
+	return chat_message.dump();
+}
+
+std::string createReadyMessage(int player_id = -1)
+{
+	json ready = {
+		{"action", "ready"}
+	};
+	if (player_id != -1) {
+		ready["player"] = player_id;
+	}
+	return ready.dump();
+}
 
 BOOST_AUTO_TEST_SUITE(CardTests)
 BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
@@ -220,152 +277,59 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(AdderRoomTests)
 BOOST_AUTO_TEST_CASE(RoomAddNewPlayer)
 {
-	json add_request = {
-		 { "action", "add" }
-		,{ "data" , "test_nick" }
-		,{ "id", -1 }
-	};
-	json res0 = {
-		 { "action", "add" }
-		,{"error", false}
-	};
-	json player = {
-		 { "id", 0 }
-		,{ "nick", "test_nick" }
-	};
-	res0["data"].push_back(player);
-	std::string req_msg = res0.dump();
-	std::string add_msg = add_request.dump();
 	GameManager man;
-	Room croupier(0, man);
-	BOOST_CHECK_EQUAL(man.doWork(0, add_msg)[0].first, req_msg);
+	BOOST_CHECK_EQUAL(man.doWork(0, createAddRequest(-1))[0].first, createAddAnswer({ 0 }, true, false));
 }
 
 BOOST_AUTO_TEST_CASE(RoomAddAtLeastFourPlayersSoMultipleRoomsAreCreated)
 {
-	json req0 = {
-		 { "action", "add" }
-		,{ "data" , "test_nick" }
-	};
-	json req1 = req0, req2 = req0, req3 = req0;
-	req0["id"] = -1;
-	req1["id"] = 0;
-	req2["id"] = 0;
-	req3["id"] = -1;
-	json res0 = {
-		 { "action", "add" }
-		,{"error", false}
-	};
-	json res1 = res0, res2 = res0, res3 = res0;
-	json player = {
-		 { "id", 0 }
-		,{ "nick", "test_nick" }
-	};
-	res0["data"].push_back(player);
-	res1["data"].push_back(player);
-	res2["data"].push_back(player);
-	player.erase("id");
-	player["id"] = 1;
-	res1["data"].push_back(player);
-	res2["data"].push_back(player);
-	player.erase("id");
-	player["id"] = 2;
-	res2["data"].push_back(player);
-	player.erase("id");
-	player["id"] = 3;
-	res3["data"].push_back(player);
 	GameManager man;
-	Room croupier(0, man);
-	std::string msg0 = req0.dump(), msg1 = req1.dump(), msg2 = req2.dump(), msg3 = req3.dump();
-	std::string ans0 = res0.dump(), ans1 = res1.dump(), ans2 = res2.dump(), ans3 = res3.dump();
-	BOOST_CHECK_EQUAL(man.doWork(0, msg0)[0].first, ans0);
-	BOOST_CHECK_EQUAL(man.doWork(1, msg1)[0].first, ans1);
-	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
-	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].first, ans3);
+	BOOST_CHECK_EQUAL(man.doWork(0, createAddRequest(-1))[0].first, createAddAnswer({ 0 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(1, createAddRequest(0))[0].first, createAddAnswer({ 0, 1 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(2, createAddRequest(0))[0].first, createAddAnswer({ 0, 1, 2 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(3, createAddRequest(-1))[0].first, createAddAnswer({ 3 }, true, false));
 }
 
 BOOST_AUTO_TEST_CASE(AddToRoomMoreThan3)
 {
-	json req0 = {
-		{ "action", "add" }
-		,{ "data" , "test_nick" }
-	};
-	json req1 = req0, req2 = req0, req3 = req0;
-	req0["id"] = -1;
-	req1["id"] = 0;
-	req2["id"] = 0;
-	req3["id"] = 0;
-	json res0 = {
-		{ "action", "add" }
-		,{ "error", false }
-	};
-	json res1 = res0, res2 = res0, res3 = res0;
-	json player = {
-		{ "id", 0 }
-		,{ "nick", "test_nick" }
-	};
-	res0["data"].push_back(player);
-	res1["data"].push_back(player);
-	res2["data"].push_back(player);
-	player.erase("id");
-	player["id"] = 1;
-	res1["data"].push_back(player);
-	res2["data"].push_back(player);
-	player.erase("id");
-	player["id"] = 2;
-	res2["data"].push_back(player);
-	res3.erase("error");
-	res3["error"] = true;
 	GameManager man;
-	Room croupier(0, man);
-	std::string msg0 = req0.dump(), msg1 = req1.dump(), msg2 = req2.dump(), msg3 = req3.dump();
-	std::string ans0 = res0.dump(), ans1 = res1.dump(), ans2 = res2.dump(), ans3 = res3.dump();
-	BOOST_CHECK_EQUAL(man.doWork(0, msg0)[0].first, ans0);
-	BOOST_CHECK_EQUAL(man.doWork(1, msg1)[0].first, ans1);
-	BOOST_CHECK_EQUAL(man.doWork(2, msg2)[0].first, ans2);
-	BOOST_CHECK_EQUAL(man.doWork(3, msg3)[0].second[0], 3);
+	BOOST_CHECK_EQUAL(man.doWork(0, createAddRequest(-1))[0].first, createAddAnswer({ 0 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(1, createAddRequest(0))[0].first, createAddAnswer({ 0, 1 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(2, createAddRequest(0))[0].first, createAddAnswer({ 0, 1, 2 }, true, false));
+	BOOST_CHECK_EQUAL(man.doWork(3, createAddRequest(0))[0].first, createAddAnswer({ }, true, true));
 }
 
 
 BOOST_AUTO_TEST_CASE(AddTwoAndGetAllMessageBack)
 {
-	json req0 = {
-		{ "action", "add" }
-		,{ "data" , "test_nick" }
-		,{"id", -1}
-	};
-	json req1 = {
-		{ "action", "add" }
-		,{ "data" , "test_nick" }
-		,{ "id", 0 }
-	};
-	json res0 = {
-		{ "action", "add" }
-		,{ "error", false }
-	};
-	//json res0 = {
-	//	{"action", "add"}
-	//};
-	json res1 = {
-		 {"action", "new_player"}
-	};
-	json tmp = {
-		 {"id", 0}
-		,{"nick", "test_nick"}
-	};
-	res0["data"].push_back(tmp);
-	tmp.erase("id");
-	tmp["id"] = 1;
-	res0["data"].push_back(tmp);
-	res1["data"].push_back(tmp);
 	GameManager man;
-	std::string msg0 = req0.dump(), msg1 = req1.dump();
-	std::string ans0 = res0.dump(), ans1 = res1.dump();
-	man.doWork(0, msg0);
-	req feedback2 = man.doWork(1, msg1);
-	BOOST_CHECK_EQUAL(feedback2[0].first, ans0);
-	BOOST_CHECK_EQUAL(feedback2[1].first, ans1);
+	man.doWork(0, createAddRequest(-1));
+	req feedback2 = man.doWork(1, createAddRequest(0));
+	BOOST_CHECK_EQUAL(feedback2[0].first, createAddAnswer({ 0, 1 }, true, false));
+	BOOST_CHECK_EQUAL(feedback2[1].first, createAddAnswer({ 1 }, false, false));
+}
 
+BOOST_AUTO_TEST_CASE(SendAndReceiveMessage)
+{
+	GameManager man;
+	std::string test = "test message";
+	man.doWork(0, createAddRequest(-1));
+	man.doWork(1, createAddRequest(0));
+	man.doWork(2, createAddRequest(0));
+	req feedback = man.doWork(1, createTextMessage(test));
+	BOOST_CHECK_EQUAL(feedback.size(), 1);
+	BOOST_CHECK_EQUAL(feedback[0].first, createTextMessage(test, 1));
+	BOOST_CHECK_EQUAL(feedback[0].second[0], 0);
+	BOOST_CHECK_EQUAL(feedback[0].second[1], 2);
+}
+
+BOOST_AUTO_TEST_CASE(PlayersGetReadyAndGetMessageBack)
+{
+	GameManager man;
+	man.doWork(0, createAddRequest(-1));
+	man.doWork(1, createAddRequest(0));
+	man.doWork(2, createAddRequest(0));
+	BOOST_CHECK_EQUAL(man.doWork(0, createReadyMessage())[0].first, createReadyMessage(0));
 }
 BOOST_AUTO_TEST_SUITE_END()
 

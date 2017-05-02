@@ -525,6 +525,12 @@ bool Room::runGame(const json & msg)
 			feedback["action"] = "end";
 			request.push_back(feedback);
 		}
+		man_.pushMessage(request);
+		return true;
+	}
+	if (parse(msg["action"]) == CHAT) {
+		request.push_back(chatMessage(msg));
+		man_.pushMessage(request);
 		return true;
 	}
 	stage temp_stage = FAIL;
@@ -583,8 +589,6 @@ bool Room::runGame(const json & msg)
 			players_.prepareGame();
 			deck_.dealCards(players_.getArray());
 			for (auto i : players_.getArray()) {
-				feedback.erase("who");
-				feedback.erase("data");
 				feedback["who"] = i.getPlayerId();
 				for (auto j : i.getPlayerDeck().getDeck()) {
 					json tmp = {
@@ -594,22 +598,16 @@ bool Room::runGame(const json & msg)
 					feedback["data"].push_back(tmp);
 				}
 				request.push_back(feedback);
+				feedback.erase("who");
+				feedback.erase("data");
 			}
 			break;
-		case CHAT :
-			request.push_back(chatMessage(msg)); break;
-			for (json i : request) {
-				i.clear();
-			}
-			ret_val = true;
 		default: break;
 		}
 		break;
 	case BIDDING:
 		switch (parse(msg["action"])) {
-		case CHAT:
-			request.push_back(chatMessage(msg));
-			ret_val = true; break;
+		case BID: break;
 		default: break;
 		}
 		break;

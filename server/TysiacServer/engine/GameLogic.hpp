@@ -38,6 +38,7 @@ const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
 const int MAX_CARDS = 7;
 const int TWO_CARDS = 2;
+const int MIN_RAISE = 10;
 const int POINTS_WINNING_CAP = 1000;
 enum iterators {
 	X = -1,
@@ -217,6 +218,7 @@ public:
 	~Bidder();
 	stage Bid(int, int);
 	void giveAddCards();
+	request_type produceMessages(const json & msg);
 };
 
 class Dealer : public Controller {

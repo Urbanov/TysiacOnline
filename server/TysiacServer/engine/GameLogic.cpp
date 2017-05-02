@@ -501,7 +501,7 @@ void Room::changeStage(stage new_stage)
 bool Room::runGame(const json & msg)
 {
 	bool ret_val = false;
-	request_type request;
+	request_type request, tmp;
 	json feedback;
 	std::vector<int> players_ids;
 	if (parse(msg["action"]) == DISCONNECT || parse(msg["action"]) == LEAVE) {
@@ -587,7 +587,9 @@ bool Room::runGame(const json & msg)
 				break;
 			}
 			players_.prepareGame();
+			feedback.clear();
 			deck_.dealCards(players_.getArray());
+			feedback["action"] = "deal";
 			for (auto i : players_.getArray()) {
 				feedback["who"] = i.getPlayerId();
 				for (auto j : i.getPlayerDeck().getDeck()) {
@@ -601,13 +603,26 @@ bool Room::runGame(const json & msg)
 				feedback.erase("who");
 				feedback.erase("data");
 			}
+			feedback.clear();
+			feedback["data"] = 100;
+			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
+			tmp = bidder_.produceMessages(feedback);
+			for (auto i : tmp) {
+				request.push_back(i);
+			}
 			break;
 		default: break;
 		}
 		break;
 	case BIDDING:
 		switch (parse(msg["action"])) {
-		case BID: break;
+		case BID: 
+			bidder_.Bid(msg["player"], msg["data"]);
+			tmp = bidder_.produceMessages(msg);
+			for (auto i : tmp) {
+				request.push_back(i);
+			}
+			break;
 		default: break;
 		}
 		break;
@@ -753,6 +768,30 @@ stage Bidder::Bid(int player_id, int new_amount)
 void Bidder::giveAddCards()
 {
 	deck_.addBonusCards(players_.getPlayer(HIGHEST));
+}
+
+request_type Bidder::produceMessages(const json & msg)
+{
+	request_type request;
+	json feedback;
+	feedback["action"] = "bid";
+	for (auto i : players_.getArray()) {
+		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
+			feedback["who"].push_back(i.getPlayerId());
+		}
+	}
+	feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
+	feedback["data"] = {
+		{ "id", msg["player"] }
+		,{ "value", msg["data"] }
+	};
+	request.push_back(feedback);
+	feedback.erase("who");
+	feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
+	feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
+	feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue();
+	request.push_back(feedback);
+	return request;
 }
 
 // </Class Bidder>

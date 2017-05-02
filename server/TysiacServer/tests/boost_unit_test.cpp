@@ -32,7 +32,13 @@ std::string createAddAnswer(std::vector<int> server_id, bool is_add_or_new_playe
 	}
 	else {
 		res0["action"] = "new_player";
+		json tmp = {
+			{"id", server_id[0]}
+			,{"nick", "test_nick"}
+		};
+		res0["data"] = tmp;
 		res0.erase("error");
+		return res0.dump();
 	}
 	for (auto i : server_id) {
 		json player = {
@@ -329,7 +335,15 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndGetMessageBack)
 	man.doWork(0, createAddRequest(-1));
 	man.doWork(1, createAddRequest(0));
 	man.doWork(2, createAddRequest(0));
-	BOOST_CHECK_EQUAL(man.doWork(0, createReadyMessage())[0].first, createReadyMessage(0));
+	req feedback = man.doWork(0, createReadyMessage());
+	BOOST_CHECK_EQUAL(feedback[0].first, createReadyMessage(0));
+	BOOST_CHECK_EQUAL(feedback[0].second[0], 1);
+	BOOST_CHECK_EQUAL(feedback[0].second[1], 2);
+}
+
+BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBid)
+{
+
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -557,7 +557,7 @@ bool Room::runGame(const json & msg)
 							feedback["who"].push_back(i["id"]);
 						}
 						else {
-							feedback["data"].push_back(i);
+							feedback["data"] = i;
 						}
 					}
 					request.push_back(feedback);

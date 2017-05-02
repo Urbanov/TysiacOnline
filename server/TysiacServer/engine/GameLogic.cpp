@@ -128,8 +128,27 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 	return correct_cards;
 }
 
-std::size_t PlayerDeck::getMaxValue() const
+std::size_t PlayerDeck::getMaxValue()
 {
+	if (max_value_ != 0) {
+		return max_value_;
+	}
+	max_value_ += MIN_VALUE;
+	std::vector<suits> vec = { DIAMONDS, CLUBS, HEARTS,	SPADES };
+	for (auto i : deck_) {
+		if (i.getFigure() == QUEEN || i.getFigure() == KING) {
+			for (auto j : deck_) {
+				if (j.getSuit() == i.getSuit() && (j.getFigure() == QUEEN || j.getFigure() == KING)) {
+					for (auto k : vec) {
+						if (k == i.getSuit()) {
+							max_value_ += i.getSuit();
+							k = NONE;
+						}
+					}
+				}
+			}
+		}
+	}
 	return max_value_;
 }
 

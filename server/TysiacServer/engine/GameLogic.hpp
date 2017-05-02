@@ -39,6 +39,7 @@ const int MAX_PLAYERS = 3;
 const int MAX_CARDS = 7;
 const int TWO_CARDS = 2;
 const int MIN_RAISE = 10;
+const int MIN_VALUE = 120;
 const int POINTS_WINNING_CAP = 1000;
 enum iterators {
 	X = -1,
@@ -112,7 +113,7 @@ public:
 	const Card & playCard(std::size_t) const;
 	bool doesHavePair(suits);
 	std::vector<int> getAllValidCards(std::vector<Card> &, suits);
-	std::size_t getMaxValue() const;
+	std::size_t getMaxValue();
 private:
 	bool findCard(figures figure, suits suit) const;
 	bool isHigher(const Card &, const Card, suits);

@@ -1,3 +1,19 @@
+var Figures = {
+	NINE: 0,
+	TEN: 10,
+	JACK: 2,
+	QUEEN: 3,
+	KING: 4,
+	ACE: 11
+};
+
+var Suits = {
+	SPADES: 40,
+	CLUBS: 60,
+	DIAMONDS: 80,
+	HEARTS: 100
+}
+
 class Card {
 	constructor(figure, suit) {
 		this.figure = figure;
@@ -20,29 +36,14 @@ class Player extends Identity {
 	}
 }
 
-class PlayerInfo extends Identity {
+class PlayerGameInfo extends Identity {
 	constructor(id, nick) {
 		super(id, nick);
 		this.score = 0;
+		this.bid = 0;
 		this.ready = false;
 		this.cards = 0;
 	}
-}
-
-var Figures = {
-	NINE: 0,
-	TEN: 10,
-	JACK: 2,
-	QUEEN: 3,
-	KING: 4,
-	ACE: 11
-};
-
-var Suits = {
-	SPADES: 40,
-	CLUBS: 60,
-	DIAMONDS: 80,
-	HEARTS: 100
 }
 
 // global variables
@@ -52,7 +53,7 @@ var game = [];
 
 $(document).ready(function () {
 
-	// create identity object
+	// create player object
 	self = new Player();
 
 	console.log(self);
@@ -115,12 +116,18 @@ $(document).ready(function () {
 				break;
 
 			case "deal":
-				console.log(msg.data);
 				for (let card of msg.data) {
 					addCard(card);
 				}
 				break;
 
+			case "bid":
+				debug(msg);
+				updateBid(msg.data.id, msg.data.value);
+				if (msg.player == self.id) {
+					showBids(msg.data.min, msg.data.max);
+				}
+				break;
 
 			default:
 				// ready is unused for now
@@ -189,7 +196,7 @@ function joinRoom(data) {
 }
 
 function addPlayer(player) {
-	game.push(new Player(player.id, player.nick));
+	game.push(new PlayerGameInfo(player.id, player.nick));
 	
 	// room is full
 	if (game.length == 3) {
@@ -239,7 +246,11 @@ function showBids(min, max) {
 function sendBid(event) {
 	$("#bids").html("");
 	$('#bids_modal').modal("hide");
-	alert(event.data.value);
+	var msg = {
+		action: "bid",
+		data: event.data.value
+	}
+	ws.send(JSON.stringify(msg));
 }
 
 function loadRooms(data) {
@@ -275,6 +286,15 @@ function sendReady() {
 
 function addCard(card) {
 	self.cards.push(new Card(card.figure, card.suit));
+}
+
+function updateBid(player, value) {
+	for (let i in game) {
+		if (game[i].id == player) {
+			game[i].bid = value;
+			break;
+		}
+	}
 }
 
 function debug(what) {

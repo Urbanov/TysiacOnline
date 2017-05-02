@@ -1,17 +1,30 @@
-class Player {
-	constructor(id) {
+class Identity {
+	constructor(id = -1, nick = "") {
 		this.id = id;
+		this.nick = nick;
 	}
 }
 
-var room_id;
-var player_id;
-var player_nick;
+class Player extends Identity {
+	constructor(id, nick) {
+		super(id, nick);
+		this.score = 0;
+		this.ready = false;
+		this.cards = [];
+	}
+}
+
+// global variables
 var ws;
+var identity;
+var game = [];
 
 $(document).ready(function () {
-	ws = new WebSocket("ws://127.0.0.1:2137");
 
+	// create identity object
+	identity = new Identity();
+
+	// initial event listeners
 	$("#create_room").click({ id: -1 }, requestRoom);
 	$("#refresh_list").click(requestRefresh);
 	$("#send").click(sendMessage);
@@ -22,21 +35,24 @@ $(document).ready(function () {
 		}
 	});
 	$("#leave").click(leaveRoom);
-
 	$("#login_modal").modal({ backdrop: "static" });
 	$("#login").click(login);
 	$("#ready").click(sendReady);
 
+	// open a connection
+	ws = new WebSocket("ws://127.0.0.1:2137");
 
-	/* on open */
-	//requestRefresh();
+	// connection opened, refresh server list
+	ws.onopen = function (event) {
+		requestRefresh();
+	}
 
-	/*ZMIENIC*/
+	// handle messages from server
 	ws.onmessage = function (event) {
 		var msg = JSON.parse(event.data);
 		switch (msg.action) {
 			case "welcome":
-				player_id = msg.values;
+				identity.id = msg.values;
 				break;
 
 			case "show":
@@ -46,7 +62,6 @@ $(document).ready(function () {
 				break;
 
 			case "add":
-				alert("add: " + JSON.stringify(msg.data));
 				if (!msg.error) {
 					$("#join_error").hide();
 					joinRoom(msg.data);
@@ -58,15 +73,19 @@ $(document).ready(function () {
 				break;
 
 			case "new_player":
-				alert("new_player: " + JSON.stringify(msg.data));
+				addMessage(msg.data[0].nick + " has entered the room");
+				addPlayer(msg.data[0]); //FIXME
 				break;
 
 			case "chat":
 				addMessage(msg.data);
 				break;
+
+			default:
+				console.log(JSON.stringify(msg.data));
+				break;
 		}
 	}
-
 });
 
 function login() {
@@ -76,7 +95,7 @@ function login() {
 	}
 	else {
 		$("#login_modal").modal("hide");
-		player_nick = nick;
+		identity.nick = nick;
 	}
 }
 
@@ -87,7 +106,7 @@ function leaveRoom() {
 }
 
 function sendMessage() {
-	var text = player_nick + ": " + $("#text_area").val();
+	var text = identity.nick + ": " + $("#text_area").val();
 	$("#text_area").val("");
 	addMessage(text);
 	var msg = {
@@ -113,7 +132,7 @@ function requestRefresh() {
 function requestRoom(event) {
 	var msg = {
 		action: "add",
-		data: player_nick,
+		data: identity.nick,
 		id: event.data.id
 	};
 	ws.send(JSON.stringify(msg));
@@ -122,6 +141,18 @@ function requestRoom(event) {
 function joinRoom(data) {
 	$("#lobby").hide();
 	$("#game_panel").show();
+	for (let player of data) {
+		addPlayer(player);
+	}
+}
+
+function addPlayer(player) {
+	game.push(new Player(player.id, player.nick));
+	
+	// room is full
+	if (game.length == 3) {
+		askReady();
+	}
 }
 
 function showBids(min, max) {
@@ -171,7 +202,7 @@ function sendBid(event) {
 
 function loadRooms(data) {
 	$("#room_list").html("");
-	for (room of data) {
+	for (let room of data) {
 		var players = room.nick.join(", ");
 		var elem = $("<button/>", {
 			text: players,
@@ -194,5 +225,14 @@ function askReady() {
 
 function sendReady() {
 	$('#ready_modal').modal("hide");
-	alert("ready");
+	var msg = {
+		action: "ready"
+	};
+	ws.send(msg);
+
+	debug(msg);
+}
+
+function debug(what) {
+	console.log(JSON.stringify(what));
 }

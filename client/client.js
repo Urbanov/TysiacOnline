@@ -55,6 +55,7 @@ $(document).ready(function () {
 
 	// create player object
 	self = new Player();
+	self.nick = "cenzotest"; //FIXME xD
 
 	console.log(self);
 
@@ -69,7 +70,7 @@ $(document).ready(function () {
 		}
 	});
 	$("#leave").click(leaveRoom);
-	$("#login_modal").modal({ backdrop: "static" });
+	//$("#login_modal").modal({ backdrop: "static" }); //FIXME
 	$("#login_modal").on("shown.bs.modal", function () {
 		$("#nickname").focus();
 	});

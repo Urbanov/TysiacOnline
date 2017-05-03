@@ -130,11 +130,12 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 	return correct_cards;
 }
 
-std::size_t PlayerDeck::getMaxValue()
+std::size_t PlayerDeck::getMaxValue(bool isLateBid)
 {
-	if (max_value_ != 0) {
+	if (max_value_ != 0 && !isLateBid) {
 		return max_value_;
 	}
+	max_value_ = 0;
 	max_value_ += MIN_VALUE;
 	std::vector <std::pair<suits, figures> > vec = { 
 		{DIAMONDS, NOT_A_FIGURE}, 
@@ -232,8 +233,14 @@ void Score::clearTurnScore()
 	temp_score_ = 0;
 }
 
-bool Score::setClaim(int claim)
+bool Score::setClaim(int claim, bool isFinal)
 {
+	if (isFinal) {
+		if (claim >= claim_) {
+			claim_ = claim;
+			return true;
+		}
+	}
 	if (claim > claim_ || claim == -1) {
 		claim_ = claim;
 		return true;
@@ -480,7 +487,7 @@ void PlayersCollection::prepareGame()
 	it_[CURRENT] = players_[1].getPlayerId();
 	it_[COMPULSORY] = players_[0].getPlayerId();
 	it_[HIGHEST] = players_[0].getPlayerId();
-	players_[0].getScoreClass().setClaim(100);
+	players_[0].getScoreClass().setClaim(100, false);
 }
 
 // </Class PlayerCollection>
@@ -647,13 +654,52 @@ bool Room::runGame(const json & msg)
 				stage_ = DEALING;
 				feedback["action"] = "stock";
 				feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
-				feedback["data"] = msg;
-				for (auto& i : players_.getArray()) {
+				feedback["data"] = deck_.addBonusCards(players_.getPlayer(HIGHEST));
+				for (const auto& i : players_.getArray()) {
 					feedback["who"].push_back(i.getPlayerId());
 				}
 				request.push_back(feedback);
 			}
 			break;
+		default: break;
+		}
+		break;
+	case DEALING:
+		switch (parse(msg["action"])) {
+		case DEAL:
+			feedback["action"] = "deal";
+			for (auto& i : players_.getArray()) {
+				if (i.getPlayerId() != players_.getPlayer(HIGHEST).getPlayerId()) {
+					feedback["who"] = i.getPlayerId();
+					for (auto& j : msg["data"]) {
+						if (j["player"] == i.getPlayerId()) {
+							Card tmp = players_.getPlayer(HIGHEST).getPlayerDeck().playCard(j["card"]);
+							json k = {
+								{"figure", tmp.getFigure()},
+								{"suit", tmp.getSuit()}
+							};
+							feedback["data"].push_back(k);
+						}
+					}
+					request.push_back(feedback);
+					feedback.erase("data");
+					feedback.erase("who");
+				}
+			}
+			feedback.erase("action");
+			feedback = bidder_.produceMessages(msg, stage_)[0];
+			request.push_back(feedback);
+			break;
+		case BID:
+			bidder_.bid(msg["player"], msg["data"]);
+			feedback["action"] = "start";
+			feedback["data"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim();
+			feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+			for (auto& i : players_.getArray()) {
+				feedback["who"].push_back(i.getPlayerId());
+			}
+			request.push_back(feedback);
+			stage_ = PLAYING;
 		default: break;
 		}
 		break;
@@ -665,7 +711,7 @@ bool Room::runGame(const json & msg)
 
 int Room::parse(const std::string & str)
 {
-	json command = { { "add", ADD }, { "get", GET }, { "bid", BID },
+	json command = { { "add", ADD }, { "deal", DEAL }, { "bid", BID },
 					{ "play", PLAY }, { "chat", CHAT }, { "ready", READY },
 					{"leave", LEAVE}, { "disconnect", DISCONNECT },
 	};
@@ -782,7 +828,11 @@ stage Bidder::bid(int player_id, int new_amount)
 	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() >= new_amount && new_amount != -1) {
 		throw std::logic_error("Player bids less than current highest bid");
 	}
-	players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount);
+	if (players_.getPlayer(CURRENT).getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
+		players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount, true);
+		return DEALING;
+	}
+	players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount, false);
 	if (new_amount != -1) {
 		players_.setPlayer(HIGHEST, player_id);
 	}
@@ -807,6 +857,16 @@ request_type Bidder::produceMessages(const json & msg, stage stage_)
 	request_type request;
 	json feedback;
 	feedback["action"] = "bid";
+	if (stage_ == DEALING) {
+		feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+		feedback["data"] = {
+			{ "value", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+			{ "id", feedback["player"] },
+			{"min", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+			{"max", players_.getPlayer(HIGHEST).getPlayerDeck().getMaxValue(true)}
+		};
+		feedback["who"] = feedback["player"];
+	}
 	for (auto i : players_.getArray()) {
 		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId() || stage_ == DEALING) {
 			feedback["who"].push_back(i.getPlayerId());
@@ -823,11 +883,11 @@ request_type Bidder::produceMessages(const json & msg, stage stage_)
 		{ "id", msg["player"] }
 	};
 	request.push_back(feedback);
-	if (stage_ == ADDING) {
+	if (stage_ == BIDDING) {
 		feedback.erase("who");
 		feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
 		feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
-		feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue();
+		feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue(false);
 		request.push_back(feedback);
 	}
 	return request;

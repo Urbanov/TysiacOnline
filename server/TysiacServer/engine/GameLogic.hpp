@@ -53,7 +53,7 @@ enum commands {
 	DISCONNECT,
 	READY,
 	ADD,
-	GET,
+	DEAL,
 	BID,
 	PLAY,
 	CHAT
@@ -113,7 +113,7 @@ public:
 	const Card & playCard(std::size_t) const;
 	bool doesHavePair(suits);
 	std::vector<int> getAllValidCards(std::vector<Card> &, suits);
-	std::size_t getMaxValue();
+	std::size_t getMaxValue(bool);
 private:
 	bool findCard(figures figure, suits suit) const;
 	bool isHigher(const Card &, const Card, suits);
@@ -130,7 +130,7 @@ public:
 	void addToTurnScore(int);
 	int getTurnScore() const;
 	void clearTurnScore();
-	bool setClaim(int);
+	bool setClaim(int, bool);
 	int getClaim() const;
 	void resetClaim();
 private:

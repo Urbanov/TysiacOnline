@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(GetAndSetTurnScore)
 BOOST_AUTO_TEST_CASE(GetAndSetClaim)
 {
 	BOOST_REQUIRE(getClaim() == 0);
-	BOOST_CHECK_THROW(setClaim(-10), std::logic_error);
-	BOOST_REQUIRE(setClaim(100) == true);
+	BOOST_CHECK_THROW(setClaim(-10, false), std::logic_error);
+	BOOST_REQUIRE(setClaim(100, false) == true);
 	BOOST_REQUIRE(getClaim() == 100);
 	resetClaim();
 	BOOST_CHECK(getClaim() == 0);
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(Return120MaxValue)
 	p.getPlayerDeck().addCard(c2);
 	p.getPlayerDeck().addCard(c3);
 	p.getPlayerDeck().addCard(c4);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 120);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 120);
 }
 
 BOOST_AUTO_TEST_CASE(Return160MaxValue)
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(Return160MaxValue)
 	p.getPlayerDeck().addCard(c2);
 	p.getPlayerDeck().addCard(c3);
 	p.getPlayerDeck().addCard(c4);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 160);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 160);
 }
 
 BOOST_AUTO_TEST_CASE(Return180MaxValue)
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(Return180MaxValue)
 	p.getPlayerDeck().addCard(c4);
 	p.getPlayerDeck().addCard(c5);
 	p.getPlayerDeck().addCard(c6);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 180);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 180);
 }
 
 BOOST_AUTO_TEST_CASE(Return200MaxValue)
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(Return200MaxValue)
 	p.getPlayerDeck().addCard(c4);
 	p.getPlayerDeck().addCard(c5);
 	p.getPlayerDeck().addCard(c6);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 200);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 200);
 }
 
 BOOST_AUTO_TEST_CASE(Return220MaxValue)
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(Return220MaxValue)
 	p.getPlayerDeck().addCard(c4);
 	p.getPlayerDeck().addCard(c5);
 	p.getPlayerDeck().addCard(c6);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 220);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 220);
 }
 
 BOOST_AUTO_TEST_CASE(Return300MaxValue)
@@ -346,7 +346,7 @@ BOOST_AUTO_TEST_CASE(Return300MaxValue)
 	p.getPlayerDeck().addCard(c4);
 	p.getPlayerDeck().addCard(c5);
 	p.getPlayerDeck().addCard(c6);
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(), 300);
+	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 300);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -477,6 +477,11 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBid)
 	}
 	req feedback = man.doWork(1, createBidMessage(110));
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, 110, 2));
+	json info = json::parse(feedback[1].first);
+	BOOST_CHECK(info["data"]["min"] == 120);
+	BOOST_CHECK(info["data"]["max"] != 0);
+	BOOST_CHECK_EQUAL(feedback[1].second.size(), 1);
+	BOOST_CHECK_EQUAL(feedback[1].second[0], 2);
 }
 
 BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
@@ -492,6 +497,10 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, -1, 2));
 	feedback = man.doWork(2, createBidMessage(-1));
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(2, -1, -1));
+	json msg = json::parse(feedback[1].first);
+	BOOST_CHECK_EQUAL(msg["action"], "stock");
+	BOOST_CHECK_EQUAL(msg["data"].size(), 3);
+	BOOST_CHECK_EQUAL(feedback[1].second.size(), 3);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

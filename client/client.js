@@ -343,10 +343,10 @@ function useCard(id) {
 		var msg = {
 			action: "deal",
 			data: [{
-				player: (self.index + 1) % 3, // next player
+				player: game[(self.index + 1) % 3].id, // next player
 				card: first_card
 			}, {
-				player: (self.index + 2) % 3, // previous player
+				player: game[(self.index + 2) % 3].id, // previous player
 				card: second_card
 			}]
 		}

@@ -124,7 +124,7 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 		}
 		return correct_cards;
 	}
-	if (vec[0].getFigure() == card.getFigure() && vec[0].getSuit() == card.getSuit()
+	if ((vec[0].getFigure() == card.getFigure() && vec[0].getSuit() == card.getSuit())
 		|| vec[0].getSuit() == vec[1].getSuit()) {
 		for (const auto & i : correct_cards) {
 			if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit()) {

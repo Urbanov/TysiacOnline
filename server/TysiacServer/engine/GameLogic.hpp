@@ -218,7 +218,7 @@ public:
 	~Bidder();
 	stage bid(int, int);
 	void giveAddCards();
-	request_type produceMessages(const json & msg, stage stage_);
+	request_type produceMessages(const json & msg, stage stage_, bool);
 };
 
 class Dealer : public Controller {

@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBid)
 	}
 	req feedback = man.doWork(1, createBidMessage(110));
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, 110, 2));
-	json info = json::parse(feedback[1].first);
+	json info = json::parse(feedback[1].first.begin(), feedback[1].first.end());
 	BOOST_CHECK(info["data"]["min"] == 120);
 	BOOST_CHECK(info["data"]["max"] != 0);
 	BOOST_CHECK_EQUAL(feedback[1].second.size(), 1);
@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(1, -1, 2));
 	feedback = man.doWork(2, createBidMessage(-1));
 	BOOST_CHECK_EQUAL(feedback[0].first, createBidAnswer(2, -1, -1));
-	json msg = json::parse(feedback[1].first);
+	json msg = json::parse(feedback[1].first.begin(), feedback[1].first.end());
 	BOOST_CHECK_EQUAL(msg["action"], "stock");
 	BOOST_CHECK_EQUAL(msg["data"].size(), 3);
 	BOOST_CHECK_EQUAL(feedback[1].second.size(), 3);

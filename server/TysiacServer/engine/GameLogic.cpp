@@ -634,7 +634,7 @@ bool Room::runGame(const json & msg)
 			feedback.clear();
 			feedback["data"] = 100;
 			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
-			tmp = bidder_.produceMessages(feedback, stage_);
+			tmp = bidder_.produceMessages(feedback, stage_, false);
 			for (auto i : tmp) {
 				request.push_back(i);
 			}
@@ -646,7 +646,7 @@ bool Room::runGame(const json & msg)
 		switch (parse(msg["action"])) {
 		case BID: 
 			temp_stage = bidder_.bid(msg["player"], msg["data"]);
-			tmp = bidder_.produceMessages(msg, temp_stage);
+			tmp = bidder_.produceMessages(msg, temp_stage, false);
 			for (auto& i : tmp) {
 				request.push_back(i);
 			}
@@ -655,6 +655,7 @@ bool Room::runGame(const json & msg)
 				feedback["action"] = "stock";
 				feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
 				feedback["data"] = deck_.addBonusCards(players_.getPlayer(HIGHEST));
+				feedback.erase("who");
 				for (const auto& i : players_.getArray()) {
 					feedback["who"].push_back(i.getPlayerId());
 				}
@@ -687,7 +688,7 @@ bool Room::runGame(const json & msg)
 				}
 			}
 			feedback.erase("action");
-			feedback = bidder_.produceMessages(msg, stage_)[0];
+			feedback = bidder_.produceMessages(msg, stage_, true)[0];
 			request.push_back(feedback);
 			break;
 		case BID:
@@ -852,12 +853,12 @@ void Bidder::giveAddCards()
 	deck_.addBonusCards(players_.getPlayer(HIGHEST));
 }
 
-request_type Bidder::produceMessages(const json & msg, stage stage_)
+request_type Bidder::produceMessages(const json & msg, stage stage_, bool isLastBid)
 {
 	request_type request;
 	json feedback;
 	feedback["action"] = "bid";
-	if (stage_ == DEALING) {
+	if (stage_ == DEALING && isLastBid) {
 		feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
 		feedback["data"] = {
 			{ "value", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
@@ -866,9 +867,11 @@ request_type Bidder::produceMessages(const json & msg, stage stage_)
 			{"max", players_.getPlayer(HIGHEST).getPlayerDeck().getMaxValue(true)}
 		};
 		feedback["who"] = feedback["player"];
+		request.push_back(feedback);
+		return request;
 	}
 	for (auto i : players_.getArray()) {
-		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId() || stage_ == DEALING) {
+		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
 			feedback["who"].push_back(i.getPlayerId());
 		}
 	}
@@ -1130,7 +1133,7 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 {
 	server_response_.clear();
 	feedback_.clear();
-	json msg = json::parse(message);
+	json msg = json::parse(message.begin(), message.end());
 	msg["player"] = player_id;
 	if (msg["action"] == "add") {
 		addPlayer(msg);

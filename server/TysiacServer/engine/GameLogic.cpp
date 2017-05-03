@@ -871,7 +871,7 @@ request_type Bidder::produceMessages(const json & msg, stage stage_, bool isLast
 		return request;
 	}
 	for (auto i : players_.getArray()) {
-		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
+		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId() || stage_ == DEALING) {
 			feedback["who"].push_back(i.getPlayerId());
 		}
 	}

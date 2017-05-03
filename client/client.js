@@ -70,6 +70,9 @@ $(document).ready(function () {
 	});
 	$("#leave").click(leaveRoom);
 	$("#login_modal").modal({ backdrop: "static" });
+	$("#login_modal").on('shown.bs.modal', function () {
+		$("#nickname").focus();
+	})
 	$("#login").click(login);
 	$("#ready").click(sendReady);
 
@@ -126,6 +129,16 @@ $(document).ready(function () {
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
+				}
+				break;
+
+			case "stock":
+				debug(msg);
+				displayStock(msg.data);
+				if (msg.player == self.id) {
+					for (let card of msg.data) {
+						addCard(card);
+					}
 				}
 				break;
 

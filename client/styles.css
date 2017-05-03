@@ -37,9 +37,9 @@ body {
 }
 
 .game_canvas {
-	width: 800px;
+	width: 780px;
 	height: 600px;
-	border: 1px solid black;
+	border: 1px solid #000;
 }
 
 .chatbox {
@@ -65,7 +65,7 @@ body {
 
 .game {
 	position: relative;
-	height: 600px;
+	overflow: auto;
 	max-width: 800px;
 	margin: 0 auto;
 }

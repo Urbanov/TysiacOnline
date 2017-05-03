@@ -19,6 +19,7 @@ class Card {
 		this.figure = figure;
 		this.suit = suit;
 		this.used = false;
+		this.available = false;
 	}
 }
 
@@ -90,6 +91,10 @@ $(document).ready(function () {
 	// handle messages from server
 	ws.onmessage = function (event) {
 		var msg = JSON.parse(event.data);
+
+		///////////////////////
+		console.log(">>> RECEIVED: " + JSON.stringify(msg));
+
 		switch (msg.action) {
 			case "welcome":
 				self.id = msg.values;
@@ -128,7 +133,6 @@ $(document).ready(function () {
 				break;
 
 			case "bid":
-				console.log(msg.data);
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
@@ -136,7 +140,6 @@ $(document).ready(function () {
 				break;
 
 			case "stock":
-				debug(msg);
 				displayStock(msg.data);
 				if (msg.player == self.id) {
 					for (let card of msg.data) {
@@ -146,9 +149,31 @@ $(document).ready(function () {
 				}
 				break;
 
+			case "start":
+				for (let player of game) {
+					if (player.id == msg.player) {
+						updateBid(player.id, msg.data);
+					}
+					else {
+						updateBid(player.id, 0);
+					}
+				}
+				if (msg.player == self.id) {
+					console.log(">>> jedziesz");
+				}
+				break;
+
+			case "play":
+				if (self.id == msg.player) {
+					console.log(">>> jedziesz");
+				}
+				// display card
+				console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
+				break;
+
 			default:
 				// ready is unused for now
-				console.log("ready: " + JSON.stringify(msg));
+				console.log(">>> UNUSED: " + JSON.stringify(msg));
 				break;
 		}
 	}
@@ -226,15 +251,24 @@ function showBids(min, max) {
 	$("#bids_modal").modal({ backdrop: false });
 	$(".modal-backdrop").appendTo(".game");
 
-	var elem = $("<button/>", {
-		text: "pass",
-		class: "btn btn-default btn-danger"
-	});
-	elem.click({ value: -1 }, sendBid);
-	$("#bids").append(elem);
+	// normal bid (includes pass button)
+	if (self.cards.length != 10) {
+		var bid = 110;
+		var elem = $("<button/>", {
+			text: "pass",
+			class: "btn btn-default btn-danger"
+		});
+		elem.click({ value: -1 }, sendBid);
+		$("#bids").append(elem);
+	}
 
+	// final bid after getting stock (can keep 100)
+	else {
+		var bid = 100;
+	}
 
-	for (var bid = 110; bid < min; bid += 10) {
+	// show other buttons
+	for (; bid < min; bid += 10) {
 		var elem = $("<button/>", {
 			text: bid,
 			class: "btn btn-default bid_button disabled"
@@ -267,6 +301,7 @@ function sendBid(event) {
 		action: "bid",
 		data: event.data.value
 	}
+	debug(msg);
 	ws.send(JSON.stringify(msg));
 }
 
@@ -315,24 +350,20 @@ function updateBid(player, value) {
 }
 
 function displayStock(cards) {
-	//FIXME
-	console.log(">>> stock: " + JSON.stringify(cards));
+	//TODO
+	//console.log(">>> stock: " + JSON.stringify(cards));
 }
 
 function handleStock() {
-	for (let i in game) {
-		if (game[i].id != self.id) {
-			console.log(">>> give card to " + game[i].nick + " (id: " + game[i].id + "): ");
-
-		}
-	}
+	$("#stock_modal").modal({ backdrop: false });
+	console.log(">>> HANDLE STOCK: tu bedzie printowanie kart i klikanie w nie");
 }
 
 function useCard(id) {
 	self.cards[id].used = true;
 	++self.used;
 
-	// 
+	// give away cards after getting stock
 	if (self.cards.length == 10 && self.used == 2) {
 		var second_card = id;
 		for (var first_card in self.cards) {
@@ -340,20 +371,33 @@ function useCard(id) {
 				break;
 			}
 		}
-		var msg = {
+		let msg = {
 			action: "deal",
 			data: [{
 				player: game[(self.index + 1) % 3].id, // next player
-				card: first_card
+				card: Number(first_card)
 			}, {
 				player: game[(self.index + 2) % 3].id, // previous player
-				card: second_card
+				card: Number(second_card)
 			}]
 		}
+		ws.send(JSON.stringify(msg));
+		return;
+	}
 
-		debug(msg);
+	// play card
+	if (self.cards.length == 8 || self.used > 2) {
+		var msg = {
+			action: "play",
+			data: id
+		}
+		console.log(">>> send play: " + JSON.stringify(msg));
 		ws.send(JSON.stringify(msg));
 	}
+}
+
+function makeAvailable(array) {
+	for (let card of array);
 }
 
 function debug(what) {

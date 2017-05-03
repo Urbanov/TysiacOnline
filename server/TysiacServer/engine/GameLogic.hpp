@@ -167,8 +167,7 @@ public:
 	Deck();
 	~Deck();
 	void dealCards(players&);
-	std::vector<Card> showBonusCards() const;
-	void addBonusCards(Player &);
+	json addBonusCards(Player &);
 	void shuffle();
 private:
 	std::random_device rd_;
@@ -227,6 +226,7 @@ public:
 	Dealer(Deck &, PlayersCollection &);
 	~Dealer();
 	stage giveCardToPeer(int player_id, std::size_t card_number);
+	std::vector<Card> showStockCards(size_t player_id);
 	void reset();
 private:
 	int user_id_;

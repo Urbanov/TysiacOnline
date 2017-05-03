@@ -359,22 +359,19 @@ void Deck::dealCards(players& players)
 	}
 }
 
-std::vector<Card> Deck::showBonusCards() const
+json Deck::addBonusCards(Player & player)
 {
-	std::vector<Card> temp;
-	std::vector<Card>::const_iterator it = deck_it_;
-	while (it != deck_.end()) {
-		temp.push_back(*it);
-	}
-	return temp;
-}
-
-void Deck::addBonusCards(Player & player)
-{
+	json msg;
 	while (deck_it_ != deck_.end()) {
+		json tmp = {
+			{"figure", (*deck_it_).getFigure() },
+			{"suit", (*deck_it_).getSuit()}
+		};
+		msg.push_back(tmp);
 		player.getPlayerDeck().addCard(*deck_it_++);
 	}
 	deck_it_ = deck_.begin();
+	return msg;
 }
 
 void Deck::shuffle()
@@ -642,12 +639,19 @@ bool Room::runGame(const json & msg)
 		switch (parse(msg["action"])) {
 		case BID: 
 			temp_stage = bidder_.bid(msg["player"], msg["data"]);
-			if (temp_stage == DEALING) {
-				stage_ = temp_stage;
-			}
-			tmp = bidder_.produceMessages(msg, stage_);
+			tmp = bidder_.produceMessages(msg, temp_stage);
 			for (auto& i : tmp) {
 				request.push_back(i);
+			}
+			if (temp_stage == DEALING) {
+				stage_ = DEALING;
+				feedback["action"] = "stock";
+				feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+				feedback["data"] = msg;
+				for (auto& i : players_.getArray()) {
+					feedback["who"].push_back(i.getPlayerId());
+				}
+				request.push_back(feedback);
 			}
 			break;
 		default: break;

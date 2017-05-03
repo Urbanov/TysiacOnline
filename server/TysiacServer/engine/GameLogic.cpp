@@ -641,7 +641,7 @@ bool Room::runGame(const json & msg)
 	case BIDDING:
 		switch (parse(msg["action"])) {
 		case BID: 
-			temp_stage = bidder_.Bid(msg["player"], msg["data"]);
+			temp_stage = bidder_.bid(msg["player"], msg["data"]);
 			if (temp_stage == DEALING) {
 				stage_ = temp_stage;
 			}
@@ -770,7 +770,7 @@ Bidder::Bidder(Deck & deck, PlayersCollection & players)
 Bidder::~Bidder()
 {}
 
-stage Bidder::Bid(int player_id, int new_amount)
+stage Bidder::bid(int player_id, int new_amount)
 {
 	if (players_.getPlayer(CURRENT).getPlayerId() != player_id) {
 		throw std::logic_error("Player trying to bid not at his turn");

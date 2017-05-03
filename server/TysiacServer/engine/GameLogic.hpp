@@ -217,7 +217,7 @@ class Bidder : public Controller {
 public:
 	Bidder(Deck &, PlayersCollection &);
 	~Bidder();
-	stage Bid(int, int);
+	stage bid(int, int);
 	void giveAddCards();
 	request_type produceMessages(const json & msg, stage stage_);
 };

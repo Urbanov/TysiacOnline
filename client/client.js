@@ -70,9 +70,9 @@ $(document).ready(function () {
 	});
 	$("#leave").click(leaveRoom);
 	$("#login_modal").modal({ backdrop: "static" });
-	$("#login_modal").on('shown.bs.modal', function () {
+	$("#login_modal").on("shown.bs.modal", function () {
 		$("#nickname").focus();
-	})
+	});
 	$("#login").click(login);
 	$("#ready").click(sendReady);
 

@@ -1109,15 +1109,14 @@ int Game::compareCardsAndPassToWinner()
 	figures superior_suit_figure = NOT_A_FIGURE;
 	figures ordinary_figure = NOT_A_FIGURE;
 	suits current_suit = NONE;
-	int winning_player = vec_[0].first;
-	int score = setSuperiorSuit();
 	current_starting_player_ = vec_[0].first;
+	int score = setSuperiorSuit();
 	if (super_suit_ != NONE) {
 		for (auto& i : vec_) {
 			if (i.second.getSuit() == super_suit_) {
 				if (superior_suit_figure < i.second.getFigure()) {
 					superior_suit_figure = i.second.getFigure();
-					winning_player = i.first;
+					current_starting_player_ = i.first;
 				}
 			}
 		}
@@ -1133,15 +1132,15 @@ int Game::compareCardsAndPassToWinner()
 			if (i.second.getSuit() == current_suit && 
 				i.second.getFigure() > superior_suit_figure) {
 				superior_suit_figure = i.second.getFigure();
-				winning_player = i.first;
+				current_starting_player_ = i.first;
 			}
 		}
 	}
 	for (auto& i : vec_) {
 		score += i.second.getFigure();
 	}
-	players_.getPlayer(X, winning_player).getScoreClass().addToTurnScore(score);
-	return winning_player;
+	players_.getPlayer(X, current_starting_player_).getScoreClass().addToTurnScore(score);
+	return current_starting_player_;
 }
 
 void Game::setStartingPlayer(int new_starting_player)

@@ -643,12 +643,12 @@ BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
 	game.manageTurn(SPADES, 2);
 	game.manageTurn(DIAMONDS, 0);
 	game.manageTurn(HEARTS, 0);
-	//game.createMessages(PLAYING);
-	//game.manageTurn(SPADES, 3);
-	//game.manageTurn(DIAMONDS, 6);
-	//game.manageTurn(HEARTS, 2);
-	//int player = game.compareCardsAndPassToWinner();
-	//BOOST_CHECK_EQUAL(player, DIAMONDS);
+	game.createMessages(PLAYING);
+	game.manageTurn(SPADES, 3);
+	game.manageTurn(DIAMONDS, 6);
+	game.manageTurn(HEARTS, 2);
+	int player = game.compareCardsAndPassToWinner();
+	BOOST_CHECK_EQUAL(player, DIAMONDS);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

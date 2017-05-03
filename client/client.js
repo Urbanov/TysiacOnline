@@ -33,6 +33,8 @@ class Player extends Identity {
 	constructor(id, nick) {
 		super(id, nick);
 		this.cards = [];
+		this.used = 0;
+		this.index = undefined;
 	}
 }
 
@@ -126,7 +128,7 @@ $(document).ready(function () {
 				break;
 
 			case "bid":
-				debug(msg);
+				console.log(msg.data);
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
@@ -140,12 +142,13 @@ $(document).ready(function () {
 					for (let card of msg.data) {
 						addCard(card);
 					}
+					handleStock();
 				}
 				break;
 
 			default:
 				// ready is unused for now
-				console.log(JSON.stringify(msg));
+				console.log("ready: " + JSON.stringify(msg));
 				break;
 		}
 	}
@@ -207,6 +210,7 @@ function joinRoom(data) {
 	for (let player of data) {
 		addPlayer(player);
 	}
+	self.index = game.length - 1;
 }
 
 function addPlayer(player) {
@@ -229,9 +233,8 @@ function showBids(min, max) {
 	elem.click({ value: -1 }, sendBid);
 	$("#bids").append(elem);
 
-	var bid = 110;
 
-	for (; bid < min; bid += 10) {
+	for (var bid = 110; bid < min; bid += 10) {
 		var elem = $("<button/>", {
 			text: bid,
 			class: "btn btn-default bid_button disabled"
@@ -305,9 +308,51 @@ function addCard(card) {
 function updateBid(player, value) {
 	for (let i in game) {
 		if (game[i].id == player) {
-			game[i].bid = value;
+			game[i].bid = value != -1 ? value : "pass";
 			break;
 		}
+	}
+}
+
+function displayStock(cards) {
+	//FIXME
+	console.log(">>> stock: " + JSON.stringify(cards));
+}
+
+function handleStock() {
+	for (let i in game) {
+		if (game[i].id != self.id) {
+			console.log(">>> give card to " + game[i].nick + " (id: " + game[i].id + "): ");
+
+		}
+	}
+}
+
+function useCard(id) {
+	self.cards[id].used = true;
+	++self.used;
+
+	// 
+	if (self.cards.length == 10 && self.used == 2) {
+		var second_card = id;
+		for (var first_card in self.cards) {
+			if (self.cards[first_card].used && first_card != second_card) {
+				break;
+			}
+		}
+		var msg = {
+			action: "deal",
+			data: [{
+				player: game[(self.index + 1) % 3].id, // next player
+				card: first_card
+			}, {
+				player: game[(self.index + 2) % 3].id, // previous player
+				card: second_card
+			}]
+		}
+
+		debug(msg);
+		ws.send(JSON.stringify(msg));
 	}
 }
 

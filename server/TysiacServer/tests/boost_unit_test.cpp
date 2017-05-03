@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 	BOOST_CHECK_EQUAL(feedback[1].second.size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(Play3CardsAndGetCorrectMessageBack)
+BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack1)
 {
 	PlayersCollection players;
 	Deck deck;
@@ -624,25 +624,31 @@ BOOST_AUTO_TEST_CASE(Play3CardsAndGetCorrectMessageBack)
 	game.manageTurn(SPADES, 0);
 	game.manageTurn(DIAMONDS, 0);
 	game.manageTurn(HEARTS, 0);
+	int player = game.compareCardsAndPassToWinner();
+	BOOST_CHECK_EQUAL(player, SPADES);
+}
+
+BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
+{
+	PlayersCollection players;
+	Deck deck;
+	Game game(deck, players);
+	players.getArray().push_back(createPlayerWithAppropriateCards(SPADES));
+	players.getArray().push_back(createPlayerWithAppropriateCards(DIAMONDS));
+	players.getArray().push_back(createPlayerWithAppropriateCards(HEARTS));
+	players.getArray()[1].getPlayerDeck().addCard(Card(ACE, SPADES));
+	players.prepareGame();
+	players.getNextPlayer(CURRENT);
+	players.getNextPlayer(CURRENT);
+	game.manageTurn(SPADES, 2);
+	game.manageTurn(DIAMONDS, 0);
+	game.manageTurn(HEARTS, 0);
+	//game.createMessages(PLAYING);
+	//game.manageTurn(SPADES, 3);
+	//game.manageTurn(DIAMONDS, 6);
+	//game.manageTurn(HEARTS, 2);
 	//int player = game.compareCardsAndPassToWinner();
-	//BOOST_CHECK_EQUAL(player, SPADES);
-
-	//std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
-	//std::vector<figures> figure = { NINE, TEN, JACK, QUEEN, KING, ACE };
-	//for (int i = 0; i < MAX_PLAYERS; ++i) {
-	//	for(int i)
-	//}
-	//GameManager man;
-	//for (int i = 0; i < 3; ++i) {
-	//	man.doWork(i, createAddRequest(i > 0 ? 0 : -1));
-	//}
-	//for (int i = 0; i < 3; ++i) {
-	//	man.doWork(i, createReadyMessage());
-	//}
-	//man.doWork(1, createBidMessage(-1));
-	//request_type tmp = createAnswerToDealBasedOnCardReturn(man.doWork(2, createBidMessage(-1)));
-
-	
+	//BOOST_CHECK_EQUAL(player, DIAMONDS);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

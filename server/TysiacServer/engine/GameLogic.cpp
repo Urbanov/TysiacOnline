@@ -971,8 +971,9 @@ stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 		counter == 1)) {
 		throw std::logic_error("Giving card to the wrong player");
 	}	
-	players_.getPlayer(X, player_id).getPlayerDeck().addCard(
-		players_.getPlayer(HIGHEST).getPlayerDeck().playCard(card_number));
+	Card tmp = players_.getPlayer(HIGHEST).getPlayerDeck().playCard(card_number);
+	tmp.setIsUsed(false);
+	players_.getPlayer(X, player_id).getPlayerDeck().addCard(tmp);
 	user_id_ = players_.getPlayer(X, player_id).getPlayerId();
 	if (++counter == TWO_CARDS) {
 		return PLAYING;
@@ -1015,7 +1016,6 @@ stage Game::manageTurn(int player, int card)
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
-		std::cout << "POLAKI BIEDAKI HEHE" << std::endl;
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 

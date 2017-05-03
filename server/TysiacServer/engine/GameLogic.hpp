@@ -239,6 +239,7 @@ public:
 	~Game();
 	const Card & playTurn(int, std::size_t);
 	stage manageTurn(int, int);
+	request_type createMessages(const stage stage_);
 	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();
 	void setStartingPlayer(int);

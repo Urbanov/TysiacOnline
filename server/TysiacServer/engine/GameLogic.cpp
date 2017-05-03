@@ -100,34 +100,74 @@ bool PlayerDeck::doesHavePair(suits suit)
 
 std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits superior)
 {
-	Card card = vec[0];
-	if (vec.size() == 2 && isHigher(vec[0], vec[1], superior)) {
-		card = vec[1];
-	}
-	std::vector<int> correct_cards;
-	for (size_t i = 0; i < deck_.size(); ++i) {
-		if (isHigher(card, deck_[i], superior)) {
-			for (size_t j = i; j < deck_.size(); ++j) {
-				if (isHigher(card, deck_[j], superior)) {
-					correct_cards.push_back(j);
-				}
-			}
-			return correct_cards;
-		}
-	}
-	for (size_t i = 0; i < deck_.size(); ++i) {
-		if (!deck_[i].getIsUsed() && (deck_[i].getSuit() == card.getSuit() || card.getSuit() == superior)) {
-			correct_cards.push_back(i);
-		}
-	}
-	if (correct_cards.empty()) {
+	std::vector<int> correct_cards, tmp;
+	if (vec.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
 			if (!deck_[i].getIsUsed()) {
 				correct_cards.push_back(i);
 			}
 		}
+		return correct_cards;
 	}
-	return correct_cards;
+	Card card = vec[0];
+	if (vec.size() == 2 && isHigher(vec[0], vec[1], superior)) {
+		card = vec[1];
+	}
+	for (size_t i = 0; i < deck_.size(); ++i) {
+		if (isHigher(card, deck_[i], superior) || vec[0].getSuit() == deck_[i].getSuit()) {
+			correct_cards.push_back(i);
+		}
+	}
+	if (correct_cards.empty()) {
+		for (size_t i = 0; i < deck_.size(); ++i) {
+			correct_cards.push_back(i);
+		}
+		return correct_cards;
+	}
+	if (vec[0].getSuit() == vec[1].getSuit()) {
+		for (const auto & i : correct_cards) {
+			if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit()) {
+				tmp.push_back(i);
+			}
+		}
+		if (!tmp.empty()) {
+			return tmp;
+		}
+		else {
+			for (const auto & i : correct_cards) {
+				if (!deck_[i].getIsUsed() && card.getSuit() == deck_[i].getSuit()) {
+					tmp.push_back(i);
+				}
+			}
+		}
+		if (!tmp.empty()) {
+			return tmp;
+		}
+		else {
+			for (const auto & i : correct_cards) {
+				if (isHigher(card, deck_[i], superior)) {
+					tmp.push_back(i);
+				}
+			}
+		}
+		return tmp;
+	}
+	for (const auto & i : correct_cards) {
+		if (!deck_[i].getIsUsed() && vec[0].getSuit() == deck_[i].getSuit()) {
+			tmp.push_back(i);
+		}
+	}
+	if (!tmp.empty()) {
+		return tmp;
+	}
+	else {
+		for (const auto & i : correct_cards) {
+			if (isHigher(card, deck_[i], superior)) {
+				tmp.push_back(i);
+			}
+		}
+		return tmp;
+	}
 }
 
 std::size_t PlayerDeck::getMaxValue(bool isLateBid)
@@ -704,6 +744,19 @@ bool Room::runGame(const json & msg)
 		default: break;
 		}
 		break;
+	case PLAYING:
+		switch (parse(msg["action"])) {
+		case PLAY:
+			temp_stage = game_.manageTurn(msg["player"], msg["data"]);
+			if (temp_stage != stage_) {
+				stage_ = temp_stage;
+			}
+			tmp = game_.createMessages(temp_stage);
+			for (const auto& i : tmp) {
+				request.push_back(i);
+			}
+		}
+		break;
 	default: break;
 	}
 	 man_.pushMessage(request);
@@ -961,13 +1014,60 @@ stage Game::manageTurn(int player, int card)
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
-		vec_.clear();
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
 			return SUMMING_UP;
 		}
 	}
 	return PLAYING;
+}
+
+request_type Game::createMessages(const stage stage_)
+{
+	request_type request;
+	json feedback = {
+		{"action", "play"},
+		{ "player", players_.getPlayer(CURRENT).getPlayerId() }
+	};
+	if (stage_ == SUMMING_UP) {
+		feedback.erase("player");
+		feedback["player"] = -1;
+	}
+	std::vector<Card> tmp;
+	for (const auto& i : vec_) {
+		tmp.push_back(i.second);
+	}
+	json tmpj = {
+		{ "figure", tmp.back().getFigure() },
+		{ "suit", tmp.back().getSuit() },
+		{ "marriage", players_.getPlayer(X, vec_.back().first).getPlayerDeck().doesHavePair(tmp.back().getSuit()) }
+	};
+	for (auto& i : players_.getArray()) {
+		feedback["who"] = i.getPlayerId();
+		feedback["data"]["prev"] = tmpj;
+		if (feedback["who"] == feedback["player"]) {
+			feedback["data"]["available"] = i.getPlayerDeck().getAllValidCards(tmp, super_suit_);
+			request.push_back(feedback);
+		}
+		feedback.erase("data");
+		feedback.erase("who");
+	}
+	if (vec_.size() == MAX_PLAYERS) {
+		vec_.clear();
+	}
+	if (stage_ == SUMMING_UP) {
+		feedback.clear();
+		feedback["action"] = "score";
+		for (auto & i : players_.getArray()) {
+			feedback["who"].push_back(i.getPlayerId());
+			feedback["data"].push_back({
+				{"player", i.getPlayerId()},
+				{"score", i.getScoreClass().getTurnScore()}
+			});
+		}
+		request.push_back(feedback);
+	}
+	return request;
 }
 
 int Game::setSuperiorSuit()

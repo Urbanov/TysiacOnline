@@ -879,7 +879,7 @@ stage Bidder::bid(int player_id, int new_amount)
 	if (players_.getPlayer(CURRENT).getPlayerId() != player_id) {
 		throw std::logic_error("Player trying to bid not at his turn");
 	}
-	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() >= new_amount && new_amount != -1) {
+	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() > new_amount && new_amount != -1) {
 		throw std::logic_error("Player bids less than current highest bid");
 	}
 	if (players_.getPlayer(CURRENT).getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {

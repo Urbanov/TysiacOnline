@@ -709,6 +709,9 @@ bool Room::runGame(const json & msg)
 	case DEALING:
 		switch (parse(msg["action"])) {
 		case DEAL:
+			for (const auto& i : msg["data"]) {
+				dealer_.giveCardToPeer(i["player"], i["card"]);
+			}
 			feedback["action"] = "deal";
 			for (auto& i : players_.getArray()) {
 				if (i.getPlayerId() != players_.getPlayer(HIGHEST).getPlayerId()) {

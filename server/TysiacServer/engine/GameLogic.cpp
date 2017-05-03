@@ -997,6 +997,7 @@ Game::Game(Deck & deck, PlayersCollection & players)
 	: turn_counter_(0) 
 	, super_suit_(NONE) 
 	, Controller(deck, players)
+	, is_marriage_(false)
 {}
 
 Game::~Game()
@@ -1044,7 +1045,7 @@ request_type Game::createMessages(const stage stage_)
 	json tmpj = {
 		{ "figure", tmp.back().getFigure() },
 		{ "suit", tmp.back().getSuit() },
-		{ "marriage", players_.getPlayer(X, vec_.back().first).getPlayerDeck().doesHavePair(tmp.back().getSuit()) }
+		{ "marriage", is_marriage_}
 	};
 	for (auto& i : players_.getArray()) {
 		feedback["who"] = i.getPlayerId();
@@ -1074,6 +1075,7 @@ request_type Game::createMessages(const stage stage_)
 		}
 		request.push_back(feedback);
 	}
+	is_marriage_ = false;
 	return request;
 }
 
@@ -1092,6 +1094,9 @@ int Game::setSuperiorSuit()
 			default: break;
 			}
 		}
+	}
+	if (score != 0) {
+		is_marriage_ = true;
 	}
 	return score;
 }

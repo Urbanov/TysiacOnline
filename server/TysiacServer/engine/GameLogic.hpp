@@ -249,6 +249,7 @@ private:
 	int turn_counter_;
 	int current_starting_player_;
 	suits super_suit_;
+	bool is_marriage_;
 };
 
 class SumScore : public Controller {

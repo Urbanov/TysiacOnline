@@ -718,7 +718,7 @@ bool Room::runGame(const json & msg)
 					feedback["who"] = i.getPlayerId();
 					for (auto& j : msg["data"]) {
 						if (j["player"] == i.getPlayerId()) {
-							Card tmp = players_.getPlayer(HIGHEST).getPlayerDeck().playCard(j["card"]);
+							Card tmp = players_.getPlayer(X, i.getPlayerId()).getPlayerDeck().getDeck().back();
 							json k = {
 								{"figure", tmp.getFigure()},
 								{"suit", tmp.getSuit()}

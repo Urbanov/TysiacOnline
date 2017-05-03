@@ -78,7 +78,7 @@ enum figures {
 	ACE = 11
 };
 enum suits {
-	NONE,
+	NONE = 0,
 	DIAMONDS = 80,
 	CLUBS = 60,
 	HEARTS = 100,

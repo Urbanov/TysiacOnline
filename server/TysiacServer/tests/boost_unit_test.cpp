@@ -92,6 +92,35 @@ std::string createBidAnswer(size_t prev_id, int value, int curr_id)
 	return msg.dump();
 }
 
+std::string createDealMessage(int p1, int c1, int p2, int c2)
+{
+	json msg = {
+		{"action", "deal"},
+		{ "action", {{{"player", p1}, {"card", c1 } } , { { "player", p2 },{ "card", c2 } }} }
+	};
+	return msg.dump();
+}
+
+std::string createDealAnswer(suits suit, figures figure)
+{
+	json msg = {
+		{"action", "deal"},
+		{"data", {{"figure", figure}, {"suit", suit}} }
+	};
+	return msg.dump();
+}
+
+Player createPlayerWithAppropriateCards(suits type)
+{
+	std::string str = "test";
+	Player player(type, str);
+	std::vector<figures> figures = { NINE, JACK, QUEEN, KING, TEN, ACE };
+	for (const auto& i : figures) {
+		player.getPlayerDeck().addCard(Card(i, type));
+	}
+	return player;
+}
+
 BOOST_AUTO_TEST_SUITE(CardTests)
 BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
 {
@@ -515,7 +544,9 @@ BOOST_AUTO_TEST_CASE(AddTwoAndGetAllMessageBack)
 	BOOST_CHECK_EQUAL(feedback2[0].first, createAddAnswer({ 0, 1 }, true, false));
 	BOOST_CHECK_EQUAL(feedback2[1].first, createAddAnswer({ 1 }, false, false));
 }
+BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(GameManagerTests)
 BOOST_AUTO_TEST_CASE(SendAndReceiveMessage)
 {
 	GameManager man;
@@ -577,6 +608,41 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 	BOOST_CHECK_EQUAL(msg["action"], "stock");
 	BOOST_CHECK_EQUAL(msg["data"].size(), 3);
 	BOOST_CHECK_EQUAL(feedback[1].second.size(), 3);
+}
+
+BOOST_AUTO_TEST_CASE(Play3CardsAndGetCorrectMessageBack)
+{
+	PlayersCollection players;
+	Deck deck;
+	Game game(deck, players);
+	players.getArray().push_back(createPlayerWithAppropriateCards(SPADES));
+	players.getArray().push_back(createPlayerWithAppropriateCards(DIAMONDS));
+	players.getArray().push_back(createPlayerWithAppropriateCards(HEARTS));
+	players.prepareGame();
+	players.getNextPlayer(CURRENT);
+	players.getNextPlayer(CURRENT);
+	game.manageTurn(SPADES, 0);
+	game.manageTurn(DIAMONDS, 0);
+	game.manageTurn(HEARTS, 0);
+	//int player = game.compareCardsAndPassToWinner();
+	//BOOST_CHECK_EQUAL(player, SPADES);
+
+	//std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
+	//std::vector<figures> figure = { NINE, TEN, JACK, QUEEN, KING, ACE };
+	//for (int i = 0; i < MAX_PLAYERS; ++i) {
+	//	for(int i)
+	//}
+	//GameManager man;
+	//for (int i = 0; i < 3; ++i) {
+	//	man.doWork(i, createAddRequest(i > 0 ? 0 : -1));
+	//}
+	//for (int i = 0; i < 3; ++i) {
+	//	man.doWork(i, createReadyMessage());
+	//}
+	//man.doWork(1, createBidMessage(-1));
+	//request_type tmp = createAnswerToDealBasedOnCardReturn(man.doWork(2, createBidMessage(-1)));
+
+	
 }
 BOOST_AUTO_TEST_SUITE_END()
 

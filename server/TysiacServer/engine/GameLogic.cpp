@@ -1011,13 +1011,16 @@ stage Game::manageTurn(int player, int card)
 	if (players_.getPlayer(CURRENT).getPlayerId() != player) {
 		throw std::logic_error("Not player's turn to play a card");
 	}
+
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
+		std::cout << "POLAKI BIEDAKI HEHE" << std::endl;
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
 			return SUMMING_UP;
+
 		}
 	}
 	return PLAYING;
@@ -1077,20 +1080,16 @@ request_type Game::createMessages(const stage stage_)
 int Game::setSuperiorSuit()
 {
 	int score = 0;
-	for (auto& i : vec_) {
-		if (i.first == current_starting_player_) {
-			if (i.second.getFigure() == KING || i.second.getFigure() == QUEEN) {
-				if (players_.getPlayer(X, current_starting_player_).getPlayerDeck().doesHavePair(
-					i.second.getSuit())) {
-					super_suit_ = i.second.getSuit();
-					switch (super_suit_) {
-					case SPADES: score = SPADES; break;
-					case CLUBS: score = CLUBS; break;
-					case DIAMONDS: score = DIAMONDS; break;
-					case HEARTS: score = HEARTS; break;
-					default: break;
-					}
-				}
+	if (vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN) {
+		if (players_.getPlayer(X, current_starting_player_).getPlayerDeck().doesHavePair(
+			vec_[0].second.getSuit())) {
+			super_suit_ = vec_[0].second.getSuit();
+			switch (super_suit_) {
+			case SPADES: score = SPADES; break;
+			case CLUBS: score = CLUBS; break;
+			case DIAMONDS: score = DIAMONDS; break;
+			case HEARTS: score = HEARTS; break;
+			default: break;
 			}
 		}
 	}
@@ -1102,9 +1101,9 @@ int Game::compareCardsAndPassToWinner()
 	figures superior_suit_figure = NOT_A_FIGURE;
 	figures ordinary_figure = NOT_A_FIGURE;
 	suits current_suit = NONE;
-	int winning_player = -1;
+	int winning_player = vec_[0].first;
 	int score = setSuperiorSuit();
-
+	current_starting_player_ = vec_[0].first;
 	if (super_suit_ != NONE) {
 		for (auto& i : vec_) {
 			if (i.second.getSuit() == super_suit_) {
@@ -1124,7 +1123,7 @@ int Game::compareCardsAndPassToWinner()
 		}
 		for (auto& i : vec_) {
 			if (i.second.getSuit() == current_suit && 
-				i.second.getFigure() == superior_suit_figure) {
+				i.second.getFigure() > superior_suit_figure) {
 				superior_suit_figure = i.second.getFigure();
 				winning_player = i.first;
 			}

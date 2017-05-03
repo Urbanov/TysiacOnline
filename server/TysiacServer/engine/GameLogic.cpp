@@ -124,7 +124,8 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 		}
 		return correct_cards;
 	}
-	if (vec[0].getSuit() == vec[1].getSuit()) {
+	if (vec[0].getFigure() == card.getFigure() && vec[0].getSuit() == card.getSuit()
+		|| vec[0].getSuit() == vec[1].getSuit()) {
 		for (const auto & i : correct_cards) {
 			if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit()) {
 				tmp.push_back(i);
@@ -1233,19 +1234,25 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 {
 	server_response_.clear();
 	feedback_.clear();
-	json msg = json::parse(message.begin(), message.end());
-	msg["player"] = player_id;
-	if (msg["action"] == "add") {
-		addPlayer(msg);
+	try {
+		json msg = json::parse(message.begin(), message.end());
+		msg["player"] = player_id;
+		if (msg["action"] == "add") {
+			addPlayer(msg);
+			return server_response_;
+		}
+		if (msg["action"] == "show") {
+			returnExistingRooms(msg);
+			return server_response_;
+		}
+		msg["id"] = findGameId(player_id);
+		active_games_[msg["id"]]->runGame(msg);
+		attachClientIdsToMessage();
 		return server_response_;
 	}
-	if (msg["action"] == "show") {
-		returnExistingRooms(msg);
-		return server_response_;
+	catch (const std::exception& e) {
+		std::cout << e.what() << std::endl;
 	}
-	msg["id"] = findGameId(player_id);
-	active_games_[msg["id"]]->runGame(msg);
-	attachClientIdsToMessage();
 	return server_response_;
 }
 

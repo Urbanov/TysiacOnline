@@ -148,6 +148,38 @@ BOOST_AUTO_TEST_CASE(ThrowWhenTryingToPlaySameCardTwice)
 	playCard(0);
 	BOOST_CHECK_THROW(playCard(0), std::logic_error);
 }
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed1)
+{
+	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
+	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	std::vector<Card> vec = { {JACK, SPADES}, {JACK, DIAMONDS} };
+	json tmp = { 6, 7, 8, 9 };
+	json tmp1 = getAllValidCards(vec, HEARTS);
+	BOOST_CHECK_EQUAL(tmp1, tmp );
+
+
+}
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed2)
+{
+	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
+	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	std::vector<Card> vec = { { JACK, SPADES } };
+	json tmp = { 6, 7, 8, 9 };
+	json tmp1 = getAllValidCards(vec, HEARTS);
+	BOOST_CHECK_EQUAL(tmp1, tmp);
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_FIXTURE_TEST_SUITE(ScoreTests, Score)
@@ -348,6 +380,7 @@ BOOST_AUTO_TEST_CASE(Return300MaxValue)
 	p.getPlayerDeck().addCard(c6);
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 300);
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(BidderTest)

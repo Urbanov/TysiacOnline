@@ -1049,8 +1049,11 @@ request_type Game::createMessages(const stage stage_)
 		if (feedback["who"] == feedback["player"]) {
 			feedback["data"]["available"] = i.getPlayerDeck().getAllValidCards(tmp, super_suit_);
 			request.push_back(feedback);
+			feedback.erase("data");
 		}
-		feedback.erase("data");
+		else {
+			request.push_back(feedback);
+		}
 		feedback.erase("who");
 	}
 	if (vec_.size() == MAX_PLAYERS) {

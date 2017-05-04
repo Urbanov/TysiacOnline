@@ -69,5 +69,5 @@ std::size_t Session::getId() const
 
 void Session::welcome()
 {
-	write("{ \"action\":\"welcome\", \"values\" : " + std::to_string(id_) + " }");
+	write("{ \"action\":\"welcome\", \"data\" : " + std::to_string(id_) + " }");
 }

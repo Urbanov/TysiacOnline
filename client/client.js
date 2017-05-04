@@ -97,7 +97,7 @@ $(document).ready(function () {
 
 		switch (msg.action) {
 			case "welcome":
-				self.id = msg.values;
+				self.id = msg.data;
 				break;
 
 			case "show":
@@ -204,7 +204,7 @@ function sendMessage() {
 		action: "chat",
 		data: text
 	}
-	ws.send(JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function addMessage(msg) {
@@ -217,7 +217,7 @@ function requestRefresh() {
 	var msg = {
 		action: "show"
 	};
-	ws.send(JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function requestRoom(event) {
@@ -226,7 +226,7 @@ function requestRoom(event) {
 		data: self.nick,
 		id: event.data.id
 	};
-	ws.send(JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function joinRoom(data) {
@@ -302,7 +302,7 @@ function sendBid(event) {
 		data: event.data.value
 	}
 	debug(msg);
-	ws.send(JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function loadRooms(data) {
@@ -333,7 +333,7 @@ function sendReady() {
 	var msg = {
 		action: "ready"
 	};
-	ws.send(JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function addCard(card) {
@@ -381,7 +381,8 @@ function useCard(id) {
 				card: Number(second_card)
 			}]
 		}
-		ws.send(JSON.stringify(msg));
+		console.log(">>> give cards: " + JSON.stringify(msg));
+		sendToServer(msg);
 		return;
 	}
 
@@ -392,14 +393,19 @@ function useCard(id) {
 			data: id
 		}
 		console.log(">>> send play: " + JSON.stringify(msg));
-		ws.send(JSON.stringify(msg));
+		sendToServer(msg);
 	}
 }
 
-function makeAvailable(array) {
-	for (let card of array);
+function changeAvailable(array) {
+	for (let card of self.cards) {
+		card.available = false;
+	}
+	for (let id of array) {
+		cards[id].available = true;
+	}
 }
 
-function debug(what) {
-	console.log(JSON.stringify(what));
+function sendToServer(msg) {
+	ws.send(JSON.stringify(msg));
 }

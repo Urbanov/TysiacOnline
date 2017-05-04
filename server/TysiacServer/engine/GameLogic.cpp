@@ -659,27 +659,16 @@ bool Room::runGame(const json & msg)
 			}
 			stage_ = temp_stage;
 			players_.prepareGame();
-			feedback.clear();
-			deck_.dealCards(players_.getArray());
-			feedback["action"] = "deal";
-			for (auto i : players_.getArray()) {
-				feedback["who"] = i.getPlayerId();
-				for (auto j : i.getPlayerDeck().getDeck()) {
-					json tmp = {
-						 {"figure", j.getFigure()}
-						,{"suit", j.getSuit()}
-					};
-					feedback["data"].push_back(tmp);
-				}
-				request.push_back(feedback);
-				feedback.erase("who");
-				feedback.erase("data");
+			dealer_.dealCards();
+			tmp = dealer_.createMessages();
+			for (const auto& i : tmp) {
+				request.push_back(i);
 			}
 			feedback.clear();
 			feedback["data"] = 100;
 			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
 			tmp = bidder_.createMessages(feedback, stage_, false);
-			for (auto i : tmp) {
+			for (const auto& i : tmp) {
 				request.push_back(i);
 			}
 			break;
@@ -767,11 +756,20 @@ bool Room::runGame(const json & msg)
 					request.push_back(i);
 				}
 			}
-			//if (stage_ != ENDING) {
-			//	dealer_.dealCards();
-			//	dealer_.produceMessages();
-			//	stage_ = BIDDING;
-			//}
+			if (stage_ != ENDING) {
+				dealer_.dealCards();
+				tmp = dealer_.createMessages();
+				for (const auto& i : tmp) {
+					request.push_back(i);
+				}
+				feedback["data"] = 100;
+				feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
+				tmp = bidder_.createMessages(feedback, stage_, false);
+				for (const auto& i : tmp) {
+					request.push_back(i);
+				}
+				stage_ = BIDDING;
+			}
 		}
 		break;
 	default: break;
@@ -997,6 +995,33 @@ stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 	return DEALING;
 }
 
+void Dealer::dealCards()
+{
+	deck_.shuffle();
+	deck_.dealCards(players_.getArray());
+}
+
+request_type Dealer::createMessages()
+{
+	json feedback;
+	request_type request;
+	feedback["action"] = "deal";
+	for (auto i : players_.getArray()) {
+		feedback["who"] = i.getPlayerId();
+		for (auto j : i.getPlayerDeck().getDeck()) {
+			json tmp = {
+				{ "figure", j.getFigure() }
+				,{ "suit", j.getSuit() }
+			};
+			feedback["data"].push_back(tmp);
+		}
+		request.push_back(feedback);
+		feedback.erase("who");
+		feedback.erase("data");
+	}
+	return request;
+}
+
 void Dealer::reset()
 {
 	user_id_ = -1;
@@ -1165,10 +1190,6 @@ void Game::reset()
 	turn_counter_ = 0;
 	current_starting_player_ = 0;
 	super_suit_ = NONE;
-	size_t player_id = players_.getNextPlayer(COMPULSORY);
-	players_.setPlayer(CURRENT, player_id);
-	players_.setPlayer(HIGHEST, player_id);
-	players_.getNextPlayer(CURRENT);
 }
 
 // </Class Game>
@@ -1223,14 +1244,11 @@ void SumScore::resetPlayersAtributes()
 		i.getScoreClass().resetClaim();
 		i.getPlayerDeck().clearDeck();
 	}
-	players_.setPlayer(HIGHEST, players_.getNextPlayer(COMPULSORY));
-	players_.setPlayer(CURRENT, players_.getPlayer(COMPULSORY).getPlayerId());
+	size_t player_id = players_.getNextPlayer(COMPULSORY);
+	players_.setPlayer(CURRENT, player_id);
+	players_.setPlayer(HIGHEST, player_id);
 	players_.getNextPlayer(CURRENT);
-	for (auto& i : players_.getArray()) {
-		i.getPlayerDeck().clearDeck();
-	}
-	deck_.shuffle();
-	deck_.dealCards(players_.getArray());
+	players_.getPlayer(COMPULSORY).getScoreClass().setClaim(100, false);
 }
 
 request_type SumScore::createMessages(stage stages_)

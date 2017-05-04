@@ -225,7 +225,8 @@ public:
 	Dealer(Deck &, PlayersCollection &);
 	~Dealer();
 	stage giveCardToPeer(int player_id, std::size_t card_number);
-	std::vector<Card> showStockCards(size_t player_id);
+	void dealCards();
+	request_type createMessages();
 	void reset();
 private:
 	int user_id_;

@@ -1103,18 +1103,6 @@ request_type Game::createMessages(const stage stage_)
 		}
 		feedback.erase("who");
 	}
-	if (stage_ == SUMMING_UP) {
-		feedback.clear();
-		feedback["action"] = "score";
-		for (auto & i : players_.getArray()) {
-			feedback["who"].push_back(i.getPlayerId());
-			feedback["data"].push_back({
-				{"player", i.getPlayerId()},
-				{"score", i.getScoreClass().getTurnScore()}
-			});
-		}
-		request.push_back(feedback);
-	}
 	is_marriage_ = false;
 	return request;
 }

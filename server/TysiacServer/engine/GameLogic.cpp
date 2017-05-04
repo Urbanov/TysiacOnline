@@ -1055,7 +1055,7 @@ request_type Game::createMessages(const stage stage_)
 		feedback["who"] = i.getPlayerId();
 		feedback["data"]["prev"] = tmpj;
 		if (feedback["who"] == feedback["player"]) {
-			feedback["data"]["available"] = { 2,1,3,7 };//i.getPlayerDeck().getAllValidCards(tmp, super_suit_);
+			feedback["data"]["available"] = i.getPlayerDeck().getAllValidCards(tmp, super_suit_);
 			request.push_back(feedback);
 			feedback.erase("data");
 		}

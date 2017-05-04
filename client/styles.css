@@ -38,8 +38,8 @@ body {
 
 .game_canvas {
 	width: 780px;
-	height: 600px;
-	border: 1px solid #000;
+	height: 700px;
+	background-image: url("images/bg.png");
 }
 
 .chatbox {
@@ -53,7 +53,7 @@ body {
 }
 
 .chat_body {
-	height: 458px;
+	height: 558px;
 	overflow: auto;
 }
 
@@ -108,4 +108,44 @@ body {
 	max-width: 1400px;
 	margin: 0 auto;
 	height: 100%;
+}
+
+.cards {
+	position: absolute;
+	top: 570px;
+	text-align: center;
+	width: 780px;
+}
+
+.card {
+	width: 70px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.middle_row {
+	position: absolute;
+	height: 385px;
+	width: 780px;
+	top: 150px;
+	left: 15px;
+}
+
+.rotate90 {
+	-webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.opponent_cards {
+	text-align: center;
+	height: 385px;
+}
+
+.helper {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
 }

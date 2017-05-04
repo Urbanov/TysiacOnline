@@ -129,6 +129,7 @@ $(document).ready(function () {
 			case "deal":
 				for (let card of msg.data) {
 					addCard(card);
+					drawCard(self.cards.length - 1);
 				}
 				break;
 
@@ -144,6 +145,7 @@ $(document).ready(function () {
 				if (msg.player == self.id) {
 					for (let card of msg.data) {
 						addCard(card);
+						drawCard(self.cards.length - 1);
 					}
 					handleStock();
 				}
@@ -160,20 +162,22 @@ $(document).ready(function () {
 				}
 				if (msg.player == self.id) {
 					console.log(">>> jedziesz");
+					allAvailable();
 				}
 				break;
 
 			case "play":
 				if (self.id == msg.player) {
 					console.log(">>> jedziesz");
+					someAvailable(msg.data.available);
 				}
 				// display card
-				console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
+				//console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
 				break;
 
 			default:
 				// ready is unused for now
-				console.log(">>> UNUSED: " + JSON.stringify(msg));
+				//console.log(">>> UNUSED: " + JSON.stringify(msg));
 				break;
 		}
 	}
@@ -301,7 +305,6 @@ function sendBid(event) {
 		action: "bid",
 		data: event.data.value
 	}
-	debug(msg);
 	sendToServer(msg);
 }
 
@@ -356,15 +359,30 @@ function displayStock(cards) {
 
 function handleStock() {
 	$("#stock_modal").modal({ backdrop: false });
-	console.log(">>> HANDLE STOCK: tu bedzie printowanie kart i klikanie w nie");
+	allAvailable();
+	//console.log(">>> HANDLE STOCK: tu bedzie printowanie kart i klikanie w nie");
 }
 
-function useCard(id) {
+function useCard(event) {
+	var id = Number(event.data.value);
+
+	////////////////////////////
+	var test = ">>> USECARD: " + event.data.value;
+	console.log(test);
+
+	if (!self.cards[id].available) {
+		console.log(">>> USECARD: card is not available");
+		return;
+	}
+
 	self.cards[id].used = true;
+	self.cards[id].available = false;
 	++self.used;
+	removeCardImg(id);
 
 	// give away cards after getting stock
 	if (self.cards.length == 10 && self.used == 2) {
+		noneAvailable();
 		var second_card = id;
 		for (var first_card in self.cards) {
 			if (self.cards[first_card].used && first_card != second_card) {
@@ -388,6 +406,7 @@ function useCard(id) {
 
 	// play card
 	if (self.cards.length == 8 || self.used > 2) {
+		noneAvailable();
 		var msg = {
 			action: "play",
 			data: id
@@ -397,15 +416,42 @@ function useCard(id) {
 	}
 }
 
-function changeAvailable(array) {
+function noneAvailable() {
 	for (let card of self.cards) {
 		card.available = false;
 	}
+}
+
+function allAvailable() {
+	for (let card of self.cards) {
+		card.available = true;
+	}
+}
+
+function someAvailable(array) {
+	noneAvailable();
 	for (let id of array) {
-		cards[id].available = true;
+		self.cards[id].available = true;
 	}
 }
 
 function sendToServer(msg) {
+	console.log("vvvvvvvv" + JSON.stringify(msg));
 	ws.send(JSON.stringify(msg));
+}
+
+function removeCardImg(id) {
+	$("#card" + id).remove();
+}
+
+function drawCard(index) {
+	var card = self.cards[index];
+	var elem = $("<img/>", {
+		id: "card" + index,
+		src: "images/" + card.figure + "_" + card.suit + ".svg",
+		class: "card",
+		title: index
+	});
+	elem.click({ value: index }, useCard);
+	$("#cards").append(elem);
 }

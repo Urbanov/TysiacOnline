@@ -259,6 +259,7 @@ public:
 	stage sumUpScore();
 	request_type createMessages(stage stage_);
 	void resetPlayersAtributes();
+	bool isFinished() const;
 private:
 };
 

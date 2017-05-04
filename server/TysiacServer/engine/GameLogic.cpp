@@ -756,7 +756,7 @@ bool Room::runGame(const json & msg)
 					request.push_back(i);
 				}
 			}
-			if (stage_ != ENDING) {
+			if (stage_ == ENDING && !score_.isFinished()) {
 				dealer_.dealCards();
 				tmp = dealer_.createMessages();
 				for (const auto& i : tmp) {
@@ -1249,6 +1249,16 @@ void SumScore::resetPlayersAtributes()
 	players_.setPlayer(HIGHEST, player_id);
 	players_.getNextPlayer(CURRENT);
 	players_.getPlayer(COMPULSORY).getScoreClass().setClaim(100, false);
+}
+
+bool SumScore::isFinished() const
+{
+	for (auto& i : players_.getArray()) {
+		if (i.getScoreClass().getScore() >= POINTS_WINNING_CAP) {
+			return true;
+		}
+	}
+	return false;
 }
 
 request_type SumScore::createMessages(stage stages_)

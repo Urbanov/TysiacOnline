@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed1)
 	std::vector<Card> vec = { {JACK, SPADES}, {JACK, DIAMONDS} };
 	json tmp = { 6, 7, 8, 9 };
 	json tmp1 = getAllValidCards(vec, HEARTS);
-	BOOST_CHECK_EQUAL(tmp1, tmp );
+	BOOST_CHECK_EQUAL(tmp1, tmp);
 
 }
 
@@ -265,6 +265,36 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed6)
 	}
 	std::vector<Card> vec = {};
 	json tmp = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
+	json tmp1 = getAllValidCards(vec, HEARTS);
+	BOOST_CHECK_EQUAL(tmp1, tmp);
+}
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed7)
+{
+	std::vector<suits> suit = { CLUBS };
+	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	std::vector<Card> vec = { {NINE, DIAMONDS}, {TEN, SPADES} };
+	json tmp = { 0,1,2,3,4,5 };
+	json tmp1 = getAllValidCards(vec, HEARTS);
+	BOOST_CHECK_EQUAL(tmp1, tmp);
+}
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed8)
+{
+	std::vector<suits> suit = { CLUBS };
+	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	std::vector<Card> vec = { { NINE, DIAMONDS } };
+	json tmp = { 0,1,2,3,4,5 };
 	json tmp1 = getAllValidCards(vec, HEARTS);
 	BOOST_CHECK_EQUAL(tmp1, tmp);
 }

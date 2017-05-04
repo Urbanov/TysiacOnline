@@ -678,7 +678,7 @@ bool Room::runGame(const json & msg)
 			feedback.clear();
 			feedback["data"] = 100;
 			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
-			tmp = bidder_.produceMessages(feedback, stage_, false);
+			tmp = bidder_.createMessages(feedback, stage_, false);
 			for (auto i : tmp) {
 				request.push_back(i);
 			}
@@ -690,7 +690,7 @@ bool Room::runGame(const json & msg)
 		switch (parse(msg["action"])) {
 		case BID: 
 			temp_stage = bidder_.bid(msg["player"], msg["data"]);
-			tmp = bidder_.produceMessages(msg, temp_stage, false);
+			tmp = bidder_.createMessages(msg, temp_stage, false);
 			for (auto& i : tmp) {
 				request.push_back(i);
 			}
@@ -735,7 +735,7 @@ bool Room::runGame(const json & msg)
 				}
 			}
 			feedback.erase("action");
-			feedback = bidder_.produceMessages(msg, stage_, true)[0];
+			feedback = bidder_.createMessages(msg, stage_, true)[0];
 			request.push_back(feedback);
 			break;
 		case BID:
@@ -755,13 +755,23 @@ bool Room::runGame(const json & msg)
 		switch (parse(msg["action"])) {
 		case PLAY:
 			temp_stage = game_.manageTurn(msg["player"], msg["data"]);
-			if (temp_stage != stage_) {
-				stage_ = temp_stage;
-			}
 			tmp = game_.createMessages(temp_stage);
 			for (const auto& i : tmp) {
 				request.push_back(i);
 			}
+			if (temp_stage != stage_) {
+				stage_ = temp_stage;
+				score_.sumUpScore();
+				tmp = score_.createMessages(stage_);
+				for (const auto& i : tmp) {
+					request.push_back(i);
+				}
+			}
+			//if (stage_ != ENDING) {
+			//	dealer_.dealCards();
+			//	dealer_.produceMessages();
+			//	stage_ = BIDDING;
+			//}
 		}
 		break;
 	default: break;
@@ -913,7 +923,7 @@ void Bidder::giveAddCards()
 	deck_.addBonusCards(players_.getPlayer(HIGHEST));
 }
 
-request_type Bidder::produceMessages(const json & msg, stage stage_, bool isLastBid)
+request_type Bidder::createMessages(const json & msg, stage stage_, bool isLastBid)
 {
 	request_type request;
 	json feedback;
@@ -1027,7 +1037,6 @@ stage Game::manageTurn(int player, int card)
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
 			return SUMMING_UP;
-
 		}
 	}
 	return PLAYING;
@@ -1156,6 +1165,10 @@ void Game::reset()
 	turn_counter_ = 0;
 	current_starting_player_ = 0;
 	super_suit_ = NONE;
+	size_t player_id = players_.getNextPlayer(COMPULSORY);
+	players_.setPlayer(CURRENT, player_id);
+	players_.setPlayer(HIGHEST, player_id);
+	players_.getNextPlayer(CURRENT);
 }
 
 // </Class Game>
@@ -1176,6 +1189,7 @@ stage SumScore::sumUpScore()
 	for (auto& i : players_.getArray()) {
 		if (i.getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
 			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
+				i.getScoreClass().addToTurnScore(-1 * (i.getScoreClass().getTurnScore() + i.getScoreClass().getClaim()));
 				i.getScoreClass().addScore(-1 * i.getScoreClass().getClaim());
 			}
 			else {
@@ -1183,13 +1197,22 @@ stage SumScore::sumUpScore()
 			}
 		}
 		else {
-			i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
+			if (i.getScoreClass().getScore() < 800) {
+				if (i.getScoreClass().getTurnScore() % 10) {
+					double rounded = round(static_cast<double>(i.getScoreClass().getTurnScore()/10));
+					i.getScoreClass().addToTurnScore((-1) * i.getScoreClass().getTurnScore());
+					i.getScoreClass().addToTurnScore(static_cast<int>(rounded * 10));
+				}
+				i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
+			}
 		}
 		if (i.getScoreClass().getScore() >= POINTS_WINNING_CAP) {
+			for (auto& i : players_.getArray()) {
+				i.setReady(false);
+			}
 			return ENDING;
 		}
 	}
-	resetPlayersAtributes();
 	return BIDDING;
 }
 
@@ -1208,6 +1231,37 @@ void SumScore::resetPlayersAtributes()
 	}
 	deck_.shuffle();
 	deck_.dealCards(players_.getArray());
+}
+
+request_type SumScore::createMessages(stage stages_)
+{
+	json message;
+	request_type request;
+	message["action"] = "score";
+	for (auto& i : players_.getArray()) {
+		message["who"].push_back(i.getPlayerId());
+		json tmp = {
+			{"player", i.getPlayerId() }, 
+			{"score", i.getScoreClass().getTurnScore() }
+		};
+		message["data"].push_back(tmp);
+	}
+	request.push_back(message);
+	resetPlayersAtributes();
+	if (stages_ == ENDING) {
+		json message = {
+			{"action", "end"}
+		};
+		for (auto& i : players_.getArray()) {
+			if (i.getScoreClass().getScore() >= POINTS_WINNING_CAP) {
+				message["data"] = i.getScoreClass().getScore();
+				message["player"] = i.getPlayerId();
+			}
+			message["who"].push_back(i.getPlayerId());
+		}
+		request.push_back(message);
+	}
+	return request;
 }
 
 // </Class SumScore>

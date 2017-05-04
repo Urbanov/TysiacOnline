@@ -32,7 +32,6 @@ using req = std::vector<std::pair<std::string, std::vector<int> > >;
 using players = std::vector<Player>;
 using players_it = std::vector<Player>::iterator;
 using PRoom = std::shared_ptr<Room>;
-//using player_info = std::vector<std::pair<int, std::string> >;
 
 const int MAX_TURNS = 8;
 const int MAX_PLAYERS = 3;
@@ -218,7 +217,7 @@ public:
 	~Bidder();
 	stage bid(int, int);
 	void giveAddCards();
-	request_type produceMessages(const json & msg, stage stage_, bool);
+	request_type createMessages(const json & msg, stage stage_, bool);
 };
 
 class Dealer : public Controller {
@@ -257,7 +256,9 @@ public:
 	SumScore(Deck &, PlayersCollection &);
 	~SumScore();
 	stage sumUpScore();
+	request_type createMessages(stage stage_);
 	void resetPlayersAtributes();
+private:
 };
 
 class AddManager

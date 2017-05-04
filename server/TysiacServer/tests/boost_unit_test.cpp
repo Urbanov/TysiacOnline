@@ -2,12 +2,6 @@
 #include <boost/test/unit_test.hpp>
 #include "../engine/GameLogic.hpp"
 
-class TestingManager : public GameManager{
-	TestingManager();
-	~TestingManager();
-	
-};
-
 std::string createAddRequest(int server_id)
 {
 	json req0 = {
@@ -298,6 +292,24 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed8)
 	json tmp1 = getAllValidCards(vec, HEARTS);
 	BOOST_CHECK_EQUAL(tmp1, tmp);
 }
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed9)
+{
+	std::vector<suits> suit = { CLUBS };
+	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	addCard(Card(NINE, DIAMONDS));
+	getDeck().back().setIsUsed(true);
+	std::vector<Card> vec = { { TEN, DIAMONDS } };
+	json tmp = { 0,1,2,3,4,5 };
+	json tmp1 = getAllValidCards(vec, HEARTS);
+	BOOST_CHECK_EQUAL(tmp1, tmp);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_FIXTURE_TEST_SUITE(ScoreTests, Score)
@@ -689,7 +701,10 @@ BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
 	game.manageTurn(SPADES, 2);
 	game.manageTurn(DIAMONDS, 0);
 	game.manageTurn(HEARTS, 0);
-	game.createMessages(PLAYING);
+	request_type request = game.createMessages(PLAYING);
+	json available_cards = request[0]["data"]["available"];
+	json expected_cards = { 0,1,3,4,5 };
+	BOOST_CHECK_EQUAL(available_cards, expected_cards);
 	game.manageTurn(SPADES, 3);
 	game.manageTurn(DIAMONDS, 6);
 	game.manageTurn(HEARTS, 2);

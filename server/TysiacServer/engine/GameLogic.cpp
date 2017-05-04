@@ -1061,7 +1061,7 @@ stage Game::manageTurn(int player, int card)
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
-			return SUMMING_UP;
+			return ENDING;
 		}
 	}
 	return PLAYING;

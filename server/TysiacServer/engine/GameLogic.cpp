@@ -121,7 +121,9 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 	}
 	if (correct_cards.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
-			correct_cards.push_back(i);
+			if (!deck_[i].getIsUsed()) {
+				correct_cards.push_back(i);
+			}
 		}
 		return correct_cards;
 	}
@@ -1042,15 +1044,18 @@ request_type Game::createMessages(const stage stage_)
 		feedback.erase("player");
 		feedback["player"] = -1;
 	}
+	json tmpj = {
+		{ "figure", vec_.back().second.getFigure() },
+		{ "suit", vec_.back().second.getSuit() },
+		{ "marriage", is_marriage_}
+	};
+	if (vec_.size() == MAX_PLAYERS) {
+		vec_.clear();
+	}
 	std::vector<Card> tmp;
 	for (const auto& i : vec_) {
 		tmp.push_back(i.second);
 	}
-	json tmpj = {
-		{ "figure", tmp.back().getFigure() },
-		{ "suit", tmp.back().getSuit() },
-		{ "marriage", is_marriage_}
-	};
 	for (auto& i : players_.getArray()) {
 		feedback["who"] = i.getPlayerId();
 		feedback["data"]["prev"] = tmpj;
@@ -1063,9 +1068,6 @@ request_type Game::createMessages(const stage stage_)
 			request.push_back(feedback);
 		}
 		feedback.erase("who");
-	}
-	if (vec_.size() == MAX_PLAYERS) {
-		vec_.clear();
 	}
 	if (stage_ == SUMMING_UP) {
 		feedback.clear();

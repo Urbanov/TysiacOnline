@@ -54,6 +54,9 @@ var ws;
 var self;
 var game = [];
 
+//FIXME
+var counter = 0;
+
 $(document).ready(function () {
 
 	// create player object
@@ -171,6 +174,7 @@ $(document).ready(function () {
 				break;
 
 			case "play":
+				displayCard(msg.data.prev);
 				if (self.id == msg.player) {
 					console.log(">>> jedziesz");
 					someAvailable(msg.data.available);
@@ -408,10 +412,10 @@ function useCard(event) {
 		let msg = {
 			action: "deal",
 			data: [{
-				player: game[(self.index + 1) % 3].id, // left player
+				player: getLeftPlayerId(), // left player
 				card: Number(first_card)
 			}, {
-				player: game[(self.index + 2) % 3].id, // right player
+				player: getRightPlayerId(), // right player
 				card: Number(second_card)
 			}]
 		}
@@ -529,5 +533,34 @@ function drawCards() {
 
 	for (let elem of images) {
 		anchor.append(elem);
+	}
+}
+
+function getLeftPlayerId() {
+	return game[(self.index + 1) % 3].id;
+}
+
+function getRightPlayerId() {
+	return game[(self.index + 2) % 3].id;
+}
+
+function displayCard(prev) {
+	if (counter == 3) {
+		counter = 0;
+		clearTop();
+		clearBottom();
+	}
+	++counter;
+
+	var card = new Card(prev.figure, prev.suit);
+
+	if (prev.player == self.id) {
+		$("#bottom_middle").prop("src", path(card));
+	}
+	else if (prev.player == getLeftPlayerId()) {
+		$("#top_left").prop("src", path(card));
+	}
+	else {
+		$("#top_right").prop("src", path(card));
 	}
 }

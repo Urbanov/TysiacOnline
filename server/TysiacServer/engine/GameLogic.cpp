@@ -1206,6 +1206,10 @@ SumScore::~SumScore()
 stage SumScore::sumUpScore()
 {
 	for (auto& i : players_.getArray()) {
+		i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
+	}
+	return BIDDING;
+	for (auto& i : players_.getArray()) {
 		if (i.getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
 			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
 				i.getScoreClass().addToTurnScore(-1 * (i.getScoreClass().getTurnScore() + i.getScoreClass().getClaim()));

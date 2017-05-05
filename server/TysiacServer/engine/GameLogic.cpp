@@ -1054,8 +1054,13 @@ stage Game::manageTurn(int player, int card)
 	if (players_.getPlayer(CURRENT).getPlayerId() != player) {
 		throw std::logic_error("Not player's turn to play a card");
 	}
-
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
+	if (vec_.size() == 1) {
+			is_marriage_ = players_.getPlayer(CURRENT).getPlayerDeck().doesHavePair(vec_[0].second.getSuit());
+			if (is_marriage_) {
+				super_suit_ = vec_[0].second.getSuit();
+			}
+	}
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
@@ -1081,8 +1086,9 @@ request_type Game::createMessages(const stage stage_)
 	json tmpj = {
 		{ "figure", vec_.back().second.getFigure() },
 		{ "suit", vec_.back().second.getSuit() },
-		{ "marriage", is_marriage_}
+		{"player", vec_.back().first}
 	};
+	tmpj["marriage"] = vec_.size() == 1 ? is_marriage_ : false;
 	if (vec_.size() == MAX_PLAYERS) {
 		vec_.clear();
 	}
@@ -1103,7 +1109,6 @@ request_type Game::createMessages(const stage stage_)
 		}
 		feedback.erase("who");
 	}
-	is_marriage_ = false;
 	return request;
 }
 
@@ -1135,7 +1140,7 @@ int Game::compareCardsAndPassToWinner()
 	figures ordinary_figure = NOT_A_FIGURE;
 	suits current_suit = NONE;
 	current_starting_player_ = vec_[0].first;
-	int score = setSuperiorSuit();
+	int score = super_suit_;
 	if (super_suit_ != NONE) {
 		for (auto& i : vec_) {
 			if (i.second.getSuit() == super_suit_) {

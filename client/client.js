@@ -130,7 +130,6 @@ $(document).ready(function () {
 				break;
 
 			case "deal":
-				clearBottom();
 				for (let card of msg.data) {
 					addCard(card);
 					//drawCard(self.cards.length - 1);
@@ -139,7 +138,6 @@ $(document).ready(function () {
 				break;
 
 			case "bid":
-				clearBottom();
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
@@ -159,6 +157,7 @@ $(document).ready(function () {
 				break;
 
 			case "start":
+				clearBottom();
 				for (let player of game) {
 					if (player.id == msg.player) {
 						updateBid(player.id, msg.data);
@@ -181,6 +180,10 @@ $(document).ready(function () {
 				}
 				// display card
 				//console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
+				break;
+
+			case "score":
+				self.cards = [];
 				break;
 
 			default:

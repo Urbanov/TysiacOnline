@@ -37,7 +37,7 @@ body {
 }
 
 .game_canvas {
-	width: 780px;
+	width: 779px;
 	height: 700px;
 	background-image: url("images/bg.png");
 }
@@ -114,7 +114,7 @@ body {
 	position: absolute;
 	top: 570px;
 	text-align: center;
-	width: 780px;
+	width: 779px;
 }
 
 .card {
@@ -126,7 +126,7 @@ body {
 .middle_row {
 	position: absolute;
 	height: 385px;
-	width: 780px;
+	width: 779px;
 	top: 150px;
 	left: 15px;
 }
@@ -167,4 +167,9 @@ body {
 	width: 70px;
 	margin-left: 3px;
 	margin-right: 3px;
+}
+
+.modal-open {
+	overflow: auto;
+	padding-right: 0px !important;
 }

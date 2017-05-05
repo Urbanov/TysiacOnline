@@ -1055,11 +1055,15 @@ stage Game::manageTurn(int player, int card)
 		throw std::logic_error("Not player's turn to play a card");
 	}
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
-	if (vec_.size() == 1) {
+	if (vec_.size() == 1 && vec_[0].second.getFigure() == QUEEN 
+		|| vec_[0].second.getFigure() == KING) {
 			is_marriage_ = players_.getPlayer(CURRENT).getPlayerDeck().doesHavePair(vec_[0].second.getSuit());
 			if (is_marriage_) {
 				super_suit_ = vec_[0].second.getSuit();
 			}
+	}
+	else {
+		is_marriage_ = false;
 	}
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
@@ -1086,9 +1090,9 @@ request_type Game::createMessages(const stage stage_)
 	json tmpj = {
 		{ "figure", vec_.back().second.getFigure() },
 		{ "suit", vec_.back().second.getSuit() },
-		{"player", vec_.back().first}
+		{"player", vec_.back().first},
+		{"marriage", is_marriage_}
 	};
-	tmpj["marriage"] = vec_.size() == 1 ? is_marriage_ : false;
 	if (vec_.size() == MAX_PLAYERS) {
 		vec_.clear();
 	}

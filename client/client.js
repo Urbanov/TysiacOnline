@@ -574,6 +574,7 @@ function displayCard(prev) {
 }
 
 function teaseStock() {
+	clearTop();
 	$("#bottom_left").prop("src", "images/back.png");
 	$("#bottom_middle").prop("src", "images/back.png");
 	$("#bottom_right").prop("src", "images/back.png");

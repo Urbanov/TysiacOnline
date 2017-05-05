@@ -84,7 +84,7 @@ $(document).ready(function () {
 	$("#ready").click(sendReady);
 
 	// open a connection
-	ws = new WebSocket("ws://127.0.0.1:2137");
+	ws = new WebSocket("ws://192.168.43.124:2137");
 
 	// connection opened, refresh server list
 	ws.onopen = function (event) {

@@ -84,7 +84,7 @@ $(document).ready(function () {
 	$("#ready").click(sendReady);
 
 	// open a connection
-	ws = new WebSocket("ws://127.0.0.1:2137");
+	ws = new WebSocket("ws://192.168.43.124:2137");
 
 	// connection opened, refresh server list
 	ws.onopen = function (event) {
@@ -184,6 +184,7 @@ $(document).ready(function () {
 
 			case "score":
 				self.cards = [];
+				self.used = 0;
 				break;
 
 			default:
@@ -364,6 +365,7 @@ function updateBid(player, value) {
 }
 
 function displayStock(cards) {
+	clearTop();
 	$("#bottom_left").prop("src", path(cards[0]));
 	$("#bottom_middle").prop("src", path(cards[1]));
 	$("#bottom_right").prop("src", path(cards[2]));

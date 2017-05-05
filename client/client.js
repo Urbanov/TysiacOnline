@@ -84,7 +84,7 @@ $(document).ready(function () {
 	$("#ready").click(sendReady);
 
 	// open a connection
-	ws = new WebSocket("ws://192.168.43.124:2137");
+	ws = new WebSocket("ws://127.0.0.1:2137");
 
 	// connection opened, refresh server list
 	ws.onopen = function (event) {
@@ -138,6 +138,9 @@ $(document).ready(function () {
 				break;
 
 			case "bid":
+				if (self.cards.length != 10 && msg.data.value == 100) {
+					teaseStock();
+				}
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
@@ -568,4 +571,10 @@ function displayCard(prev) {
 	else {
 		$("#top_right").prop("src", path(card));
 	}
+}
+
+function teaseStock() {
+	$("#bottom_left").prop("src", "images/back.png");
+	$("#bottom_middle").prop("src", "images/back.png");
+	$("#bottom_right").prop("src", "images/back.png");
 }

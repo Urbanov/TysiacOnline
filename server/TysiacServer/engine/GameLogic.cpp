@@ -749,14 +749,13 @@ bool Room::runGame(const json & msg)
 				request.push_back(i);
 			}
 			if (temp_stage != stage_) {
-				stage_ = temp_stage;
-				score_.sumUpScore();
+				stage_ = score_.sumUpScore();
 				tmp = score_.createMessages(stage_);
 				for (const auto& i : tmp) {
 					request.push_back(i);
 				}
 			}
-			if (stage_ == ENDING && !score_.isFinished()) {
+			if (stage_ == BIDDING) {
 				dealer_.dealCards();
 				tmp = dealer_.createMessages();
 				for (const auto& i : tmp) {
@@ -768,7 +767,6 @@ bool Room::runGame(const json & msg)
 				for (const auto& i : tmp) {
 					request.push_back(i);
 				}
-				stage_ = BIDDING;
 			}
 		}
 		break;
@@ -1144,7 +1142,10 @@ int Game::compareCardsAndPassToWinner()
 	figures ordinary_figure = NOT_A_FIGURE;
 	suits current_suit = NONE;
 	current_starting_player_ = vec_[0].first;
-	int score = super_suit_;
+	int score = 0;
+	if (is_marriage_) {
+		score = super_suit_;
+	}
 	if (super_suit_ != NONE) {
 		for (auto& i : vec_) {
 			if (i.second.getSuit() == super_suit_) {
@@ -1208,7 +1209,7 @@ stage SumScore::sumUpScore()
 		if (i.getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
 			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
 				i.getScoreClass().addToTurnScore(-1 * (i.getScoreClass().getTurnScore() + i.getScoreClass().getClaim()));
-				i.getScoreClass().addScore(-1 * i.getScoreClass().getClaim());
+				i.getScoreClass().addScore((-1) * i.getScoreClass().getClaim());
 			}
 			else {
 				i.getScoreClass().addScore(i.getScoreClass().getClaim());
@@ -1217,9 +1218,10 @@ stage SumScore::sumUpScore()
 		else {
 			if (i.getScoreClass().getScore() < 800) {
 				if (i.getScoreClass().getTurnScore() % 10) {
-					double rounded = round(static_cast<double>(i.getScoreClass().getTurnScore()/10));
+					double rounded = static_cast<double>(i.getScoreClass().getTurnScore());
+					rounded /= 10;
 					i.getScoreClass().addToTurnScore((-1) * i.getScoreClass().getTurnScore());
-					i.getScoreClass().addToTurnScore(static_cast<int>(rounded * 10));
+					i.getScoreClass().addToTurnScore(round(static_cast<int>(rounded))*10);
 				}
 				i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
 			}

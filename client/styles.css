@@ -131,14 +131,6 @@ body {
 	left: 15px;
 }
 
-.rotate90 {
-	-webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    -ms-transform: rotate(90deg);
-    transform: rotate(90deg);
-}
-
 .opponent_cards {
 	text-align: center;
 	height: 385px;
@@ -148,4 +140,31 @@ body {
     display: inline-block;
     height: 100%;
     vertical-align: middle;
+}
+
+.top_table {
+	height: 200px;
+	width: 100%;
+	font-size: 0px;
+}
+
+.bottom_table {
+	height: 100%;
+	width: 100%;
+	text-align: center;
+	font-size: 0px;
+}
+
+.top_card {
+	width: 70px;
+	margin-left: 55px;
+	margin-right: 55px;
+	position: relative;
+	top: 90px;
+}
+
+.bottom_card {
+	width: 70px;
+	margin-left: 3px;
+	margin-right: 3px;
 }

@@ -127,13 +127,16 @@ $(document).ready(function () {
 				break;
 
 			case "deal":
+				clearBottom();
 				for (let card of msg.data) {
 					addCard(card);
-					drawCard(self.cards.length - 1);
+					//drawCard(self.cards.length - 1);
 				}
+				drawCards();
 				break;
 
 			case "bid":
+				clearBottom();
 				updateBid(msg.data.id, msg.data.value);
 				if (msg.player == self.id) {
 					showBids(msg.data.min, msg.data.max);
@@ -145,8 +148,9 @@ $(document).ready(function () {
 				if (msg.player == self.id) {
 					for (let card of msg.data) {
 						addCard(card);
-						drawCard(self.cards.length - 1);
+						//drawCard(self.cards.length - 1);
 					}
+					drawCards();
 					handleStock();
 				}
 				break;
@@ -353,8 +357,20 @@ function updateBid(player, value) {
 }
 
 function displayStock(cards) {
-	//TODO
-	//console.log(">>> stock: " + JSON.stringify(cards));
+	$("#bottom_left").prop("src", path(cards[0]));
+	$("#bottom_middle").prop("src", path(cards[1]));
+	$("#bottom_right").prop("src", path(cards[2]));
+}
+
+function clearBottom() {
+	$("#bottom_left").prop("src", "images/empty.png");
+	$("#bottom_middle").prop("src", "images/empty.png");
+	$("#bottom_right").prop("src", "images/empty.png");
+}
+
+function clearTop() {
+	$("#top_left").prop("src", "images/empty.png");
+	$("#top_right").prop("src", "images/empty.png");
 }
 
 function handleStock() {
@@ -392,10 +408,10 @@ function useCard(event) {
 		let msg = {
 			action: "deal",
 			data: [{
-				player: game[(self.index + 1) % 3].id, // next player
+				player: game[(self.index + 1) % 3].id, // left player
 				card: Number(first_card)
 			}, {
-				player: game[(self.index + 2) % 3].id, // previous player
+				player: game[(self.index + 2) % 3].id, // right player
 				card: Number(second_card)
 			}]
 		}
@@ -444,7 +460,7 @@ function removeCardImg(id) {
 	$("#card" + id).remove();
 }
 
-function drawCard(index) {
+/*function drawCard(index) {
 	var card = self.cards[index];
 	var elem = $("<img/>", {
 		id: "card" + index,
@@ -454,4 +470,64 @@ function drawCard(index) {
 	});
 	elem.click({ value: index }, useCard);
 	$("#cards").append(elem);
+}*/
+
+function path(card) {
+	return ("images/" + card.figure + "_" + card.suit + ".svg");
+}
+
+function spawnCardImg(card, index) {
+	var elem = $("<img/>", {
+		id: "card" + index,
+		src: path(card),
+		class: "card",
+		title: index
+	});
+	elem.click({ value: index }, useCard);
+	return elem;
+}
+
+function drawCards() {
+	var anchor = $("#cards");
+	var images = [];
+	anchor.html("");
+	
+	for (let i in self.cards) {
+		images.push(spawnCardImg(self.cards[i], i));
+	}
+
+	var order = function (suit) {
+		switch (suit) {
+			case Suits.HEARTS:
+				return 1;
+				break;
+
+			case Suits.DIAMONDS:
+				return 3;
+				break;
+
+			case Suits.CLUBS:
+				return 2;
+				break;
+
+			case Suits.SPADES:
+				return 4;
+				break;
+		}
+	}
+
+	images.sort(function (first, second) {
+		var first_card = self.cards[first.prop("id").charAt(4)];
+		var second_card = self.cards[second.prop("id").charAt(4)];
+
+		if (first_card.suit == second_card.suit) {
+			return second_card.figure - first_card.figure;
+		}
+
+		return order(first_card.suit) - order(second_card.suit);
+	});
+
+	for (let elem of images) {
+		anchor.append(elem);
+	}
 }

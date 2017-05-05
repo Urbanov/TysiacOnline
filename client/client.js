@@ -184,6 +184,7 @@ $(document).ready(function () {
 
 			case "score":
 				self.cards = [];
+				self.used = 0;
 				break;
 
 			default:
@@ -364,6 +365,7 @@ function updateBid(player, value) {
 }
 
 function displayStock(cards) {
+	clearTop();
 	$("#bottom_left").prop("src", path(cards[0]));
 	$("#bottom_middle").prop("src", path(cards[1]));
 	$("#bottom_right").prop("src", path(cards[2]));

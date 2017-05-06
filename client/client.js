@@ -44,7 +44,6 @@ class PlayerGameInfo extends Identity {
 		super(id, nick);
 		this.score = 0;
 		this.bid = 0;
-		this.ready = false;
 		this.cards = 0;
 	}
 }
@@ -58,13 +57,209 @@ var game = [];
 var counter = 0;
 
 $(document).ready(function () {
-
 	// create player object
 	self = new Player();
 	self.nick = "cenzotest"; //FIXME xD
 
-	console.log(self);
+	// initiate event listeners
+	initiateEventListeners();
 
+	// open a connection
+	ws = new WebSocket("ws://127.0.0.1:2137");
+
+	// refresh server list
+	ws.onopen = function (event) {
+		requestRefresh();
+	}
+
+	// handle messages from server
+	ws.onmessage = function (event) {
+		var msg = JSON.parse(event.data);
+
+		///////////////////////
+		console.log(">>> RECEIVED: " + JSON.stringify(msg));
+
+		switch (msg.action) {
+			case "welcome":
+				handleWelcome(msg);
+				break;
+
+			case "show":
+				handleShow(msg);
+				break;
+
+			case "add":
+				handleAdd(msg);
+				break;
+
+			case "new_player":
+				handleNewPlayer(msg);
+				break;
+
+			case "chat":
+				handleChat(msg);
+				break;
+
+			case "deal":
+				handleDeal(msg);
+				break;
+
+			case "bid":
+				handleBid(msg);
+				break;
+
+			case "stock":
+				handleStock(msg);
+				break;
+
+			case "start":
+				handleStart(msg);
+				break;
+
+			case "play":
+				handlePlay(msg);
+				break;
+
+			case "score":
+				handleScore(msg);
+				break;
+
+			default:
+				// ready is unused for now
+				//console.log(">>> UNUSED: " + JSON.stringify(msg));
+				break;
+		}
+	}
+});
+
+function handleWelcome(msg) {
+	self.id = msg.data;
+}
+
+function handleShow(msg) {
+	if (msg.hasOwnProperty("data")) {
+		loadRooms(msg.data);
+	}
+}
+
+function handleAdd(msg) {
+	if (!msg.error) {
+		$("#join_error").hide();
+		joinRoom(msg.data);
+	}
+	else {
+		$("#join_error").show();
+		requestRefresh();
+	}
+}
+
+function handleNewPlayer(msg) {
+	addMessage(msg.data.nick + " has entered the room");
+	addPlayer(msg.data);
+}
+
+function handleChat(msg) {
+	addMessage(msg.data);
+}
+
+function handleDeal(msg) {
+	for (let card of msg.data) {
+		addCard(card);
+	}
+
+	drawCards();
+
+	if (msg.data.length == 7) {
+		for (let player of game) {
+			player.cards = 7;
+		}
+		drawOpponentsCards();
+		return;
+	}
+
+	if (msg.data.length == 1) {
+		for (let player of game) {
+			if (player.bid == "pass") {
+				++player.cards;
+			}
+			else {
+				player.cards -= 2;
+			}
+		}
+		drawOpponentsCards();
+	}
+}
+
+function handleBid(msg) {
+	if (self.cards.length != 10 && msg.data.value == 100) {
+		teaseStock();
+	}
+	else if (self.cards.length == 10) {
+		for (let player of game) {
+			if (player.id != self.id) {
+				++player.cards;
+			}
+		}
+		drawOpponentsCards();
+	}
+	updateBid(msg.data.id, msg.data.value);
+	if (msg.player == self.id) {
+		showBids(msg.data.min, msg.data.max);
+	}
+}
+
+function handleStock(msg) {
+
+	for (player of game) {
+		if (player.id == msg.player) {
+			player.cards = 10;
+		}
+	}
+	drawOpponentsCards();
+
+	displayStock(msg.data);
+	if (msg.player == self.id) {
+		for (let card of msg.data) {
+			addCard(card);
+		}
+		drawCards();
+		$("#stock_modal").modal({ backdrop: false });
+		allAvailable();
+	}
+}
+
+function handleStart(msg) {
+	clearBottom();
+	for (let player of game) {
+		if (player.id == msg.player) {
+			updateBid(player.id, msg.data);
+		}
+		else {
+			updateBid(player.id, 0);
+		}
+	}
+	if (msg.player == self.id) {
+		console.log(">>> jedziesz");
+		allAvailable();
+	}
+}
+
+function handlePlay(msg) {
+	displayCard(msg.data.prev);
+	if (self.id == msg.player) {
+		console.log(">>> jedziesz");
+		someAvailable(msg.data.available);
+	}
+	// display card
+	//console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
+}
+
+function handleScore(msg) {
+	self.cards = [];
+	self.used = 0;
+}
+
+function initiateEventListeners() {
 	// initial event listeners
 	$("#create_room").click({ id: -1 }, requestRoom);
 	$("#refresh_list").click(requestRefresh);
@@ -82,121 +277,15 @@ $(document).ready(function () {
 	});
 	$("#login").click(login);
 	$("#ready").click(sendReady);
+}
 
-	// open a connection
-	ws = new WebSocket("ws://127.0.0.1:2137");
 
-	// connection opened, refresh server list
-	ws.onopen = function (event) {
-		requestRefresh();
-	}
 
-	// handle messages from server
-	ws.onmessage = function (event) {
-		var msg = JSON.parse(event.data);
 
-		///////////////////////
-		console.log(">>> RECEIVED: " + JSON.stringify(msg));
 
-		switch (msg.action) {
-			case "welcome":
-				self.id = msg.data;
-				break;
 
-			case "show":
-				if (msg.hasOwnProperty("data")) {
-					loadRooms(msg.data);
-				}
-				break;
 
-			case "add":
-				if (!msg.error) {
-					$("#join_error").hide();
-					joinRoom(msg.data);
-				}
-				else {
-					$("#join_error").show();
-					requestRefresh();	
-				}
-				break;
 
-			case "new_player":
-				addMessage(msg.data.nick + " has entered the room");
-				addPlayer(msg.data);
-				break;
-
-			case "chat":
-				addMessage(msg.data);
-				break;
-
-			case "deal":
-				for (let card of msg.data) {
-					addCard(card);
-					//drawCard(self.cards.length - 1);
-				}
-				drawCards();
-				break;
-
-			case "bid":
-				if (self.cards.length != 10 && msg.data.value == 100) {
-					teaseStock();
-				}
-				updateBid(msg.data.id, msg.data.value);
-				if (msg.player == self.id) {
-					showBids(msg.data.min, msg.data.max);
-				}
-				break;
-
-			case "stock":
-				displayStock(msg.data);
-				if (msg.player == self.id) {
-					for (let card of msg.data) {
-						addCard(card);
-						//drawCard(self.cards.length - 1);
-					}
-					drawCards();
-					handleStock();
-				}
-				break;
-
-			case "start":
-				clearBottom();
-				for (let player of game) {
-					if (player.id == msg.player) {
-						updateBid(player.id, msg.data);
-					}
-					else {
-						updateBid(player.id, 0);
-					}
-				}
-				if (msg.player == self.id) {
-					console.log(">>> jedziesz");
-					allAvailable();
-				}
-				break;
-
-			case "play":
-				displayCard(msg.data.prev);
-				if (self.id == msg.player) {
-					console.log(">>> jedziesz");
-					someAvailable(msg.data.available);
-				}
-				// display card
-				//console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
-				break;
-
-			case "score":
-				self.cards = [];
-				self.used = 0;
-				break;
-
-			default:
-				// ready is unused for now
-				//console.log(">>> UNUSED: " + JSON.stringify(msg));
-				break;
-		}
-	}
-});
 
 function login() {
 	var nick = $("#nickname").val();
@@ -358,10 +447,10 @@ function addCard(card) {
 	self.cards.push(new Card(card.figure, card.suit));
 }
 
-function updateBid(player, value) {
-	for (let i in game) {
-		if (game[i].id == player) {
-			game[i].bid = value != -1 ? value : "pass";
+function updateBid(target, value) {
+	for (let player of game) {
+		if (player.id == target) {
+			player.bid = value != -1 ? value : "pass";
 			break;
 		}
 	}
@@ -385,12 +474,6 @@ function clearTop() {
 	$("#top_right").prop("src", "images/empty.png");
 }
 
-function handleStock() {
-	$("#stock_modal").modal({ backdrop: false });
-	allAvailable();
-	//console.log(">>> HANDLE STOCK: tu bedzie printowanie kart i klikanie w nie");
-}
-
 function useCard(event) {
 	var id = Number(event.data.value);
 
@@ -406,6 +489,7 @@ function useCard(event) {
 	self.cards[id].used = true;
 	self.cards[id].available = false;
 	++self.used;
+	--game[self.index].cards;
 	removeCardImg(id);
 
 	// give away cards after getting stock
@@ -420,10 +504,10 @@ function useCard(event) {
 		let msg = {
 			action: "deal",
 			data: [{
-				player: getLeftPlayerId(), // left player
+				player: getLeftPlayer().id, // left player
 				card: Number(first_card)
 			}, {
-				player: getRightPlayerId(), // right player
+				player: getRightPlayer().id, // right player
 				card: Number(second_card)
 			}]
 		}
@@ -508,26 +592,6 @@ function drawCards() {
 		images.push(spawnCardImg(self.cards[i], i));
 	}
 
-	var order = function (suit) {
-		switch (suit) {
-			case Suits.HEARTS:
-				return 1;
-				break;
-
-			case Suits.DIAMONDS:
-				return 3;
-				break;
-
-			case Suits.CLUBS:
-				return 2;
-				break;
-
-			case Suits.SPADES:
-				return 4;
-				break;
-		}
-	}
-
 	images.sort(function (first, second) {
 		var first_card = self.cards[first.prop("id").charAt(4)];
 		var second_card = self.cards[second.prop("id").charAt(4)];
@@ -544,12 +608,12 @@ function drawCards() {
 	}
 }
 
-function getLeftPlayerId() {
-	return game[(self.index + 1) % 3].id;
+function getLeftPlayer() {
+	return game[(self.index + 1) % 3];
 }
 
-function getRightPlayerId() {
-	return game[(self.index + 2) % 3].id;
+function getRightPlayer() {
+	return game[(self.index + 2) % 3];
 }
 
 function displayCard(prev) {
@@ -564,13 +628,19 @@ function displayCard(prev) {
 
 	if (prev.player == self.id) {
 		$("#bottom_middle").prop("src", path(card));
+		return;
 	}
-	else if (prev.player == getLeftPlayerId()) {
+
+	var left_player = getLeftPlayer();
+	if (prev.player == left_player.id) {
 		$("#top_left").prop("src", path(card));
+		$("#opponent_left").prop("src", "images/opponent" + --left_player.cards + ".png");
+		return;
 	}
-	else {
-		$("#top_right").prop("src", path(card));
-	}
+
+	var right_player = getRightPlayer();
+	$("#top_right").prop("src", path(card));
+	$("#opponent_right").prop("src", "images/opponent" + --right_player.cards + ".png");
 }
 
 function teaseStock() {
@@ -578,4 +648,29 @@ function teaseStock() {
 	$("#bottom_left").prop("src", "images/back.png");
 	$("#bottom_middle").prop("src", "images/back.png");
 	$("#bottom_right").prop("src", "images/back.png");
+}
+
+function drawOpponentsCards() {
+	$("#opponent_left").prop("src", "images/opponent" + getLeftPlayer().cards + ".png");
+	$("#opponent_right").prop("src", "images/opponent" + getRightPlayer().cards + ".png");
+}
+
+function order(suit) {
+	switch (suit) {
+		case Suits.HEARTS:
+			return 1;
+			break;
+
+		case Suits.DIAMONDS:
+			return 3;
+			break;
+
+		case Suits.CLUBS:
+			return 2;
+			break;
+
+		case Suits.SPADES:
+			return 4;
+			break;
+	}
 }

@@ -10,6 +10,7 @@
 #include <string>
 #include <exception>
 #include <json.hpp>
+#include <cmath>
 
 class Adder;
 class Bidder;
@@ -40,6 +41,8 @@ const int TWO_CARDS = 2;
 const int MIN_RAISE = 10;
 const int MIN_VALUE = 120;
 const int POINTS_WINNING_CAP = 1000;
+const int NO_TAX_CAP = 800;
+
 enum iterators {
 	X = -1,
 	CURRENT = 0,
@@ -132,7 +135,10 @@ public:
 	bool setClaim(int, bool);
 	int getClaim() const;
 	void resetClaim();
+	int round(int) const;
+	void roundScore();
 private:
+
 	int score_;
 	int temp_score_;
 	int claim_;

@@ -301,6 +301,38 @@ void Score::resetClaim()
 	claim_ = 0;
 }
 
+void Score::roundScore()
+{
+	if (claim_ != -1) {
+		if (temp_score_ >= claim_) {
+			temp_score_ = claim_;
+		}
+		else {
+			temp_score_ = (-1)*claim_;
+		}
+	}
+	else if (score_ >= NO_TAX_CAP) {
+		temp_score_ = 0;
+	}
+	else {
+		temp_score_ = round(temp_score_);
+	}
+}
+
+int Score::round(int number) const
+{
+	int temp = number % 10;
+	if (temp) {
+		if (temp >=5) {
+			number += (10 - temp);
+		}
+		else {
+			number -= temp;
+		}
+	}
+	return number;
+}
+
 // </Class Score>
 
 
@@ -1206,30 +1238,8 @@ SumScore::~SumScore()
 stage SumScore::sumUpScore()
 {
 	for (auto& i : players_.getArray()) {
+		i.getScoreClass().roundScore();
 		i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
-	}
-	return BIDDING;
-	for (auto& i : players_.getArray()) {
-		if (i.getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
-			if (i.getScoreClass().getClaim() > i.getScoreClass().getTurnScore()) {
-				i.getScoreClass().addToTurnScore(-1 * (i.getScoreClass().getTurnScore() + i.getScoreClass().getClaim()));
-				i.getScoreClass().addScore((-1) * i.getScoreClass().getClaim());
-			}
-			else {
-				i.getScoreClass().addScore(i.getScoreClass().getClaim());
-			}
-		}
-		else {
-			if (i.getScoreClass().getScore() < 800) {
-				if (i.getScoreClass().getTurnScore() % 10) {
-					double rounded = static_cast<double>(i.getScoreClass().getTurnScore());
-					rounded /= 10;
-					i.getScoreClass().addToTurnScore((-1) * i.getScoreClass().getTurnScore());
-					i.getScoreClass().addToTurnScore(round(static_cast<int>(rounded))*10);
-				}
-				i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
-			}
-		}
 		if (i.getScoreClass().getScore() >= POINTS_WINNING_CAP) {
 			for (auto& i : players_.getArray()) {
 				i.setReady(false);

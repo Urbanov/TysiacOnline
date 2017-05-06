@@ -115,6 +115,33 @@ Player createPlayerWithAppropriateCards(suits type)
 	return player;
 }
 
+void addPlayers(PlayersCollection& players)
+{
+	std::string test = "test";
+	for (int i = 0; i < 3; ++i) {
+		players.addPlayer(i, test);
+	}
+}
+
+void addScoreToPlayers(PlayersCollection & players, std::vector<std::pair<int, int> > vec)
+{
+	addPlayers(players);
+	players.prepareGame();
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
+		players.getArray()[i].getScoreClass().setClaim(vec[i].first, false);
+		players.getArray()[i].getScoreClass().addToTurnScore(vec[i].second);
+	}
+}
+
+std::vector<int> getScoreOfPlayers(PlayersCollection & players)
+{
+	std::vector<int> vec;
+	for (auto & i : players.getArray()) {
+		vec.push_back(i.getScoreClass().getScore());
+	}
+	return vec;
+}
+
 BOOST_AUTO_TEST_SUITE(CardTests)
 BOOST_AUTO_TEST_CASE(CreateCardAndGetMemberValues)
 {
@@ -337,6 +364,24 @@ BOOST_AUTO_TEST_CASE(GetAndSetClaim)
 	BOOST_REQUIRE(getClaim() == 100);
 	resetClaim();
 	BOOST_CHECK(getClaim() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(CheckIfRoundMethodWorksProperly1)
+{
+	int x = 3;
+	BOOST_CHECK_EQUAL(round(x), 0);
+}
+
+BOOST_AUTO_TEST_CASE(CheckIfRoundMethodWorksProperly2)
+{
+	int x = 5;
+	BOOST_CHECK_EQUAL(round(x), 10);
+}
+
+BOOST_AUTO_TEST_CASE(CheckIfRoundMethodWorksProperly3)
+{
+	int x = 10;
+	BOOST_CHECK_EQUAL(round(x), 10);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -713,3 +758,16 @@ BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(SumTestClassTests)
+BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers)
+{
+	PlayersCollection players;
+	Deck deck;
+	SumScore score(deck, players);
+	addScoreToPlayers(players, { { 140, 120 },{ -1, 36 },{ -1, 14 } });
+	score.sumUpScore();
+	json expected = { -140, 40, 10 }, returned = getScoreOfPlayers(players);
+	BOOST_CHECK_EQUAL(expected, returned);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

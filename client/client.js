@@ -23,35 +23,32 @@ class Card {
 	}
 }
 
-class Identity {
+class Player {
 	constructor(id, nick) {
 		this.id = id;
 		this.nick = nick;
-	}
-}
-
-class Player extends Identity {
-	constructor(id, nick) {
-		super(id, nick);
 		this.cards = [];
 		this.used = 0;
 		this.index = undefined;
+		this.score = 0;
+		this.bid = 0;
+		this.n_cards = 0;
+		this.turn = false;
 	}
 }
 
-class PlayerGameInfo extends Identity {
-	constructor(id, nick) {
-		super(id, nick);
-		this.score = 0;
-		this.bid = 0;
-		this.cards = 0;
+class Game {
+	constructor() {
+		this.players = [];
+		this.timeouts = [];
+		this.counter = 0;
 	}
 }
 
 // global variables
 var ws;
 var self;
-var game = [];
+var game;
 
 //FIXME
 var counter = 0;
@@ -170,20 +167,20 @@ function handleDeal(msg) {
 	drawCards();
 
 	if (msg.data.length == 7) {
-		for (let player of game) {
-			player.cards = 7;
+		for (let player of game.players) {
+			player.n_cards = 7;
 		}
 		drawOpponentsCards();
 		return;
 	}
 
 	if (msg.data.length == 1) {
-		for (let player of game) {
+		for (let player of game.players) {
 			if (player.bid == "pass") {
-				++player.cards;
+				++player.n_cards;
 			}
 			else {
-				player.cards -= 2;
+				player.n_cards -= 2;
 			}
 		}
 		drawOpponentsCards();
@@ -195,9 +192,9 @@ function handleBid(msg) {
 		teaseStock();
 	}
 	else if (self.cards.length == 10) {
-		for (let player of game) {
+		for (let player of game.players) {
 			if (player.id != self.id) {
-				++player.cards;
+				++player.n_cards;
 			}
 		}
 		drawOpponentsCards();
@@ -210,9 +207,9 @@ function handleBid(msg) {
 
 function handleStock(msg) {
 
-	for (player of game) {
+	for (player of game.players) {
 		if (player.id == msg.player) {
-			player.cards = 10;
+			player.n_cards = 10;
 		}
 	}
 	drawOpponentsCards();
@@ -230,7 +227,7 @@ function handleStock(msg) {
 
 function handleStart(msg) {
 	clearBottom();
-	for (let player of game) {
+	for (let player of game.players) {
 		if (player.id == msg.player) {
 			updateBid(player.id, msg.data);
 		}
@@ -245,13 +242,22 @@ function handleStart(msg) {
 }
 
 function handlePlay(msg) {
+	++game.counter;
+
+	if (game.counter == 1) {
+		clearTimeouts();
+		clearBottom();
+		clearTop();
+	}
+	else if (game.counter == 3) {
+		endRotation();
+	}
+
 	displayCard(msg.data.prev);
 	if (self.id == msg.player) {
 		console.log(">>> jedziesz");
 		someAvailable(msg.data.available);
 	}
-	// display card
-	//console.log(">>> DISPLAY: " + JSON.stringify(msg.data.prev));
 }
 
 function handleScore(msg) {
@@ -338,19 +344,25 @@ function requestRoom(event) {
 }
 
 function joinRoom(data) {
+	game = new Game();
 	$("#lobby").hide();
 	$("#game_panel").show();
 	for (let player of data) {
 		addPlayer(player);
 	}
-	self.index = game.length - 1;
+	self.index = game.players.length - 1;
 }
 
 function addPlayer(player) {
-	game.push(new PlayerGameInfo(player.id, player.nick));
+	if (player.id == self.id) {
+		game.players.push(self);
+	}
+	else {
+		game.players.push(new Player(player.id, player.nick));
+	}
 	
 	// room is full
-	if (game.length == 3) {
+	if (game.players.length == 3) {
 		askReady();
 	}
 }
@@ -448,7 +460,7 @@ function addCard(card) {
 }
 
 function updateBid(target, value) {
-	for (let player of game) {
+	for (let player of game.players) {
 		if (player.id == target) {
 			player.bid = value != -1 ? value : "pass";
 			break;
@@ -489,7 +501,7 @@ function useCard(event) {
 	self.cards[id].used = true;
 	self.cards[id].available = false;
 	++self.used;
-	--game[self.index].cards;
+	--self.n_cards;
 	removeCardImg(id);
 
 	// give away cards after getting stock
@@ -609,21 +621,14 @@ function drawCards() {
 }
 
 function getLeftPlayer() {
-	return game[(self.index + 1) % 3];
+	return game.players[(self.index + 1) % 3];
 }
 
 function getRightPlayer() {
-	return game[(self.index + 2) % 3];
+	return game.players[(self.index + 2) % 3];
 }
 
 function displayCard(prev) {
-	if (counter == 3) {
-		counter = 0;
-		clearTop();
-		clearBottom();
-	}
-	++counter;
-
 	var card = new Card(prev.figure, prev.suit);
 
 	if (prev.player == self.id) {
@@ -634,16 +639,29 @@ function displayCard(prev) {
 	var left_player = getLeftPlayer();
 	if (prev.player == left_player.id) {
 		$("#top_left").prop("src", path(card));
-		$("#opponent_left").prop("src", "images/opponent" + --left_player.cards + ".png");
+		$("#opponent_left").prop("src", "images/opponent" + --left_player.n_cards + ".png");
 		return;
 	}
 
 	var right_player = getRightPlayer();
 	$("#top_right").prop("src", path(card));
-	$("#opponent_right").prop("src", "images/opponent" + --right_player.cards + ".png");
+	$("#opponent_right").prop("src", "images/opponent" + --right_player.n_cards + ".png");
+}
+
+function endRotation() {
+	game.counter = 0;
+	game.timeouts.push(setTimeout(clearTop, 2000));
+	game.timeouts.push(setTimeout(clearBottom, 2000));
+}
+
+function clearTimeouts() {
+	for (let timeout of game.timeouts) {
+		clearTimeout(timeout);
+	}
 }
 
 function teaseStock() {
+	clearTimeouts();
 	clearTop();
 	$("#bottom_left").prop("src", "images/back.png");
 	$("#bottom_middle").prop("src", "images/back.png");
@@ -651,8 +669,8 @@ function teaseStock() {
 }
 
 function drawOpponentsCards() {
-	$("#opponent_left").prop("src", "images/opponent" + getLeftPlayer().cards + ".png");
-	$("#opponent_right").prop("src", "images/opponent" + getRightPlayer().cards + ".png");
+	$("#opponent_left").prop("src", "images/opponent" + getLeftPlayer().n_cards + ".png");
+	$("#opponent_right").prop("src", "images/opponent" + getRightPlayer().n_cards + ".png");
 }
 
 function order(suit) {

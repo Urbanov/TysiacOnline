@@ -94,11 +94,13 @@ public:
 	Card(Card&&);
 	Card operator=(const Card&);
 	Card operator=(Card&&);
+	bool operator==(const Card& other);
 	~Card();
 	bool getIsUsed() const;
 	void setIsUsed(bool) const;
 	const figures getFigure() const;
 	const suits getSuit() const;
+	const Card & isBigger(const Card & other, suits suit);
 private:
 	mutable bool is_used_;
 	figures figure_;
@@ -116,9 +118,9 @@ public:
 	bool doesHavePair(suits);
 	std::vector<int> getAllValidCards(std::vector<Card> &, suits);
 	std::size_t getMaxValue(bool);
+	bool isHigher(const Card &, const Card, suits);
 private:
 	bool findCard(figures figure, suits suit) const;
-	bool isHigher(const Card &, const Card, suits);
 	std::vector<Card> deck_;
 	std::size_t max_value_;
 };
@@ -246,8 +248,8 @@ public:
 	const Card & playTurn(int, std::size_t);
 	stage manageTurn(int, int);
 	request_type createMessages(const stage stage_);
-	int setSuperiorSuit();
 	int compareCardsAndPassToWinner();
+	void setSuperiorSuit();
 	void setStartingPlayer(int);
 	void reset();
 private:

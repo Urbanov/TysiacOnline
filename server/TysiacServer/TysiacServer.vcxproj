@@ -245,7 +245,6 @@
     <ClInclude Include="tests\TestFeatures.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\client\client.html" />
     <None Include="..\..\client\client.js" />
     <None Include="..\..\client\styles.css" />
   </ItemGroup>

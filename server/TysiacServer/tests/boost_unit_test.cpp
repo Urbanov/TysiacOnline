@@ -118,7 +118,7 @@ Player createPlayerWithAppropriateCards(suits type)
 void addPlayers(PlayersCollection& players)
 {
 	std::string test = "test";
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
 		players.addPlayer(i, test);
 	}
 }
@@ -140,6 +140,13 @@ std::vector<int> getScoreOfPlayers(PlayersCollection & players)
 		vec.push_back(i.getScoreClass().getScore());
 	}
 	return vec;
+}
+
+void addCards(Player & player, std::vector<Card> vec)
+{
+	for (const auto & i : vec) {
+		player.getPlayerDeck().addCard(i);
+	}
 }
 
 BOOST_AUTO_TEST_SUITE(CardTests)
@@ -435,16 +442,10 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(DealerTest)
 BOOST_AUTO_TEST_CASE(DealerGiveCardToPeer)
 {
-	GameManager man;
 	Deck deck;
 	PlayersCollection players;
-	std::string s = "test";
-	Player p(0, s);
-	PRoom croupier = std::make_shared<Room>(0, man);
 	Dealer d(deck, players);
-	players.addPlayer(1, s);
-	players.addPlayer(3, s);
-	players.addPlayer(4, s);
+	addPlayers(players);
 	players.prepareGame();
 	players.setPlayer(HIGHEST, players.getArray()[0].getPlayerId());
 	BOOST_CHECK_THROW(d.giveCardToPeer(2, 0), std::out_of_range);
@@ -454,14 +455,7 @@ BOOST_AUTO_TEST_CASE(Return120MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, SPADES),
-		c4(ACE, SPADES);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
+	addCards(p, { { QUEEN, HEARTS }, { QUEEN, DIAMONDS}, {KING, SPADES}, { QUEEN, CLUBS } });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 120);
 }
 
@@ -469,14 +463,7 @@ BOOST_AUTO_TEST_CASE(Return160MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, SPADES),
-		c4(QUEEN, SPADES);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
+	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ QUEEN, SPADES } });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 160);
 }
 
@@ -484,18 +471,8 @@ BOOST_AUTO_TEST_CASE(Return180MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, SPADES),
-		c4(ACE, SPADES),
-		c5(KING, CLUBS),
-		c6(QUEEN, CLUBS);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
-	p.getPlayerDeck().addCard(c5);
-	p.getPlayerDeck().addCard(c6);
+	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
+	{ KING, CLUBS },{ QUEEN, CLUBS} });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 180);
 }
 
@@ -503,18 +480,8 @@ BOOST_AUTO_TEST_CASE(Return200MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, SPADES),
-		c4(ACE, SPADES),
-		c5(KING, CLUBS),
-		c6(KING, DIAMONDS);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
-	p.getPlayerDeck().addCard(c5);
-	p.getPlayerDeck().addCard(c6);
+	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
+	{ KING, CLUBS },{ KING, DIAMONDS } });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 200);
 }
 
@@ -522,18 +489,8 @@ BOOST_AUTO_TEST_CASE(Return220MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, SPADES),
-		c4(ACE, SPADES),
-		c5(KING, HEARTS),
-		c6(QUEEN, CLUBS);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
-	p.getPlayerDeck().addCard(c5);
-	p.getPlayerDeck().addCard(c6);
+	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
+	{ KING, HEARTS },{ QUEEN, CLUBS } });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 220);
 }
 
@@ -541,18 +498,8 @@ BOOST_AUTO_TEST_CASE(Return300MaxValue)
 {
 	std::string test = "test";
 	Player p(0, test);
-	Card c1(QUEEN, HEARTS),
-		c2(QUEEN, DIAMONDS),
-		c3(KING, DIAMONDS),
-		c4(ACE, SPADES),
-		c5(KING, HEARTS),
-		c6(QUEEN, CLUBS);
-	p.getPlayerDeck().addCard(c1);
-	p.getPlayerDeck().addCard(c2);
-	p.getPlayerDeck().addCard(c3);
-	p.getPlayerDeck().addCard(c4);
-	p.getPlayerDeck().addCard(c5);
-	p.getPlayerDeck().addCard(c6);
+	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, DIAMONDS },{ ACE, SPADES },
+	{ KING, HEARTS },{ QUEEN, CLUBS } });
 	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 300);
 }
 
@@ -561,52 +508,32 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(BidderTest)
 BOOST_AUTO_TEST_CASE(IfBidsBecomesHighestBidder)
 {
-	GameManager man;
 	Deck deck;
 	PlayersCollection players;
-	std::string s = "test";
-	PRoom croupier = std::make_shared<Room>(0, man);
-	Dealer d(deck, players);
 	Bidder bid(deck, players);
-	players.addPlayer(1, s);
-	players.addPlayer(3, s);
-	players.addPlayer(4, s);
+	addPlayers(players);
 	players.prepareGame();
-	bid.bid(3, 120);
-	BOOST_CHECK_EQUAL(3, players.getPlayer(HIGHEST).getPlayerId());
+	bid.bid(1, 120);
+	BOOST_CHECK_EQUAL(1, players.getPlayer(HIGHEST).getPlayerId());
 	BOOST_CHECK_EQUAL(players.getPlayer(HIGHEST).getScoreClass().getClaim(),120);
 }
 BOOST_AUTO_TEST_CASE(ThrowIfBidsNotAtHisTurn)
 {
-	GameManager man;
 	Deck deck;
 	PlayersCollection players;
-	std::string s = "test";
-	Player p(0, s);
-	PRoom croupier = std::make_shared<Room>(0, man);
-	Dealer d(deck, players);
 	Bidder bid(deck, players);
-	players.addPlayer(1, s);
-	players.addPlayer(3, s);
-	players.addPlayer(4, s);
+	addPlayers(players);
 	players.prepareGame();
 	players.getNextPlayer(CURRENT);
-	BOOST_CHECK_THROW(bid.bid(1, 110), std::logic_error);
+	BOOST_CHECK_THROW(bid.bid(0, 110), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(ThrowIfBidsLessThanActual)
 {
-	GameManager man;
 	Deck deck;
 	PlayersCollection players;
-	std::string s = "test";
-	Player p(0, s);
-	PRoom croupier = std::make_shared<Room>(0, man);
-	Dealer d(deck, players);
 	Bidder bid(deck, players);
-	players.addPlayer(1, s);
-	players.addPlayer(3, s);
-	players.addPlayer(4, s);
+	addPlayers(players);
 	players.prepareGame();
 	players.getNextPlayer(CURRENT);
 	BOOST_CHECK_THROW(bid.bid(3, 90), std::logic_error);
@@ -759,7 +686,7 @@ BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(SumTestClassTests)
-BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers)
+BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers1)
 {
 	PlayersCollection players;
 	Deck deck;
@@ -767,6 +694,17 @@ BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers)
 	addScoreToPlayers(players, { { 140, 120 },{ -1, 36 },{ -1, 14 } });
 	score.sumUpScore();
 	json expected = { -140, 40, 10 }, returned = getScoreOfPlayers(players);
+	BOOST_CHECK_EQUAL(expected, returned);
+}
+
+BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers2)
+{
+	PlayersCollection players;
+	Deck deck;
+	SumScore score(deck, players);
+	addScoreToPlayers(players, { { 140, 144 },{ -1, 36 },{ -1, 14 } });
+	score.sumUpScore();
+	json expected = { 140, 40, 10 }, returned = getScoreOfPlayers(players);
 	BOOST_CHECK_EQUAL(expected, returned);
 }
 

@@ -52,9 +52,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\client\client.html">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\client\client.js">
       <Filter>Resource Files</Filter>
     </None>

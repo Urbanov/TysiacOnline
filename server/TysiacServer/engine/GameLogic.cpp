@@ -36,6 +36,11 @@ Card Card::operator=(Card && card)
 	return *this;
 }
 
+bool Card::operator==(const Card & other)
+{
+	return (suit_ == other.suit_ && figure_ == other.figure_);
+}
+
 Card::~Card() {}
 
 bool Card::getIsUsed() const
@@ -56,6 +61,22 @@ const figures Card::getFigure() const
 const suits Card::getSuit() const
 {
 	return suit_;
+}
+
+const Card & Card::isBigger(const Card & other, suits suit)
+{
+	if (suit_ == other.suit_) {
+		if (figure_ > other.figure_) {
+			return *this;
+		}
+		else {
+			return other;
+		}
+	}
+	else if (other.suit_ == suit) {
+		return other;
+	}
+	return *this;
 }
 
 // </Class Card>
@@ -1085,16 +1106,7 @@ stage Game::manageTurn(int player, int card)
 		throw std::logic_error("Not player's turn to play a card");
 	}
 	vec_.emplace_back(std::make_pair(player, playTurn(player, card) ));
-	if (vec_.size() == 1 && vec_[0].second.getFigure() == QUEEN 
-		|| vec_[0].second.getFigure() == KING) {
-			is_marriage_ = players_.getPlayer(CURRENT).getPlayerDeck().doesHavePair(vec_[0].second.getSuit());
-			if (is_marriage_) {
-				super_suit_ = vec_[0].second.getSuit();
-			}
-	}
-	else {
-		is_marriage_ = false;
-	}
+	setSuperiorSuit();
 	players_.getNextPlayer(CURRENT);
 	if (vec_.size() == MAX_PLAYERS) {
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
@@ -1146,67 +1158,31 @@ request_type Game::createMessages(const stage stage_)
 	return request;
 }
 
-int Game::setSuperiorSuit()
+void Game::setSuperiorSuit()
 {
 	int score = 0;
-	if (vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN) {
-		if (players_.getPlayer(X, current_starting_player_).getPlayerDeck().doesHavePair(
+	if (vec_.size() == 1 && vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN) {
+		if (players_.getPlayer(X, vec_[0].first).getPlayerDeck().doesHavePair(
 			vec_[0].second.getSuit())) {
 			super_suit_ = vec_[0].second.getSuit();
-			switch (super_suit_) {
-			case SPADES: score = SPADES; break;
-			case CLUBS: score = CLUBS; break;
-			case DIAMONDS: score = DIAMONDS; break;
-			case HEARTS: score = HEARTS; break;
-			default: break;
-			}
+			players_.getPlayer(X, vec_[0].first).getScoreClass().addToTurnScore(super_suit_);
+			is_marriage_ = true;
 		}
 	}
-	if (score != 0) {
-		is_marriage_ = true;
-	}
-	return score;
+	is_marriage_ = false;
 }
 
 int Game::compareCardsAndPassToWinner()
 {
-	figures superior_suit_figure = NOT_A_FIGURE;
-	figures ordinary_figure = NOT_A_FIGURE;
-	suits current_suit = NONE;
-	current_starting_player_ = vec_[0].first;
-	int score = 0;
-	if (is_marriage_) {
-		score = super_suit_;
-	}
-	if (super_suit_ != NONE) {
-		for (auto& i : vec_) {
-			if (i.second.getSuit() == super_suit_) {
-				if (superior_suit_figure < i.second.getFigure()) {
-					superior_suit_figure = i.second.getFigure();
-					current_starting_player_ = i.first;
-				}
-			}
-		}
-	}
-	if (superior_suit_figure == NOT_A_FIGURE) {
-		for (auto& i : vec_) {
-			if (i.first == current_starting_player_) {
-				superior_suit_figure = i.second.getFigure();
-				current_suit = i.second.getSuit();
-			}
-		}
-		for (auto& i : vec_) {
-			if (i.second.getSuit() == current_suit && 
-				i.second.getFigure() > superior_suit_figure) {
-				superior_suit_figure = i.second.getFigure();
-				current_starting_player_ = i.first;
-			}
+	Card tmp = vec_[0].second.isBigger(vec_[1].second.isBigger(vec_[2].second, super_suit_), super_suit_);
+	for (const auto& i : vec_) {
+		if (tmp == i.second) {
+			current_starting_player_ = i.first;
 		}
 	}
 	for (auto& i : vec_) {
-		score += i.second.getFigure();
+		players_.getPlayer(X, current_starting_player_).getScoreClass().addToTurnScore(i.second.getFigure());
 	}
-	players_.getPlayer(X, current_starting_player_).getScoreClass().addToTurnScore(score);
 	return current_starting_player_;
 }
 

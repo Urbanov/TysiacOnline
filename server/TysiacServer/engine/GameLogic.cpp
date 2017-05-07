@@ -645,9 +645,7 @@ bool Room::runGame(const json & msg)
 	temp_stage = employees_[parse(msg["action"])]->changeModel(msg, stage_);
 	request = employees_[parse(msg["action"])]->createMessages(msg, temp_stage);
 	stage_ = temp_stage;
-	std::cout << " NO ELKO " << std::endl;
 	if (temp_stage == SUMMING_UP) {
-		std::cout << " SIEMANECZKO" << std::endl;
 		employees_[BID]->changeModel(msg, SUMMING_UP);
 		tmp = employees_[BID]->createMessages(msg, SUMMING_UP);
 		for (const auto & i : tmp) {
@@ -1282,7 +1280,6 @@ stage Game::manageTurn(int player, int card)
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
-			std::cout << " NO ELKO XDXDXD" << std::endl;
 			return SUMMING_UP;
 		}
 	}
@@ -1458,30 +1455,6 @@ request_type SumScore::createMessage(stage stages_)
 }
 
 // </Class SumScore>
-
-
-
-// <Class RoomManager>
-//RoomManager::RoomManager(std::vector<PRoom> & active_games)
-//	: active_games_(active_games)
-//{}
-//
-//
-//RoomManager::~RoomManager()
-//{}
-//
-//stage RoomManager::changeModel(const json & msg, const stage stage_)
-//{
-//	
-//}
-//
-//req RoomManager::addPlayer(const json & msg)
-//{
-//	return req();
-//}
-
-
-// </Class RoomManager>
 
 
 

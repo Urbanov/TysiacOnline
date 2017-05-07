@@ -228,17 +228,6 @@ public:
 	virtual request_type createMessages(const json & msg, const stage stage_);
 };
 
-//class RoomManager : public Controller {
-//public:
-//	RoomManager(std::vector<PRoom> &);
-//	~RoomManager();
-//	virtual stage changeModel(const json& msg, const stage stage_);
-//	virtual request_type createMessages(const json & msg, const stage stage_);
-//private:
-//	std::vector<PRoom> & active_games_;
-//};
-
-
 class Adder : public Controller {
 public:
 	Adder(Deck &, PlayersCollection &);

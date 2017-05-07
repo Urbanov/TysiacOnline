@@ -40,8 +40,9 @@ class Player {
 class Game {
 	constructor() {
 		this.players = [];
-		this.timeouts = [];
+		this.timeout;
 		this.counter = 0;
+		this.round = 0;
 	}
 }
 
@@ -49,9 +50,6 @@ class Game {
 var ws;
 var self;
 var game;
-
-//FIXME
-var counter = 0;
 
 $(document).ready(function () {
 	// create player object
@@ -121,9 +119,16 @@ $(document).ready(function () {
 				handleScore(msg);
 				break;
 
+			case "end":
+				handleEnd(msg);
+				break;
+
+			case "leave":
+				handleLeave(msg);
+				break;
+
 			default:
-				// ready is unused for now
-				//console.log(">>> UNUSED: " + JSON.stringify(msg));
+				console.log(">>> UNUSED: " + JSON.stringify(msg));
 				break;
 		}
 	}
@@ -160,21 +165,25 @@ function handleChat(msg) {
 }
 
 function handleDeal(msg) {
+	// check if game has just started
+	if (game.round == 0) {
+		startFirstRound();
+	}
+
+	// get cards from server and draw them
 	for (let card of msg.data) {
 		addCard(card);
 	}
-
 	drawCards();
 
+	// change number of opponents' cards and draw them
 	if (msg.data.length == 7) {
 		for (let player of game.players) {
 			player.n_cards = 7;
 		}
 		drawOpponentsCards();
-		return;
 	}
-
-	if (msg.data.length == 1) {
+	else if (msg.data.length == 1) {
 		for (let player of game.players) {
 			if (player.bid == "pass") {
 				++player.n_cards;
@@ -188,9 +197,12 @@ function handleDeal(msg) {
 }
 
 function handleBid(msg) {
+	// first bid
 	if (self.cards.length != 10 && msg.data.value == 100) {
 		teaseStock();
 	}
+
+	// final bid
 	else if (self.cards.length == 10) {
 		for (let player of game.players) {
 			if (player.id != self.id) {
@@ -199,19 +211,18 @@ function handleBid(msg) {
 		}
 		drawOpponentsCards();
 	}
+
+	setTurn(msg.player);
 	updateBid(msg.data.id, msg.data.value);
+	drawBids();
 	if (msg.player == self.id) {
 		showBids(msg.data.min, msg.data.max);
 	}
 }
 
 function handleStock(msg) {
-
-	for (player of game.players) {
-		if (player.id == msg.player) {
-			player.n_cards = 10;
-		}
-	}
+	setTurn(msg.player);
+	getPlayerWithId(msg.player).n_cards = 10;
 	drawOpponentsCards();
 
 	displayStock(msg.data);
@@ -235,6 +246,7 @@ function handleStart(msg) {
 			updateBid(player.id, 0);
 		}
 	}
+	drawBids();
 	if (msg.player == self.id) {
 		console.log(">>> jedziesz");
 		allAvailable();
@@ -242,15 +254,11 @@ function handleStart(msg) {
 }
 
 function handlePlay(msg) {
-	++game.counter;
+	setTurn(msg.player);
+	rotate();
 
-	if (game.counter == 1) {
-		clearTimeouts();
-		clearBottom();
-		clearTop();
-	}
-	else if (game.counter == 3) {
-		endRotation();
+	if (msg.data.prev.marriage) {
+		drawTrump(msg.data.prev.suit);
 	}
 
 	displayCard(msg.data.prev);
@@ -261,8 +269,30 @@ function handlePlay(msg) {
 }
 
 function handleScore(msg) {
-	self.cards = [];
-	self.used = 0;
+	for (let data of msg.data) {
+		updateScore(data.player, data.score);
+	}
+	drawScores();
+	newRound();
+}
+
+function handleEnd(msg) {
+	for (let player of game.players) {
+		player.score = 0;
+	}
+	var text = getPlayerWithId(msg.player) + " wins the game with " + msg.data + " points!";
+	$("#win_modal .modal-title").text(text);
+	$("#win_modal").modal({ backdrop: false });
+}
+
+function handleLeave(msg) {
+	for (let i in game.players) {
+		if (game.players[i].id == msg.data) {
+			game.players.splice(i, 1);
+			break;
+		}
+	}
+	self.index = (game.players[0].id == self.id ? 0 : 1);
 }
 
 function initiateEventListeners() {
@@ -283,12 +313,12 @@ function initiateEventListeners() {
 	});
 	$("#login").click(login);
 	$("#ready").click(sendReady);
+	$("#win_modal .btn").click(function () {
+		$("#win_modal").modal("hide");
+		clearTable();
+		checkReady();
+	});
 }
-
-
-
-
-
 
 
 
@@ -305,25 +335,34 @@ function login() {
 }
 
 function leaveRoom() {
-	alert("xD");
-	$("#lobby").show();
+	var msg = {
+		action: "leave"
+	};
+	sendToServer(msg);
+	game = null;
+	requestRefresh();
 	$("#game_panel").hide();
+	$("#lobby").show();
 }
 
 function sendMessage() {
-	var text = self.nick + ":\xa0" + $("#text_area").val();
-	$("#text_area").val("");
+	var anchor = $("#text_area");
+	if (anchor.val() == "") {
+		return;
+	}
+	var text = self.nick + ": " + anchor.val();
+	anchor.val("");
 	addMessage(text);
 	var msg = {
 		action: "chat",
 		data: text
-	}
+	};
 	sendToServer(msg);
 }
 
 function addMessage(msg) {
-	$('#chatbox').append($("<div>", {
-		text: msg
+	$("#chatbox").append($("<div/>", {
+		text: "\xBB " + msg
 	}));
 }
 
@@ -360,16 +399,11 @@ function addPlayer(player) {
 	else {
 		game.players.push(new Player(player.id, player.nick));
 	}
-	
-	// room is full
-	if (game.players.length == 3) {
-		askReady();
-	}
+	checkReady();
 }
 
 function showBids(min, max) {
 	$("#bids_modal").modal({ backdrop: false });
-	$(".modal-backdrop").appendTo(".game");
 
 	// normal bid (includes pass button)
 	if (self.cards.length != 10) {
@@ -420,7 +454,7 @@ function sendBid(event) {
 	var msg = {
 		action: "bid",
 		data: event.data.value
-	}
+	};
 	sendToServer(msg);
 }
 
@@ -444,7 +478,6 @@ function loadRooms(data) {
 
 function askReady() {
 	$("#ready_modal").modal({ backdrop: false });
-	$(".modal-backdrop").appendTo(".game");
 }
 
 function sendReady() {
@@ -466,6 +499,10 @@ function updateBid(target, value) {
 			break;
 		}
 	}
+}
+
+function updateScore(target, value) {
+	getPlayerWithId(target).score += value;
 }
 
 function displayStock(cards) {
@@ -506,38 +543,45 @@ function useCard(event) {
 
 	// give away cards after getting stock
 	if (self.cards.length == 10 && self.used == 2) {
-		noneAvailable();
-		var second_card = id;
-		for (var first_card in self.cards) {
-			if (self.cards[first_card].used && first_card != second_card) {
-				break;
-			}
-		}
-		let msg = {
-			action: "deal",
-			data: [{
-				player: getLeftPlayer().id, // left player
-				card: Number(first_card)
-			}, {
-				player: getRightPlayer().id, // right player
-				card: Number(second_card)
-			}]
-		}
-		console.log(">>> give cards: " + JSON.stringify(msg));
-		sendToServer(msg);
+		giveAwayCards(id);
 		return;
 	}
 
 	// play card
 	if (self.cards.length == 8 || self.used > 2) {
-		noneAvailable();
-		var msg = {
-			action: "play",
-			data: id
-		}
-		console.log(">>> send play: " + JSON.stringify(msg));
-		sendToServer(msg);
+		playCard(id);
 	}
+}
+
+function giveAwayCards(second_card) {
+	noneAvailable();
+	for (var first_card in self.cards) {
+		if (self.cards[first_card].used && first_card != second_card) {
+			break;
+		}
+	}
+	let msg = {
+		action: "deal",
+		data: [{
+			player: getLeftPlayer().id, // left player
+			card: Number(first_card)
+		}, {
+			player: getRightPlayer().id, // right player
+			card: Number(second_card)
+		}]
+	};
+	console.log(">>> give cards: " + JSON.stringify(msg));
+	sendToServer(msg);
+}
+
+function playCard(id) {
+	noneAvailable();
+	var msg = {
+		action: "play",
+		data: id
+	};
+	console.log(">>> send play: " + JSON.stringify(msg));
+	sendToServer(msg);
 }
 
 function noneAvailable() {
@@ -567,18 +611,6 @@ function sendToServer(msg) {
 function removeCardImg(id) {
 	$("#card" + id).remove();
 }
-
-/*function drawCard(index) {
-	var card = self.cards[index];
-	var elem = $("<img/>", {
-		id: "card" + index,
-		src: "images/" + card.figure + "_" + card.suit + ".svg",
-		class: "card",
-		title: index
-	});
-	elem.click({ value: index }, useCard);
-	$("#cards").append(elem);
-}*/
 
 function path(card) {
 	return ("images/" + card.figure + "_" + card.suit + ".svg");
@@ -636,32 +668,27 @@ function displayCard(prev) {
 		return;
 	}
 
-	var left_player = getLeftPlayer();
-	if (prev.player == left_player.id) {
+	if (prev.player == getLeftPlayer().id) {
 		$("#top_left").prop("src", path(card));
-		$("#opponent_left").prop("src", "images/opponent" + --left_player.n_cards + ".png");
+		$("#opponent_left").prop("src", "images/opponent" + --getLeftPlayer().n_cards + ".png");
 		return;
 	}
 
-	var right_player = getRightPlayer();
 	$("#top_right").prop("src", path(card));
-	$("#opponent_right").prop("src", "images/opponent" + --right_player.n_cards + ".png");
+	$("#opponent_right").prop("src", "images/opponent" + --getRightPlayer().n_cards + ".png");
 }
 
-function endRotation() {
+function newRotation() {
 	game.counter = 0;
-	game.timeouts.push(setTimeout(clearTop, 2000));
-	game.timeouts.push(setTimeout(clearBottom, 2000));
-}
-
-function clearTimeouts() {
-	for (let timeout of game.timeouts) {
-		clearTimeout(timeout);
-	}
+	game.timeout = setTimeout(function () {
+		clearTop();
+		clearBottom();
+	}, 2000);
 }
 
 function teaseStock() {
-	clearTimeouts();
+	clearTimeout(game.timeout);
+	drawTrump(0);
 	clearTop();
 	$("#bottom_left").prop("src", "images/back.png");
 	$("#bottom_middle").prop("src", "images/back.png");
@@ -691,4 +718,132 @@ function order(suit) {
 			return 4;
 			break;
 	}
+}
+
+function setTurn(id) {
+	console.log(">>> SETTURN: " + id);
+	for (let player of game.players) {
+		if (player.id == id) {
+			
+			player.turn = true;
+		}
+		else {
+			player.turn = false;
+		}
+	}
+	drawTurns();
+}
+
+function drawTurns() {
+	console.log(" >>> drawing turns");
+	$("#data_left .nick").css({
+		"color": getLeftPlayer().turn ? "#fff" : "#bbb",
+		"font-weight": getLeftPlayer().turn ? "bold" : "normal"
+	});
+	$("#data_middle .nick").css({
+		"color": self.turn ? "#fff" : "#bbb",
+		"font-weight": self.turn ? "bold" : "normal"
+	});
+	$("#data_right .nick").css({
+		"color": getRightPlayer().turn ? "#fff" : "#bbb",
+		"font-weight": getRightPlayer().turn ? "bold" : "normal"
+	});
+}
+
+function drawPlayers() {
+	$("#data_left .nick").text(getLeftPlayer().nick);
+	$("#data_middle .nick").text(self.nick);
+	$("#data_right .nick").text(getRightPlayer().nick);
+}
+
+function drawScores() {
+	$("#data_left .score").text("score: " + getLeftPlayer().score);
+	$("#data_middle .score").text("score: " + self.score);
+	$("#data_right .score").text("score: " + getRightPlayer().score);
+}
+
+function drawBids() {
+	$("#data_left .bid").text(getLeftPlayer().bid ? "bid: " + getLeftPlayer().bid : "");
+	$("#data_middle .bid").text(self.bid ? "bid: " + self.bid : "");
+	$("#data_right .bid").text(getRightPlayer().bid ? "bid: " + getRightPlayer().bid : "");
+}
+
+function drawTrump(suit) {
+	if (suit == 0) {
+		$("#data_middle .trump").css("visibility", "hidden");
+	}
+	else {
+		$("#trump").prop("src", "images/" + suit + ".png");
+		$("#data_middle .trump").css("visibility", "visible");
+	}
+}
+
+function startFirstRound() {
+	for (let player of game.players) {
+		player.score = 0;
+	}
+	clearCardData();
+	drawPlayers();
+	drawScores();
+	++game.round;
+}
+
+function getPlayerWithId(id) {
+	for (let player of game.players) {
+		if (player.id == id) {
+			return player;
+		}
+	}
+}
+
+function rotate() {
+	++game.counter;
+	if (game.counter == 1) {
+		clearTimeout(game.timeout);
+		clearBottom();
+		clearTop();
+	}
+	else if (game.counter == 3) {
+		newRotation();
+	}
+}
+
+function newRound() {
+	clearCardData();
+	for (let player of game.players) {
+		player.bid = 0;
+	}
+	++game.round;
+}
+
+function clearCardData() {
+	self.cards = [];
+	self.used = 0;
+}
+
+function checkReady() {
+	// room is full
+	if (game.players.length == 3) {
+		askReady();
+	}
+}
+
+function clearTable() {
+	drawTrump(0);
+	clearTop();
+	clearBottom();
+	$(".nick").text("");
+	$(".score").text("");
+	$(".bid").text("");
+	$(".opponent_cards img").prop("src", "images/empty.png");
+	$("#cards").html("");
+	$(".modal").modal("hide");
+}
+
+function clearChat() {
+	$("#chatbox").html("");
+}
+
+function test(i) {
+	handleLeave({action: "leave", data: i});
 }

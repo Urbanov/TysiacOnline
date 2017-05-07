@@ -5,6 +5,7 @@ html {
 
 body {
 	margin-bottom: 60px;
+	padding-right: 0px !important;
 }
 
 .footer {
@@ -40,6 +41,13 @@ body {
 	width: 780px;
 	height: 700px;
 	background-image: url("images/bg.png");
+	margin-bottom: 10px;
+}
+
+.chat_wrapper {
+	max-width: 400px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .chatbox {
@@ -55,6 +63,7 @@ body {
 .chat_body {
 	height: 558px;
 	overflow: auto;
+	word-wrap: break-word;
 }
 
 .chat_footer {
@@ -123,6 +132,7 @@ body {
 	margin-right: 3px;
 }
 
+
 .middle_row {
 	position: absolute;
 	height: 385px;
@@ -172,4 +182,51 @@ body {
 .modal-open {
 	overflow: auto;
 	padding-right: 0px !important;
+}
+
+.data_row {
+	position: absolute;
+	height: 140px;
+	width: 780px;
+	top: 10px;
+	left: 15px;
+}
+
+.data_col {
+	height: 100%;
+	width: 250px;
+	margin-left: 5px;
+	margin-right: 5px;
+	overflow: hidden;
+}
+
+.nick {
+	font-size: 30px;
+	color: #bbb;
+	white-space: nowrap;
+	display: block;
+	text-align: center;
+}
+
+.score, .bid {
+	font-size: 20px;
+	font-family: inherit;
+	color: #bbb;
+	white-space: nowrap;
+	display: block;
+	text-align: center;
+}
+
+.trump {
+	display: block;
+	text-align: center;
+	margin-top: 14px;
+	font-size: 20px;
+	visibility: hidden;
+	color: #bbb;
+}
+
+.trump_img {
+	width: 25px;
+	height: 25px;
 }

@@ -23,7 +23,7 @@
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h4 class="modal-title bid">Login</h4>
+							<h4 class="modal-title">Login</h4>
 						</div>
 						<div class="modal-body">
 							<div id="login_error" class="alert alert-danger">
@@ -60,15 +60,36 @@
 				</div>
 				<div id="game_panel" class="panel-body game_panel">
 					<div class="row">
-						<div class="col-md-8">
+						<div class="col-lg-8 col-md-12 cold-sm-12 col-xs-12">
 							<div class="game">
 								<div id="game_canvas" class="game_canvas">
+
+									<div class="row data_row">
+										<div id="data_left" class="col-md-4 col-xs-4 data_col">
+											<span class="nick"></span>
+											<span class="score"></span>
+											<span class="bid"></span>
+										</div>
+										<div id="data_middle" class="col-md-4 col-xs-4 data_col">
+											<span class="nick"></span>
+											<span class="score"></span>
+											<span class="bid"></span>
+											<span class="trump">trump suit: 
+												<img id="trump" src="images/empty.png" class="trump_img">
+											</span>												
+										</div>
+										<div id="data_right" class="col-md-4 col-xs-4 data_col">
+											<span class="nick"></span>
+											<span class="score"></span>
+											<span class="bid"></span>
+										</div>
+									</div>
 
 									<div class="row middle_row">
 										<div class="col-md-3 col-xs-3">
 											<div class="opponent_cards">
 												<span class="helper"></span>
-												<img id="opponent_left" src="images/opponent5.png">
+												<img id="opponent_left" src="images/empty.png">
 											</div>
 										</div>
 										<div class="col-md-6 col-xs-6">
@@ -85,7 +106,7 @@
 										<div class="col-md-3 col-xs-3">
 											<div class="opponent_cards">
 												<span class="helper"></span>
-												<img id="opponent_right" src="images/opponent4.png">
+												<img id="opponent_right" src="images/empty.png">
 											</div>
 										</div>
 									</div>
@@ -95,7 +116,7 @@
 									<div class="modal-dialog">
 										<div class="modal-content">
 											<div class="modal-header">
-												<h4 class="modal-title bid">Make a bid</h4>
+												<h4 class="modal-title">Make a bid</h4>
 											</div>
 											<div id="bids" class="modal-body"></div>
 										</div>
@@ -125,24 +146,38 @@
 										</div>
 									</div>
 								</div>
+								<div id="win_modal" class="modal fade game_modal" role="dialog">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h4 class="modal-title"></h4>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default">Close</button>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
-							<button type="button" id="leave" class="btn room btn-block">
-								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave room
-							</button>
-							<div class="spacer"></div>
-							<div class="panel chatbox panel_no_margin">
-								<div class="chat_header panel-heading">
-									<span class="glyphicon glyphicon glyphicon-user" aria-hidden="true"></span> Chat
-								</div>
-								<div id="chatbox" class="panel-body chat_body img-responsive"></div>
-								<div class="panel-footer chat_footer">
-									<div class="input-group">
-										<input type="text" id="text_area" class="form-control" placeholder="Type your message...">
-										<span class="input-group-btn">
-										<button id="send" class="btn btn-default" type="button">Send</button>
-										</span>
+						<div class="col-lg-4 col-md-12 cold-sm-12 col-xs-12">
+							<div class="chat_wrapper">
+								<button type="button" id="leave" class="btn room btn-block">
+									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave room
+								</button>
+								<div class="spacer"></div>
+								<div class="panel chatbox panel_no_margin">
+									<div class="chat_header panel-heading">
+										<span class="glyphicon glyphicon glyphicon-user" aria-hidden="true"></span> Chat
+									</div>
+									<div id="chatbox" class="panel-body chat_body img-responsive"></div>
+									<div class="panel-footer chat_footer">
+										<div class="input-group">
+											<input type="text" id="text_area" class="form-control" placeholder="Type your message...">
+											<span class="input-group-btn">
+											<button id="send" class="btn btn-default" type="button">Send</button>
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>

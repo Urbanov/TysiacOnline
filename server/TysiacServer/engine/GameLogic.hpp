@@ -20,6 +20,7 @@ class Dealer;
 class Deck;
 class Game;
 class GameManager;
+class LeaveBuster;
 class Player;
 class PlayersCollection;
 class PlayerDeck;
@@ -51,19 +52,20 @@ enum iterators {
 };
 
 enum commands {
-	LEAVE,
-	DISCONNECT,
-	READY,
-	ADD,
-	DEAL,
-	BID,
-	PLAY,
-	CHAT
+	LEAVE = 0,
+	DISCONNECT = 15,
+	READY = 12,
+	ADD = 2,
+	DEAL = 4,
+	BID = 3,
+	PLAY = 5,
+	CHAT = 1
 };
 
 enum stage {
 	FAIL,
 	ADDING,
+	STARTING,
 	BIDDING,
 	DEALING,
 	PLAYING,
@@ -133,10 +135,9 @@ public:
 	void addScore(int);
 	void addToTurnScore(int);
 	int getTurnScore() const;
-	void clearTurnScore();
 	bool setClaim(int, bool);
 	int getClaim() const;
-	void resetClaim();
+	void reset(bool);
 	int round(int) const;
 	void roundScore();
 private:
@@ -193,7 +194,8 @@ public:
 	players & getArray();
 	Player & getPlayer(iterators, size_t = 0);
 	void setPlayer(iterators, size_t);
-	void prepareGame();
+	void prepareGame(bool);
+	void resetPlayerAttributes(bool);
 private:
 	players players_;
 	std::vector<size_t> it_;
@@ -202,62 +204,105 @@ private:
 class Controller {
 public:
 	Controller(Deck & deck, PlayersCollection & players);
-	~Controller();
-
+	virtual ~Controller();
+	virtual stage changeModel(const json & msg, const stage stage_) = 0;
+	virtual request_type createMessages(const json & msg, const stage stage_) = 0;
 protected:
 	Deck & deck_;
 	PlayersCollection & players_;
 };
+
+class LeaveBuster : public Controller {
+public:
+	LeaveBuster(Deck &, PlayersCollection &);
+	virtual ~LeaveBuster();
+	virtual stage changeModel(const json & msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+};
+
+class ChatBox : public Controller {
+public:
+	ChatBox(Deck&, PlayersCollection&);
+	virtual ~ChatBox();
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+};
+
+//class RoomManager : public Controller {
+//public:
+//	RoomManager(std::vector<PRoom> &);
+//	~RoomManager();
+//	virtual stage changeModel(const json& msg, const stage stage_);
+//	virtual request_type createMessages(const json & msg, const stage stage_);
+//private:
+//	std::vector<PRoom> & active_games_;
+//};
 
 
 class Adder : public Controller {
 public:
 	Adder(Deck &, PlayersCollection &);
 	~Adder();
-	stage addPlayer(int, std::string);
-	stage setPlayerReady(int , bool);
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
 	bool isFull() const;
+
+private:
+	json acceptNewPlayer(const json & msg, stage stage_);
+	request_type informOtherPlayers(const json & msg, stage stage_);
+};
+
+class Starter : public Controller {
+public:
+	Starter(Deck &, PlayersCollection &);
+	virtual ~Starter();
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+	json createStartMessage(const json & msg) const;
+	bool getIsFull() const;
+	void setIsFull(bool);
+private:
+	bool isReadyToStart() const;
+	void prepareToStart();
+	bool is_full_;
 };
 
 class Bidder : public Controller {
 public:
 	Bidder(Deck &, PlayersCollection &);
 	~Bidder();
-	stage bid(int, int);
-	void giveAddCards();
-	request_type createMessages(const json & msg, stage stage_, bool);
+
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+private:
+	stage bid(const json & msg, const stage stage_);
+	request_type createUpdateInfo(const json & msg) const;
+	request_type createSpecialInfo(const json & msg) const;
+	json createStock(const json & msg) const;
+	request_type createBid(const json & msg, stage stage_) const;
+	request_type firstBid(stage stage_);
+	request_type createCardDealingMessages() const;
+	request_type createStarterMessages(const json & msg, stage stage_);
+
+	mutable json additional_cards_;
+	Starter starter_;
 };
 
 class Dealer : public Controller {
 public:
 	Dealer(Deck &, PlayersCollection &);
 	~Dealer();
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
 	stage giveCardToPeer(int player_id, std::size_t card_number);
 	void dealCards();
-	request_type createMessages();
 	void reset();
 private:
+	request_type createMessage(const json &);
+	json createFinalBidMessage();
+
 	int user_id_;
 	int counter;
-};
-
-class Game : public Controller {
-public:
-	Game(Deck &, PlayersCollection &);
-	~Game();
-	const Card & playTurn(int, std::size_t);
-	stage manageTurn(int, int);
-	request_type createMessages(const stage stage_);
-	int compareCardsAndPassToWinner();
-	void setSuperiorSuit();
-	void setStartingPlayer(int);
-	void reset();
-private:
-	std::vector<std::pair<int, Card> > vec_;
-	int turn_counter_;
-	int current_starting_player_;
-	suits super_suit_;
-	bool is_marriage_;
 };
 
 class SumScore : public Controller {
@@ -265,21 +310,37 @@ public:
 	SumScore(Deck &, PlayersCollection &);
 	~SumScore();
 	stage sumUpScore();
-	request_type createMessages(stage stage_);
-	void resetPlayersAtributes();
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+	void resetPlayerAttributes(bool);
 	bool isFinished() const;
 private:
+	request_type createMessage(stage stages_);
 };
 
-class AddManager
-{
+class Game : public Controller {
 public:
-	AddManager(std::vector<PRoom> &);
-	~AddManager();
-	req addPlayer(const json &);
+	Game(Deck &, PlayersCollection &);
+	~Game();
+	virtual stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json & msg, const stage stage_);
+	const Card & playTurn(int, std::size_t);
+	stage manageTurn(int, int);
+	request_type createMessage(const stage stage_);
+	int compareCardsAndPassToWinner();
+	void setSuperiorSuit();
+	void setStartingPlayer(int);
+	void reset();
 private:
-	std::vector<PRoom> & active_games_;
+	SumScore score_;
+	std::vector<std::pair<int, Card> > vec_;
+	int turn_counter_;
+	int current_starting_player_;
+	suits super_suit_;
+	bool is_marriage_;
 };
+
+
 
 class GameManager {
 public:
@@ -291,7 +352,10 @@ protected:
 	void returnExistingRooms(const json &);
 	void attachClientIdsToMessage();
 	int findGameId(size_t) const;
-	void addPlayer(json &);
+	void addPlayer(const json &);
+	bool runGame(const json& msg);
+	void createNewRoom(const json & msg);
+	bool useEmptyRoom(const json & msg);
 
 	std::vector<std::vector<size_t> > players_;
 	std::vector<PRoom> active_games_;
@@ -312,17 +376,12 @@ public:
 	size_t getRoomId() const;
 	json getPlayersInfo() const;
 private:
-	json chatMessage(const json & msg);
+	std::vector<Controller*> employees_;
 	GameManager & man_;
 	size_t room_id_;
 	Deck deck_;
 	PlayersCollection players_;
 	stage stage_;
-	Adder adder_;
-	Bidder bidder_;
-	Dealer dealer_;
-	Game game_;
-	SumScore score_;
 };
 
 #endif // _GAME_LOGIC_HPP_

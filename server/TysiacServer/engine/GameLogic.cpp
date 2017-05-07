@@ -293,9 +293,13 @@ int Score::getTurnScore() const
 	return temp_score_;
 }
 
-void Score::clearTurnScore()
+void Score::reset(bool isFinal)
 {
 	temp_score_ = 0;
+	claim_ = 0;
+	if (isFinal) {
+		score_ = 0;
+	}
 }
 
 bool Score::setClaim(int claim, bool isFinal)
@@ -316,10 +320,6 @@ bool Score::setClaim(int claim, bool isFinal)
 int Score::getClaim() const
 {
 	return claim_;
-}
-void Score::resetClaim()
-{
-	claim_ = 0;
 }
 
 void Score::roundScore()
@@ -451,7 +451,6 @@ Deck::Deck()
 
 Deck::~Deck() {}
 
-//clear player's decks and deal out new cards after shuffling the deck
 void Deck::dealCards(players& players)
 {
 	shuffle();
@@ -523,13 +522,9 @@ size_t PlayersCollection::getNextPlayer(iterators it)
 	if (it == X) {
 		throw std::logic_error("Non existing iterator called in getNextPlayer() method");
 	}
-	if (players_.back().getPlayerId() == it_[it]) {
-		it_[it] = players_.front().getPlayerId();
-		return it_[it];
-	}
 	for (size_t i = 0; i < players_.size(); ++i) {
 		if (players_[i].getPlayerId() == it_[it]) {
-			it_[it] = players_[i + 1].getPlayerId();
+			it_[it] = players_[(i + 1) % MAX_PLAYERS].getPlayerId();
 			return it_[it];
 		}
 	}
@@ -578,13 +573,29 @@ void PlayersCollection::setPlayer(iterators it, size_t player_id)
 	it_[it] = player_id;
 }
 
-void PlayersCollection::prepareGame()
+void PlayersCollection::prepareGame(bool isFirst)
 {
+	int i = isFirst ? 0 : (it_[COMPULSORY] + 1) % MAX_PLAYERS;
 	it_.resize(MAX_PLAYERS);
-	it_[CURRENT] = players_[1].getPlayerId();
-	it_[COMPULSORY] = players_[0].getPlayerId();
-	it_[HIGHEST] = players_[0].getPlayerId();
-	players_[0].getScoreClass().setClaim(100, false);
+	it_[CURRENT] = players_[(i+1) % MAX_PLAYERS].getPlayerId();
+	it_[COMPULSORY] = players_[i].getPlayerId();
+	it_[HIGHEST] = players_[i].getPlayerId();
+	players_[i].getScoreClass().setClaim(100, false);
+
+}
+
+void PlayersCollection::resetPlayerAttributes(bool isFinal)
+{
+	for (auto& i : players_) {
+		i.getScoreClass().reset(isFinal);
+		i.getPlayerDeck().clearDeck();
+		if (isFinal) {
+			i.setReady(false);
+		}
+	}
+	if (isFinal) {
+		it_.clear();
+	}
 }
 
 // </Class PlayerCollection>
@@ -595,30 +606,32 @@ void PlayersCollection::prepareGame()
 
 Room::Room(int room_id, GameManager & man)
 	: man_(man)
-	, room_id_(room_id) 
-	, stage_(ADDING) 
-	, adder_(deck_, players_)
-	, bidder_(deck_, players_)
-	, dealer_(deck_, players_)
-	, game_(deck_, players_)
-	, score_(deck_, players_)
-{}
+	, room_id_(room_id)
+	, stage_(ADDING)
+{
+	employees_.push_back(new LeaveBuster(deck_, players_));
+	employees_.push_back(new ChatBox(deck_, players_));
+	employees_.push_back(new Adder(deck_, players_));
+	employees_.push_back(new Bidder(deck_, players_));
+	employees_.push_back(new Dealer(deck_, players_));
+	employees_.push_back(new Game(deck_, players_));
+}
 
 Room::Room(const Room & other)
 	: man_(other.man_)
+	, employees_(other.employees_.begin(), other.employees_.end())
 	, room_id_(other.room_id_)
 	, deck_(other.deck_)
     , players_(other.players_)
 	, stage_(other.stage_)
-	, adder_(other.adder_)
-	, bidder_(other.bidder_)
-	, dealer_(other.dealer_)
-	, game_(other.game_)
-	, score_(other.score_)
 {}
 
 Room::~Room()
-{}
+{
+	for (auto i : employees_) {
+		delete i;
+	}
+}
 
 void Room::changeStage(stage new_stage)
 {
@@ -627,213 +640,34 @@ void Room::changeStage(stage new_stage)
 
 bool Room::runGame(const json & msg)
 {
-	bool ret_val = false;
 	request_type request, tmp;
-	json feedback;
-	std::vector<int> players_ids;
-	if (parse(msg["action"]) == DISCONNECT || parse(msg["action"]) == LEAVE) {
-		for (players_it it = players_.getArray().begin(); it != players_.getArray().end(); ++it) {
-			if ((*it).getPlayerId() == msg["player"]) {
-				players_.getArray().erase(it);
-				score_.resetPlayersAtributes();
-				for (auto i : players_.getArray()) {
-					i.setReady(false);
-				}
-			}
+	stage temp_stage;
+	temp_stage = employees_[parse(msg["action"])]->changeModel(msg, stage_);
+	request = employees_[parse(msg["action"])]->createMessages(msg, temp_stage);
+	stage_ = temp_stage;
+	std::cout << " NO ELKO " << std::endl;
+	if (temp_stage == SUMMING_UP) {
+		std::cout << " SIEMANECZKO" << std::endl;
+		employees_[BID]->changeModel(msg, SUMMING_UP);
+		tmp = employees_[BID]->createMessages(msg, SUMMING_UP);
+		for (const auto & i : tmp) {
+			request.push_back(i);
 		}
-		feedback["action"] = "leave";
-		feedback["player"] = msg["player"];
-		for (auto& i : players_.getArray()) {
-			feedback["who"].push_back(i.getPlayerId());
-		}
-		request.push_back(feedback);
-		if (stage_ != ADDING || stage_ != ENDING) {
-			feedback.erase("action");
-			feedback["action"] = "end";
-			request.push_back(feedback);
-		}
-		man_.pushMessage(request);
+		stage_ = BIDDING;
+	}
+	man_.pushMessage(request);
+	if (temp_stage != FAIL) {
 		return true;
 	}
-	if (parse(msg["action"]) == CHAT) {
-		request.push_back(chatMessage(msg));
-		man_.pushMessage(request);
-		return true;
-	}
-	stage temp_stage = FAIL;
-	switch (stage_) {
-	case ADDING:
-		switch (parse(msg["action"])) {
-		case ADD:
-			temp_stage = adder_.addPlayer(msg["player"], msg["data"]);
-			if (temp_stage != FAIL) {
-				ret_val = true;
-				request_type player_info = players_.getPlayerInfo();
-				feedback["who"] = msg["player"];
-				feedback["action"] = "add";
-				feedback["error"] = false;
-				for (auto& i : player_info) {
-					feedback["data"].push_back(i);
-				}
-				request.push_back(feedback);
-				if (players_.getArray().size() > 1) {
-					feedback.clear();
-					feedback["action"] = "new_player";
-					for (auto& i : player_info) {
-						if (i["id"] != msg["player"]) {
-							feedback["who"].push_back(i["id"]);
-						}
-						else {
-							feedback["data"] = i;
-						}
-					}
-					request.push_back(feedback);
-				}
-			}
-			else {
-				feedback["action"] = "add";
-				feedback["error"] = true;
-				feedback["who"] = msg["player"];
-				request.push_back(feedback);
-			}
-			break;
-		case READY:
-			temp_stage = adder_.setPlayerReady(msg["player"], true);
-			feedback["action"] = "ready";
-			feedback["player"] = msg["player"];
-			for (auto i : players_.getArray()) {
-				if (i.getPlayerId() != msg["player"]) {
-					feedback["who"].push_back(i.getPlayerId());
-				}
-			}
-			request.push_back(feedback);
-			if (temp_stage == ADDING) {
-				break;
-			}
-			stage_ = temp_stage;
-			players_.prepareGame();
-			dealer_.dealCards();
-			tmp = dealer_.createMessages();
-			for (const auto& i : tmp) {
-				request.push_back(i);
-			}
-			feedback.clear();
-			feedback["data"] = 100;
-			feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
-			tmp = bidder_.createMessages(feedback, stage_, false);
-			for (const auto& i : tmp) {
-				request.push_back(i);
-			}
-			break;
-		default: break;
-		}
-		break;
-	case BIDDING:
-		switch (parse(msg["action"])) {
-		case BID: 
-			temp_stage = bidder_.bid(msg["player"], msg["data"]);
-			tmp = bidder_.createMessages(msg, temp_stage, false);
-			for (auto& i : tmp) {
-				request.push_back(i);
-			}
-			if (temp_stage == DEALING) {
-				stage_ = DEALING;
-				feedback["action"] = "stock";
-				feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
-				feedback["data"] = deck_.addBonusCards(players_.getPlayer(HIGHEST));
-				feedback.erase("who");
-				for (const auto& i : players_.getArray()) {
-					feedback["who"].push_back(i.getPlayerId());
-				}
-				request.push_back(feedback);
-			}
-			break;
-		default: break;
-		}
-		break;
-	case DEALING:
-		switch (parse(msg["action"])) {
-		case DEAL:
-			for (const auto& i : msg["data"]) {
-				dealer_.giveCardToPeer(i["player"], i["card"]);
-			}
-			feedback["action"] = "deal";
-			for (auto& i : players_.getArray()) {
-				if (i.getPlayerId() != players_.getPlayer(HIGHEST).getPlayerId()) {
-					feedback["who"] = i.getPlayerId();
-					for (auto& j : msg["data"]) {
-						if (j["player"] == i.getPlayerId()) {
-							Card tmp = players_.getPlayer(X, i.getPlayerId()).getPlayerDeck().getDeck().back();
-							json k = {
-								{"figure", tmp.getFigure()},
-								{"suit", tmp.getSuit()}
-							};
-							feedback["data"].push_back(k);
-						}
-					}
-					request.push_back(feedback);
-					feedback.erase("data");
-					feedback.erase("who");
-				}
-			}
-			feedback.erase("action");
-			feedback = bidder_.createMessages(msg, stage_, true)[0];
-			request.push_back(feedback);
-			break;
-		case BID:
-			bidder_.bid(msg["player"], msg["data"]);
-			feedback["action"] = "start";
-			feedback["data"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim();
-			feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
-			for (auto& i : players_.getArray()) {
-				feedback["who"].push_back(i.getPlayerId());
-			}
-			request.push_back(feedback);
-			stage_ = PLAYING;
-		default: break;
-		}
-		break;
-	case PLAYING:
-		switch (parse(msg["action"])) {
-		case PLAY:
-			temp_stage = game_.manageTurn(msg["player"], msg["data"]);
-			tmp = game_.createMessages(temp_stage);
-			for (const auto& i : tmp) {
-				request.push_back(i);
-			}
-			if (temp_stage != stage_) {
-				stage_ = score_.sumUpScore();
-				tmp = score_.createMessages(stage_);
-				for (const auto& i : tmp) {
-					request.push_back(i);
-				}
-			}
-			if (stage_ == BIDDING) {
-				dealer_.dealCards();
-				tmp = dealer_.createMessages();
-				for (const auto& i : tmp) {
-					request.push_back(i);
-				}
-				feedback["data"] = 100;
-				feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
-				tmp = bidder_.createMessages(feedback, stage_, false);
-				for (const auto& i : tmp) {
-					request.push_back(i);
-				}
-			}
-		}
-		break;
-	default: break;
-	}
-	 man_.pushMessage(request);
-	 return ret_val;
+	return false;
+	
 }
 
 int Room::parse(const std::string & str)
 {
 	json command = { { "add", ADD }, { "deal", DEAL }, { "bid", BID },
-					{ "play", PLAY }, { "chat", CHAT }, { "ready", READY },
-					{"leave", LEAVE}, { "disconnect", DISCONNECT },
+					{ "play", PLAY }, { "chat", CHAT }, { "ready", BID },
+					{"leave", LEAVE}, { "disconnect", LEAVE }
 	};
 	return command[str];
 }
@@ -859,26 +693,13 @@ json Room::getPlayersInfo() const
 	return players;
 }
 
-json Room::chatMessage(const json & msg)
-{
-	json response = {
-		{"action", "chat"},
-		{"player", msg["player"]},
-		{"data", msg["data"]},
-	};
-	for (auto& i : players_.getArray()) {
-		if (i.getPlayerId() != msg["player"]) {
-			response["who"].push_back(i.getPlayerId());
-		}
-	}
-	return response;
-}
 
 // </Class Room>
 
 
 
-// <Class Controller>
+ // <Class Controller>
+
 Controller::Controller(Deck & deck, PlayersCollection & players)
 	: deck_(deck)
 	, players_(players)
@@ -891,6 +712,84 @@ Controller::~Controller()
 
 
 
+// <Class LeaveBuster>
+
+LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players) 
+	: Controller(deck, players)
+{}
+
+LeaveBuster::~LeaveBuster()
+{}
+
+stage LeaveBuster::changeModel(const json & msg, const stage stage_)
+{
+	for (auto i = players_.getArray().begin(); i != players_.getArray().end(); ++i) {
+		if ((*i).getPlayerId() == msg["player"]) {
+			players_.getArray().erase(i);
+			break;
+		}
+	}
+	players_.resetPlayerAttributes(true);
+	return ADDING;
+}
+
+request_type LeaveBuster::createMessages(const json & msg, const stage stage_)
+{
+	json feedback;
+	request_type request;
+	feedback["action"] = "leave";
+	feedback["data"] = msg["player"];
+	for (auto& i : players_.getArray()) {
+		feedback["who"].push_back(i.getPlayerId());
+	}
+	request.push_back(feedback);
+	if (stage_ != ADDING || stage_ != ENDING) {
+		feedback.erase("action");
+		feedback["action"] = "end";
+		request.push_back(feedback);
+	}
+	return request;
+}
+
+ // </Class LeaveBuster>
+
+
+
+// <Class ChatBox>
+
+ChatBox::ChatBox(Deck & deck, PlayersCollection & players)
+	: Controller(deck, players)
+{}
+
+ChatBox::~ChatBox()
+{}
+
+stage ChatBox::changeModel(const json & msg, const stage stage_)
+{
+	return stage_;
+}
+
+request_type ChatBox::createMessages(const json & msg, const stage stage_)
+{
+	request_type request;
+	json response = {
+		{ "action", "chat" },
+		{ "player", msg["player"] },
+		{ "data", msg["data"] },
+	};
+	for (auto& i : players_.getArray()) {
+		if (i.getPlayerId() != msg["player"]) {
+			response["who"].push_back(i.getPlayerId());
+		}
+	}
+	request.push_back(response);
+	return request;
+}
+
+// </Class ChatBox>
+
+
+
 // <Class Adder>
 
 Adder::Adder(Deck & deck, PlayersCollection & players)
@@ -900,26 +799,22 @@ Adder::Adder(Deck & deck, PlayersCollection & players)
 Adder::~Adder()
 {}
 
-stage Adder::addPlayer(int player_id, std::string nick)
+stage Adder::changeModel(const json & msg, const stage stage_)
 {
-	if (!players_.addPlayer(player_id, nick)) {
+	std::string tmp = msg["data"];
+	if (!players_.addPlayer(msg["player"], tmp)) {
 		return FAIL;
 	}
 	return ADDING;
 }
 
-stage Adder::setPlayerReady(int player_id, bool isReady)
+request_type Adder::createMessages(const json & msg, const stage stage_)
 {
-	players_.getPlayer(X, player_id).setReady(isReady);
-	if (players_.getArray().size() == MAX_PLAYERS) {
-		for (auto& i : players_.getArray()) {
-			if (!i.getReady()) {
-				return ADDING;
-			}
-		}
-		return BIDDING;
-	}
-	return ADDING;
+	json feedback;
+	request_type request;
+	request = informOtherPlayers(msg, stage_);
+	request.push_back(acceptNewPlayer(msg, stage_));
+	return request;
 }
 
 bool Adder::isFull() const
@@ -927,7 +822,133 @@ bool Adder::isFull() const
 	return (players_.getArray().size() == MAX_PLAYERS);
 }
 
+json Adder::acceptNewPlayer(const json & msg, stage stage_)
+{
+	json feedback;
+	request_type request, player_info = players_.getPlayerInfo();
+	feedback["who"] = msg["player"];
+	feedback["action"] = "add";
+	if (stage_ != FAIL) {
+		feedback["error"] = false;
+		for (auto& i : player_info) {
+			feedback["data"].push_back(i);
+		}
+	}
+	else {
+		feedback["error"] = true;
+	}
+	return feedback;
+}
+
+request_type Adder::informOtherPlayers(const json & msg, stage stage_)
+{
+	request_type request, player_info = players_.getPlayerInfo();
+	json feedback;
+	if (stage_ != FAIL) {
+		if (players_.getArray().size() > 1) {
+			feedback.clear();
+			feedback["action"] = "new_player";
+			for (auto& i : player_info) {
+				if (i["id"] != msg["player"]) {
+					feedback["who"].push_back(i["id"]);
+				}
+				else {
+					feedback["data"] = i;
+				}
+			}
+			request.push_back(feedback);
+		}
+	}
+	return request;
+}
+
 // </Class Adder>
+
+
+
+// <Class Starter>
+
+Starter::Starter(Deck & deck, PlayersCollection & players)
+	: Controller(deck, players)
+	, is_full_(false)
+{}
+
+Starter::~Starter()
+{}
+
+stage Starter::changeModel(const json & msg, const stage stage_)
+{
+	if (stage_ == SUMMING_UP) {
+		prepareToStart();
+		return BIDDING;
+	}
+	players_.getPlayer(X, msg["player"]).setReady(true);
+	if (isReadyToStart()) {
+		prepareToStart();
+		return BIDDING;
+	}
+	return ADDING;
+}
+
+request_type Starter::createMessages(const json & msg, const stage stage_)
+{
+	json feedback;
+	request_type request;
+	feedback["action"] = "ready";
+	feedback["player"] = msg["player"];
+	for (auto i : players_.getArray()) {
+		if (i.getPlayerId() != msg["player"]) {
+			feedback["who"].push_back(i.getPlayerId());
+		}
+	}
+	request.push_back(feedback);
+	return request;
+}
+
+json Starter::createStartMessage(const json & msg) const
+{
+	json feedback;
+	feedback["action"] = "start";
+	feedback["data"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim();
+	feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+	for (auto& i : players_.getArray()) {
+		feedback["who"].push_back(i.getPlayerId());
+	}
+	return feedback;
+}
+
+bool Starter::getIsFull() const
+{
+	return is_full_;
+}
+
+void Starter::setIsFull(bool is_full)
+{
+	is_full_ = is_full;
+}
+
+bool Starter::isReadyToStart() const
+{
+	if (players_.getArray().size() != MAX_PLAYERS) {
+		return false;
+	}
+	for (auto& i : players_.getArray()) {
+		if (!i.getReady()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void Starter::prepareToStart()
+{
+	is_full_ = false;
+	players_.prepareGame(true);
+	deck_.shuffle();
+	deck_.dealCards(players_.getArray());
+}
+
+// </Class Starter>
 
 
 
@@ -935,26 +956,28 @@ bool Adder::isFull() const
 
 Bidder::Bidder(Deck & deck, PlayersCollection & players)  
 	: Controller(deck, players)
+	, starter_(deck, players)
 {}
 
 Bidder::~Bidder()
 {}
 
-stage Bidder::bid(int player_id, int new_amount)
+stage Bidder::bid(const json & msg, const stage stage_)
 {
-	if (players_.getPlayer(CURRENT).getPlayerId() != player_id) {
+	if (players_.getPlayer(CURRENT).getPlayerId() != msg["player"]) {
 		throw std::logic_error("Player trying to bid not at his turn");
 	}
-	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() > new_amount && new_amount != -1) {
+	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() > static_cast<int>(msg["data"])
+		&& msg["data"] != -1) {
 		throw std::logic_error("Player bids less than current highest bid");
 	}
 	if (players_.getPlayer(CURRENT).getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
-		players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount, true);
-		return DEALING;
+		players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], true);
+		return PLAYING;
 	}
-	players_.getPlayer(CURRENT).getScoreClass().setClaim(new_amount, false);
-	if (new_amount != -1) {
-		players_.setPlayer(HIGHEST, player_id);
+	players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], false);
+	if (msg["data"] != -1) {
+		players_.setPlayer(HIGHEST, msg["player"]);
 	}
 	players_.getNextPlayer(CURRENT);
 	while (players_.getPlayer(CURRENT).getScoreClass().getClaim() == -1) {
@@ -962,55 +985,152 @@ stage Bidder::bid(int player_id, int new_amount)
 	}
 	if (players_.getPlayer(CURRENT).getPlayerId() ==
 		players_.getPlayer(HIGHEST).getPlayerId()) {
+		additional_cards_ = deck_.addBonusCards(players_.getPlayer(HIGHEST));
 		return DEALING;
 	}
 	return BIDDING;
 }
-
-void Bidder::giveAddCards()
+stage Bidder::changeModel(const json & msg, const stage stage_)
 {
-	deck_.addBonusCards(players_.getPlayer(HIGHEST));
+	if (stage_ == ADDING || stage_ == SUMMING_UP) {
+		return starter_.changeModel(msg, stage_);
+	}
+	else {
+		return bid(msg, stage_);
+	}
 }
 
-request_type Bidder::createMessages(const json & msg, stage stage_, bool isLastBid)
+request_type Bidder::createMessages(const json & msg, stage stage_)
+{
+	request_type request, tmp;
+	request = createStarterMessages(msg, stage_);
+	if (request.empty()) {
+		request = createBid(msg, stage_);
+	}
+	return request;
+}
+
+request_type Bidder::createSpecialInfo(const json & msg) const
 {
 	request_type request;
 	json feedback;
 	feedback["action"] = "bid";
-	if (stage_ == DEALING && isLastBid) {
-		feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
-		feedback["data"] = {
-			{ "value", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
-			{ "id", feedback["player"] },
-			{"min", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
-			{"max", players_.getPlayer(HIGHEST).getPlayerDeck().getMaxValue(true)}
-		};
-		feedback["who"] = feedback["player"];
-		request.push_back(feedback);
-		return request;
-	}
 	for (auto i : players_.getArray()) {
-		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId() || stage_ == DEALING) {
-			feedback["who"].push_back(i.getPlayerId());
-		}
+		feedback["who"].push_back(i.getPlayerId());
 	}
-	if (stage_ == BIDDING) {
-		feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
-	}
-	else {
-		feedback["player"] = -1;
-	}
+	feedback["player"] = -1;
 	feedback["data"] = {
 		{ "value", msg["data"] },
 		{ "id", msg["player"] }
 	};
 	request.push_back(feedback);
-	if (stage_ == BIDDING) {
-		feedback.erase("who");
-		feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
-		feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
-		feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue(false);
+	return request;
+}
+
+request_type Bidder::createUpdateInfo(const json & msg) const
+{
+	json feedback;
+	request_type request;
+	for (auto i : players_.getArray()) {
+		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
+			feedback["who"].push_back(i.getPlayerId());
+		}
+	}
+	feedback["action"] = "bid";
+	feedback["player"] = players_.getPlayer(CURRENT).getPlayerId();
+	feedback["data"] = {
+		{ "value", msg["data"] },
+		{ "id", msg["player"] }
+	};
+	request.push_back(feedback);
+	feedback.erase("who");
+	feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
+	feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
+	feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayerDeck().getMaxValue(false);
+	request.push_back(feedback);
+	return request;
+}
+
+json Bidder::createStock(const json & msg) const
+{
+	json feedback;
+	feedback["action"] = "stock";
+	feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+	feedback["data"] = additional_cards_;
+	for (const auto& i : players_.getArray()) {
+		feedback["who"].push_back(i.getPlayerId());
+	}
+	additional_cards_.clear();
+	return feedback;
+}
+
+request_type Bidder::createBid(const json & msg, stage stage_) const
+{
+	request_type request;
+	if (stage_ == BIDDING || stage_ == SUMMING_UP) {
+		request = createUpdateInfo(msg);
+	}
+	else if (stage_ == PLAYING || stage_ == DEALING ) {
+		request = createSpecialInfo(msg);
+		if (stage_ == PLAYING) {
+			request.push_back(starter_.createStartMessage(msg));
+		}
+		else {
+			request.push_back(createStock(msg));
+		}
+	}
+	return request;
+}
+
+request_type Bidder::firstBid(stage stage_)
+{
+		json feedback;
+		request_type request;
+		feedback["data"] = 100;
+		feedback["player"] = players_.getPlayer(COMPULSORY).getPlayerId();
+		request = createBid(feedback, stage_);
+		return request;
+}
+
+request_type Bidder::createCardDealingMessages() const
+{
+	json feedback;
+	request_type request;
+	feedback["action"] = "deal";
+	for (auto i : players_.getArray()) {
+		feedback["who"] = i.getPlayerId();
+		for (auto& j : i.getPlayerDeck().getDeck()) {
+			json tmp = {
+				{ "figure", j.getFigure() }
+				,{ "suit", j.getSuit() }
+			};
+			feedback["data"].push_back(tmp);
+		}
 		request.push_back(feedback);
+		feedback.erase("who");
+		feedback.erase("data");
+	}
+	return request;
+}
+
+request_type Bidder::createStarterMessages(const json & msg, stage stage_)
+{
+	request_type tmp, request;
+	if (!starter_.getIsFull()) {
+		if (stage_ == BIDDING) {
+			request = starter_.createMessages(msg, stage_);
+		}
+		if (stage_ == BIDDING || stage_ == SUMMING_UP) {
+			tmp = createCardDealingMessages();
+			for (const auto & i : tmp) {
+				request.push_back(i);
+			}
+			tmp = firstBid(stage_);
+			for (const auto & i : tmp) {
+				request.push_back(i);
+			}
+			starter_.setIsFull(true);
+		}
 	}
 	return request;
 }
@@ -1029,6 +1149,22 @@ Dealer::Dealer(Deck & deck, PlayersCollection & players)
 
 Dealer::~Dealer()
 {}
+
+stage Dealer::changeModel(const json & msg, const stage stage_)
+{
+	for (const auto& i : msg["data"]) {
+		giveCardToPeer(i["player"], i["card"]);
+	}
+	return DEALING;
+}
+
+request_type Dealer::createMessages(const json & msg, stage stage_)
+{
+	request_type request = createMessage(msg);
+	request.push_back(createFinalBidMessage());
+	return request;
+}
+
 
 stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 {
@@ -1052,23 +1188,21 @@ void Dealer::dealCards()
 	deck_.dealCards(players_.getArray());
 }
 
-request_type Dealer::createMessages()
+request_type Dealer::createMessage(const json & msg)
 {
-	json feedback;
 	request_type request;
-	feedback["action"] = "deal";
-	for (auto i : players_.getArray()) {
-		feedback["who"] = i.getPlayerId();
-		for (auto j : i.getPlayerDeck().getDeck()) {
-			json tmp = {
-				{ "figure", j.getFigure() }
-				,{ "suit", j.getSuit() }
-			};
-			feedback["data"].push_back(tmp);
-		}
+	for (const auto & i : msg["data"]) {
+		json feedback = {
+			{"action", "deal"},
+			{"who", i["player"]}
+		};
+		Card tmp = players_.getPlayer(X, i["player"]).getPlayerDeck().getDeck().back();
+		json tmp1 = {
+			{"figure", tmp.getFigure()},
+			{"suit", tmp.getSuit()}
+		};
+		feedback["data"].push_back(tmp1);
 		request.push_back(feedback);
-		feedback.erase("who");
-		feedback.erase("data");
 	}
 	return request;
 }
@@ -1079,6 +1213,21 @@ void Dealer::reset()
 	counter = 0;
 }
 
+json Dealer::createFinalBidMessage()
+{
+	json feedback;
+	feedback["action"] = "bid";
+	feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+	feedback["data"] = {
+		{ "value", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+		{ "id", feedback["player"] },
+		{ "min", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+		{ "max", players_.getPlayer(HIGHEST).getPlayerDeck().getMaxValue(true) }
+	};
+	feedback["who"] = feedback["player"];
+	return feedback;
+}
+
 // </Class Dealer>
 
 
@@ -1086,7 +1235,8 @@ void Dealer::reset()
 // <Class Game>
 
 Game::Game(Deck & deck, PlayersCollection & players)
-	: turn_counter_(0) 
+	: score_(deck, players)
+	, turn_counter_(0) 
 	, super_suit_(NONE) 
 	, Controller(deck, players)
 	, is_marriage_(false)
@@ -1094,6 +1244,26 @@ Game::Game(Deck & deck, PlayersCollection & players)
 
 Game::~Game()
 {}
+
+stage Game::changeModel(const json & msg, const stage stage_)
+{
+	if (manageTurn(msg["player"], msg["data"]) == SUMMING_UP) {
+		return score_.sumUpScore();
+	}
+	return PLAYING;
+}
+
+request_type Game::createMessages(const json & msg, stage stage_)
+{
+	request_type request = createMessage(stage_);
+	if (stage_ == SUMMING_UP || stage_ == ENDING) {
+		request_type tmp = score_.createMessages(msg, stage_);
+		for (const auto & i : tmp) {
+			request.push_back(i);
+		}
+	}
+	return request;
+}
 
 const Card & Game::playTurn(int player, std::size_t card)
 {
@@ -1112,13 +1282,14 @@ stage Game::manageTurn(int player, int card)
 		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
 		if (++turn_counter_ == MAX_TURNS) {
 			reset(); 
-			return ENDING;
+			std::cout << " NO ELKO XDXDXD" << std::endl;
+			return SUMMING_UP;
 		}
 	}
 	return PLAYING;
 }
 
-request_type Game::createMessages(const stage stage_)
+request_type Game::createMessage(const stage stage_)
 {
 	request_type request;
 	json feedback = {
@@ -1223,21 +1394,26 @@ stage SumScore::sumUpScore()
 			return ENDING;
 		}
 	}
-	return BIDDING;
+	return SUMMING_UP;
 }
 
-void SumScore::resetPlayersAtributes()
+stage SumScore::changeModel(const json & msg, const stage stage_)
 {
-	for (auto& i : players_.getArray()) {
-		i.getScoreClass().clearTurnScore();
-		i.getScoreClass().resetClaim();
-		i.getPlayerDeck().clearDeck();
+	return sumUpScore();
+}
+
+request_type SumScore::createMessages(const json & msg, stage stage_)
+{
+	return createMessage(stage_);
+}
+
+void SumScore::resetPlayerAttributes(bool isFinal)
+{
+	players_.resetPlayerAttributes(isFinal);
+	if (isFinal) {
+		return;
 	}
-	size_t player_id = players_.getNextPlayer(COMPULSORY);
-	players_.setPlayer(CURRENT, player_id);
-	players_.setPlayer(HIGHEST, player_id);
-	players_.getNextPlayer(CURRENT);
-	players_.getPlayer(COMPULSORY).getScoreClass().setClaim(100, false);
+	players_.prepareGame(false);
 }
 
 bool SumScore::isFinished() const
@@ -1250,7 +1426,7 @@ bool SumScore::isFinished() const
 	return false;
 }
 
-request_type SumScore::createMessages(stage stages_)
+request_type SumScore::createMessage(stage stages_)
 {
 	json message;
 	request_type request;
@@ -1264,7 +1440,7 @@ request_type SumScore::createMessages(stage stages_)
 		message["data"].push_back(tmp);
 	}
 	request.push_back(message);
-	resetPlayersAtributes();
+	resetPlayerAttributes(false);
 	if (stages_ == ENDING) {
 		json message = {
 			{"action", "end"}
@@ -1285,22 +1461,27 @@ request_type SumScore::createMessages(stage stages_)
 
 
 
-// <Class AddManager>
-AddManager::AddManager(std::vector<PRoom> & active_games)
-	: active_games_(active_games)
-{}
+// <Class RoomManager>
+//RoomManager::RoomManager(std::vector<PRoom> & active_games)
+//	: active_games_(active_games)
+//{}
+//
+//
+//RoomManager::~RoomManager()
+//{}
+//
+//stage RoomManager::changeModel(const json & msg, const stage stage_)
+//{
+//	
+//}
+//
+//req RoomManager::addPlayer(const json & msg)
+//{
+//	return req();
+//}
 
 
-AddManager::~AddManager()
-{}
-
-req AddManager::addPlayer(const json & msg)
-{
-	return req();
-}
-
-
-// </Class AddManager>
+// </Class RoomManager>
 
 
 
@@ -1317,21 +1498,13 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 {
 	server_response_.clear();
 	feedback_.clear();
+	json msg = json::parse(message.begin(), message.end());
+	msg["player"] = player_id;
 	try {
-		json msg = json::parse(message.begin(), message.end());
-		msg["player"] = player_id;
-		if (msg["action"] == "add") {
-			addPlayer(msg);
-			return server_response_;
+		if (!runGame(msg)) {
+			active_games_[findGameId(player_id)]->runGame(msg);
+			attachClientIdsToMessage();
 		}
-		if (msg["action"] == "show") {
-			returnExistingRooms(msg);
-			return server_response_;
-		}
-		msg["id"] = findGameId(player_id);
-		active_games_[msg["id"]]->runGame(msg);
-		attachClientIdsToMessage();
-		return server_response_;
 	}
 	catch (const std::exception& e) {
 		std::cout << e.what() << std::endl;
@@ -1383,23 +1556,12 @@ int GameManager::findGameId(size_t player_id) const
 	return -1;
 }
 
-void GameManager::addPlayer(json & msg)
+void GameManager::addPlayer(const json & msg)
 {
 	if (msg["id"] == -1) {
-		for (size_t i = 0; i < active_games_.size(); ++i) {
-			if (active_games_[i]->isEmpty()) {
-				active_games_[i]->runGame(msg);
-				players_[i].push_back(msg["player"]);
-				attachClientIdsToMessage();
-				return;
-			}
+		if (!useEmptyRoom(msg)) {
+			createNewRoom(msg);
 		}
-		active_games_.emplace_back(std::make_shared<Room>(room_counter_++, *this));
-		if (active_games_.back()->runGame(msg)) {
-			players_.emplace_back();
-			players_.back().push_back(msg["player"]);
-		}
-		attachClientIdsToMessage();
 		return;
 	}
 	if (static_cast<size_t>(msg["id"]) < active_games_.size()) {
@@ -1408,10 +1570,44 @@ void GameManager::addPlayer(json & msg)
 		}
 		attachClientIdsToMessage();
 	}
-	return;
-	 //Tutaj mo¿e byæ ró¿nie w zale¿noœci od tego
-	 //jak bêdzie na poziomie Roomu obs³ugiwany brak dodania
 }
 
-// </Class GameManager>
+bool GameManager::runGame(const json & msg)
+{
+	if (msg["action"] == "add") {
+		addPlayer(msg);
+		return true;
+	}
+	if (msg["action"] == "show") {
+		returnExistingRooms(msg);
+		return true;
+	}
+	return false;
+}
+
+void GameManager::createNewRoom(const json & msg)
+{
+	active_games_.emplace_back(std::make_shared<Room>(room_counter_++, *this));
+	if (active_games_.back()->runGame(msg)) {
+		players_.emplace_back();
+		players_.back().push_back(msg["player"]);
+	}
+	attachClientIdsToMessage();
+}
+
+bool GameManager::useEmptyRoom(const json & msg)
+{
+	for (size_t i = 0; i < active_games_.size(); ++i) {
+		if (active_games_[i]->isEmpty()) {
+			active_games_[i]->runGame(msg);
+			players_[i].push_back(msg["player"]);
+			attachClientIdsToMessage();
+			return true;
+		}
+	}
+	return false;
+}
+
+ //</Class GameManager>
+
 

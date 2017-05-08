@@ -286,6 +286,7 @@ function handleEnd(msg) {
 }
 
 function handleLeave(msg) {
+	addMessage(getPlayerWithId(msg.data).nick + " has left the room");
 	for (let i in game.players) {
 		if (game.players[i].id == msg.data) {
 			game.players.splice(i, 1);
@@ -339,6 +340,8 @@ function leaveRoom() {
 		action: "leave"
 	};
 	sendToServer(msg);
+	clearTable();
+	clearChat();
 	game = null;
 	requestRefresh();
 	$("#game_panel").hide();

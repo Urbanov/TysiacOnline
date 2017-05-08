@@ -32,6 +32,7 @@ void Session::readHandler(const boost::system::error_code& error_code)
 {
 	//TODO: handle errors
 	if (error_code) {
+		disconnect();
 		manager_.unregisterSession(id_);
 		return;
 	}
@@ -69,5 +70,10 @@ std::size_t Session::getId() const
 
 void Session::welcome()
 {
-	write("{ \"action\":\"welcome\", \"data\" : " + std::to_string(id_) + " }");
+	write("{\"action\":\"welcome\",\"data\":" + std::to_string(id_) + "}");
+}
+
+void Session::disconnect() const
+{
+	manager_.interpret(id_, "{\"action\":\"disconnect\"}");
 }

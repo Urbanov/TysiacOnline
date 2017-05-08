@@ -741,7 +741,7 @@ request_type LeaveBuster::createMessages(const json & msg, const stage stage_)
 		feedback["who"].push_back(i.getPlayerId());
 	}
 	request.push_back(feedback);
-	if (stage_ != ADDING || stage_ != ENDING) {
+	if (stage_ != ADDING && stage_ != ENDING) {
 		feedback.erase("action");
 		feedback.erase("data");
 		feedback["player"] = -1;

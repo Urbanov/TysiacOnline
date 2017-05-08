@@ -252,7 +252,7 @@ public:
 	void setIsFull(bool);
 private:
 	bool isReadyToStart() const;
-	void prepareToStart();
+	void prepareToStart(stage);
 	bool is_full_;
 };
 
@@ -338,6 +338,7 @@ public:
 	req doWork(std::size_t, const std::string &);
 	void pushMessage(const request_type &);
 protected:
+	void removeIfLeaveCalled(const json& msg, int player_id);
 	void returnExistingRooms(const json &);
 	void attachClientIdsToMessage();
 	int findGameId(size_t) const;

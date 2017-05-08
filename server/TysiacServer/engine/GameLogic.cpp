@@ -743,6 +743,8 @@ request_type LeaveBuster::createMessages(const json & msg, const stage stage_)
 	request.push_back(feedback);
 	if (stage_ != ADDING || stage_ != ENDING) {
 		feedback.erase("action");
+		feedback.erase("data");
+		feedback["player"] = -1;
 		feedback["action"] = "end";
 		request.push_back(feedback);
 	}
@@ -877,12 +879,12 @@ Starter::~Starter()
 stage Starter::changeModel(const json & msg, const stage stage_)
 {
 	if (stage_ == SUMMING_UP) {
-		prepareToStart();
+		prepareToStart(stage_);
 		return BIDDING;
 	}
 	players_.getPlayer(X, msg["player"]).setReady(true);
 	if (isReadyToStart()) {
-		prepareToStart();
+		prepareToStart(stage_);
 		return BIDDING;
 	}
 	return ADDING;
@@ -938,10 +940,15 @@ bool Starter::isReadyToStart() const
 	return true;
 }
 
-void Starter::prepareToStart()
+void Starter::prepareToStart(stage stage_)
 {
 	is_full_ = false;
-	players_.prepareGame(true);
+	if (stage_ == SUMMING_UP) {
+		players_.prepareGame(false);
+	}
+	else {
+		players_.prepareGame(true);
+	}
 	deck_.shuffle();
 	deck_.dealCards(players_.getArray());
 }
@@ -1337,7 +1344,9 @@ void Game::setSuperiorSuit()
 			is_marriage_ = true;
 		}
 	}
-	is_marriage_ = false;
+	else {
+		is_marriage_ = false;
+	}
 }
 
 int Game::compareCardsAndPassToWinner()
@@ -1476,6 +1485,7 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 	try {
 		if (!runGame(msg)) {
 			active_games_[findGameId(player_id)]->runGame(msg);
+			removeIfLeaveCalled(msg, player_id);
 			attachClientIdsToMessage();
 		}
 	}
@@ -1483,6 +1493,21 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 		std::cout << e.what() << std::endl;
 	}
 	return server_response_;
+}
+
+void GameManager::removeIfLeaveCalled(const json& msg, int player_id)
+{
+	if (msg["action"] != "leave") {
+		return;
+	}
+	for (auto & i : players_) {
+		for (auto it = i.begin(); it != i.end(); ++it) {
+			if (*it == player_id) {
+				i.erase(it);
+				return;
+			}
+		}
+	}
 }
 
 void GameManager::returnExistingRooms(const json & msg)

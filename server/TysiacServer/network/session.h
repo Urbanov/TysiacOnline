@@ -25,4 +25,5 @@ private:
 	void readHandler(const boost::system::error_code& error_code);
 	void writeHandler(const boost::system::error_code& error_code);
 	void welcome();
+	void disconnect() const;
 };

@@ -1,6 +1,6 @@
 # TysiacOnline
 
-[bardzo stary niekatualny opis]
+[bardzo stary nieakatualny opis, tak samo stary jak kod w masterze]
 
 W tym momencie klient dziala jak prosty czat - kazdy gracz przy polaczeniu z serwerem dostaje kolejne id, a przy probie dolaczenia do pokoju jest przypisywany do pierwszego wolnego; w kazdym pokoju moze byc 3 graczy i kazdy pokoj ma osobny czat. Bedac w pokoju, wyslana wiadomosc dojdzie jedynie do pozostalych graczy znajdujacych sie w tym samym pokoju. Po stronie serwerowej logiki gry znajduje sie juz wiecej funkcjonalnosci zwiazanych z cala gra, jednak nie zostala jeszcze zaimplementowana pelna komunikacja server<->client.
 

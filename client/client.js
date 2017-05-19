@@ -139,6 +139,7 @@ function handleWelcome(msg) {
 }
 
 function handleShow(msg) {
+	$("#room_list").html("");
 	if (msg.hasOwnProperty("data")) {
 		loadRooms(msg.data);
 	}
@@ -280,12 +281,14 @@ function handleEnd(msg) {
 	for (let player of game.players) {
 		player.score = 0;
 	}
+	game.round = 0;
 	var text = getPlayerWithId(msg.player) + " wins the game with " + msg.data + " points!";
 	$("#win_modal .modal-title").text(text);
 	$("#win_modal").modal({ backdrop: false });
 }
 
 function handleLeave(msg) {
+	$("#ready_modal").modal("hide");
 	addMessage(getPlayerWithId(msg.data).nick + " has left the room");
 	for (let i in game.players) {
 		if (game.players[i].id == msg.data) {
@@ -293,6 +296,7 @@ function handleLeave(msg) {
 			break;
 		}
 	}
+	clearCardData();
 	self.index = (game.players[0].id == self.id ? 0 : 1);
 }
 
@@ -308,7 +312,7 @@ function initiateEventListeners() {
 		}
 	});
 	$("#leave").click(leaveRoom);
-	//$("#login_modal").modal({ backdrop: "static" }); //FIXME
+	$("#login_modal").modal({ backdrop: "static" }); //FIXME
 	$("#login_modal").on("shown.bs.modal", function () {
 		$("#nickname").focus();
 	});
@@ -317,6 +321,7 @@ function initiateEventListeners() {
 	$("#win_modal .btn").click(function () {
 		$("#win_modal").modal("hide");
 		clearTable();
+		hideModals();
 		checkReady();
 	});
 }
@@ -342,6 +347,7 @@ function leaveRoom() {
 	sendToServer(msg);
 	clearTable();
 	clearChat();
+	hideModals();
 	game = null;
 	requestRefresh();
 	$("#game_panel").hide();
@@ -406,7 +412,7 @@ function addPlayer(player) {
 }
 
 function showBids(min, max) {
-	$("#bids_modal").modal({ backdrop: false });
+	$("#bids").html("");
 
 	// normal bid (includes pass button)
 	if (self.cards.length != 10) {
@@ -449,10 +455,12 @@ function showBids(min, max) {
 		});
 		$("#bids").append(elem);
 	}
+
+	$("#bids_modal").modal({ backdrop: false });
+	$(".modal-backdrop").appendTo("#game_canvas");
 }
 
 function sendBid(event) {
-	$("#bids").html("");
 	$('#bids_modal').modal("hide");
 	var msg = {
 		action: "bid",
@@ -462,7 +470,6 @@ function sendBid(event) {
 }
 
 function loadRooms(data) {
-	$("#room_list").html("");
 	for (let room of data) {
 		var players = room.nick.join(", ");
 		var elem = $("<button/>", {
@@ -480,6 +487,7 @@ function loadRooms(data) {
 }
 
 function askReady() {
+	clearTable();
 	$("#ready_modal").modal({ backdrop: false });
 }
 
@@ -840,6 +848,9 @@ function clearTable() {
 	$(".bid").text("");
 	$(".opponent_cards img").prop("src", "images/empty.png");
 	$("#cards").html("");
+}
+
+function hideModals() {
 	$(".modal").modal("hide");
 }
 

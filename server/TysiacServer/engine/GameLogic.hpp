@@ -64,6 +64,7 @@ enum commands {
 
 enum stage {
 	FAIL,
+	LEAVING,
 	ADDING,
 	STARTING,
 	BIDDING,
@@ -263,8 +264,8 @@ public:
 
 	virtual stage changeModel(const json& msg, const stage stage_);
 	virtual request_type createMessages(const json & msg, const stage stage_);
-private:
 	stage bid(const json & msg, const stage stage_);
+private:
 	request_type createUpdateInfo(const json & msg) const;
 	request_type createSpecialInfo(const json & msg) const;
 	json createStock(const json & msg) const;

@@ -644,7 +644,12 @@ bool Room::runGame(const json & msg)
 	stage temp_stage;
 	temp_stage = employees_[parse(msg["action"])]->changeModel(msg, stage_);
 	request = employees_[parse(msg["action"])]->createMessages(msg, temp_stage);
-	stage_ = temp_stage;
+	if (temp_stage == LEAVING) {
+		stage_ = ADDING;
+	}
+	else {
+		stage_ = temp_stage;
+	}
 	if (temp_stage == SUMMING_UP) {
 		employees_[BID]->changeModel(msg, SUMMING_UP);
 		tmp = employees_[BID]->createMessages(msg, SUMMING_UP);
@@ -728,7 +733,10 @@ stage LeaveBuster::changeModel(const json & msg, const stage stage_)
 		}
 	}
 	players_.resetPlayerAttributes(true);
-	return ADDING;
+	if (stage_ != ADDING && stage_ != ENDING) {
+		return LEAVING;
+	}
+	else return ADDING;
 }
 
 request_type LeaveBuster::createMessages(const json & msg, const stage stage_)

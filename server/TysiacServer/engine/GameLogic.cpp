@@ -1588,6 +1588,9 @@ bool GameManager::runGame(const json & msg)
 		returnExistingRooms(msg);
 		return true;
 	}
+	if (msg["action"] == "disconnect" && findGameId(msg["player"]) == -1) {
+		return true;
+	}
 	return false;
 }
 

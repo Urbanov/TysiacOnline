@@ -35,6 +35,9 @@ void Server::run(const std::string& address, size_t port)
 
 void Server::acceptHandler(const boost::system::error_code& error_code)
 {
+	if (error_code) {
+		return;
+	}
 	//TODO: handle errors
 	std::shared_ptr<Session> session = std::make_shared<Session>(manager_, std::move(socket_));
 	session->run();

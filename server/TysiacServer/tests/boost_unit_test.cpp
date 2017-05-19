@@ -123,7 +123,7 @@ void addPlayers(PlayersCollection& players)
 	}
 }
 
-/*void addScoreToPlayers(PlayersCollection & players, std::vector<std::pair<int, int> > vec)
+void addScoreToPlayers(PlayersCollection & players, std::vector<std::pair<int, int> > vec)
 {
 	addPlayers(players);
 	players.prepareGame(true);
@@ -131,7 +131,7 @@ void addPlayers(PlayersCollection& players)
 		players.getArray()[i].getScoreClass().setClaim(vec[i].first, false);
 		players.getArray()[i].getScoreClass().addToTurnScore(vec[i].second);
 	}
-}*/
+}
 
 std::vector<int> getScoreOfPlayers(PlayersCollection & players)
 {
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(CreateCardAndSetIfUsed)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-/*
+
 BOOST_FIXTURE_TEST_SUITE(PlayerDeckTests, PlayerDeck)
 BOOST_AUTO_TEST_CASE(AddCardCheckDeckLengthAndClearDeck)
 {
@@ -713,4 +713,4 @@ BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers2)
 	BOOST_CHECK_EQUAL(expected, returned);
 }
 
-BOOST_AUTO_TEST_SUITE_END()*/
+BOOST_AUTO_TEST_SUITE_END()

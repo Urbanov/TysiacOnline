@@ -55,13 +55,34 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\client\client.js">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\client\styles.css">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\client\client.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\handlers.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\lobby.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\main.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\player.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\view.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\controller.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\game.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\card.js">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

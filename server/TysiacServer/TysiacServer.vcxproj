@@ -256,7 +256,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\client\client.html" />
-    <None Include="..\..\client\client.js" />
+    <None Include="..\..\client\scripts\card.js" />
+    <None Include="..\..\client\scripts\controller.js" />
+    <None Include="..\..\client\scripts\handlers.js" />
+    <None Include="..\..\client\scripts\lobby.js" />
+    <None Include="..\..\client\scripts\main.js" />
+    <None Include="..\..\client\scripts\player.js" />
+    <None Include="..\..\client\scripts\game.js" />
+    <None Include="..\..\client\scripts\view.js" />
     <None Include="..\..\client\styles.css" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,7 +18,9 @@ Session::Session(SessionManager& manager, boost::asio::ip::tcp::socket&& socket)
 
 void Session::run()
 {
-	websocket_.async_accept(std::bind(&Session::acceptHandler, shared_from_this(), beast::asio::placeholders::error));
+	websocket_.async_accept(std::bind(
+		&Session::acceptHandler, shared_from_this(), beast::asio::placeholders::error
+	));
 }
 
 void Session::acceptHandler(const boost::system::error_code& error_code)
@@ -29,7 +31,9 @@ void Session::acceptHandler(const boost::system::error_code& error_code)
 
 	manager_.registerSession(shared_from_this());
 	welcome();
-	websocket_.async_read(opcode_, buffer_, std::bind(&Session::readHandler, shared_from_this(), beast::asio::placeholders::error));
+	websocket_.async_read(opcode_, buffer_, std::bind(
+		&Session::readHandler, shared_from_this(), beast::asio::placeholders::error
+	));
 }
 
 void Session::readHandler(const boost::system::error_code& error_code)
@@ -40,7 +44,10 @@ void Session::readHandler(const boost::system::error_code& error_code)
 		return;
 	}
 
-	websocket_.async_read(opcode_, buffer_, std::bind(&Session::readHandler, shared_from_this(), beast::asio::placeholders::error));
+	websocket_.async_read(opcode_, buffer_, std::bind(
+		&Session::readHandler, shared_from_this(), beast::asio::placeholders::error
+	));
+
 	auto message = beast::to_string(buffer_.data());
 	const std::string msg(message);
 	buffer_.consume(buffer_.size());
@@ -52,7 +59,9 @@ void Session::write(const std::string& message)
 	queue_.push(message);
 	if (!busy_) {
 		busy_ = true;
-		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error));
+		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(
+			&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error
+		));
 	}
 }
 
@@ -65,7 +74,9 @@ void Session::writeHandler(const boost::system::error_code& error_code)
 
 	queue_.pop();
 	if (!queue_.empty()) {
-		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error));
+		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(
+			&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error
+		));
 	} else {
 		busy_ = false;
 	}

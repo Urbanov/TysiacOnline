@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed3)
 		}
 	}
 	std::vector<Card> vec = { { JACK, SPADES }, { NINE, HEARTS } };
-	json tmp = { 5, 6, 7, 8, 9 };
+	json tmp = { 16, 17, 18, 19 };
 	json tmp1 = getAllValidCards(vec, HEARTS);
 	BOOST_CHECK_EQUAL(tmp1, tmp);
 }
@@ -376,6 +376,25 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed9)
 	json tmp1 = getAllValidCards(vec, HEARTS);
 	BOOST_CHECK_EQUAL(tmp1, tmp);
 }
+
+BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed10)
+{
+	std::vector<suits> suit = { CLUBS, DIAMONDS };
+	std::vector<figures> figure = { NINE, QUEEN, KING, TEN };
+	for (const auto& i : suit) {
+		for (const auto & j : figure) {
+			addCard(Card(j, i));
+		}
+	}
+	addCard(Card(NINE, DIAMONDS));
+	getDeck().back().setIsUsed(true);
+	std::vector<Card> vec = { { JACK, DIAMONDS }, { ACE, DIAMONDS } };
+	json tmp = { 4,5,6,7 };
+	json tmp1 = getAllValidCards(vec, DIAMONDS);
+	BOOST_CHECK_EQUAL(tmp1, tmp);
+}
+
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

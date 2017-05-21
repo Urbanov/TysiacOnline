@@ -36,7 +36,7 @@ Card Card::operator=(Card && card)
 	return *this;
 }
 
-bool Card::operator==(const Card & other)
+bool Card::operator==(const Card & other) const
 {
 	return (suit_ == other.suit_ && figure_ == other.figure_);
 }
@@ -63,7 +63,7 @@ const suits Card::getSuit() const
 	return suit_;
 }
 
-const Card & Card::isBigger(const Card & other, suits suit)
+const Card & Card::isBigger(const Card & other, suits suit) const
 {
 	if (suit_ == other.suit_) {
 		if (figure_ > other.figure_) {
@@ -119,7 +119,7 @@ bool PlayerDeck::doesHavePair(suits suit)
 	return (findCard(KING, suit) || findCard(QUEEN, suit));
 }
 
-std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits superior)
+const std::vector<int> PlayerDeck::getAllValidCards(const std::vector<Card> & vec, suits superior) const
 {
 	std::vector<int> correct_cards, tmp;
 	if (vec.empty()) {
@@ -131,13 +131,26 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 		return correct_cards;
 	}
 	Card card = vec[0];
-	if (vec.size() == 2 && isHigher(vec[0], vec[1], superior)) {
+	if (vec.size() == 2 && vec[0].isBigger(vec[1], superior) == vec[1]) {
 		card = vec[1];
 	}
 	for (size_t i = 0; i < deck_.size(); ++i) {
-		if (isHigher(card, deck_[i], superior) || 
-			(vec[0].getSuit() == deck_[i].getSuit() && !deck_[i].getIsUsed())) {
+		if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit() ) {
 			correct_cards.push_back(i);
+		}
+	}
+	if (correct_cards.empty()) {
+		for (size_t i = 0; i < deck_.size(); ++i) {
+			if ((vec[0].getSuit() == deck_[i].getSuit() && !deck_[i].getIsUsed())) {
+				correct_cards.push_back(i);
+			}
+		}
+	}
+	if (correct_cards.empty()) {
+		for (size_t i = 0; i < deck_.size(); ++i) {
+			if (isHigher(card, deck_[i], superior)) {
+				correct_cards.push_back(i);
+			}
 		}
 	}
 	if (correct_cards.empty()) {
@@ -146,53 +159,9 @@ std::vector<int> PlayerDeck::getAllValidCards(std::vector<Card> & vec, suits sup
 				correct_cards.push_back(i);
 			}
 		}
-		return correct_cards;
+		//return correct_cards;
 	}
-	if (vec[0].getFigure() == card.getFigure() && (vec[0].getSuit() == card.getSuit())
-		|| vec[0].getSuit() == vec[1].getSuit()) {
-		for (const auto & i : correct_cards) {
-			if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit()) {
-				tmp.push_back(i);
-			}
-		}
-		if (!tmp.empty()) {
-			return tmp;
-		}
-		else {
-			for (const auto & i : correct_cards) {
-				if (!deck_[i].getIsUsed() && card.getSuit() == deck_[i].getSuit()) {
-					tmp.push_back(i);
-				}
-			}
-		}
-		if (!tmp.empty()) {
-			return tmp;
-		}
-		else {
-			for (const auto & i : correct_cards) {
-				if (isHigher(card, deck_[i], superior)) {
-					tmp.push_back(i);
-				}
-			}
-		}
-		return tmp;
-	}
-	for (const auto & i : correct_cards) {
-		if (!deck_[i].getIsUsed() && vec[0].getSuit() == deck_[i].getSuit()) {
-			tmp.push_back(i);
-		}
-	}
-	if (!tmp.empty()) {
-		return tmp;
-	}
-	else {
-		for (const auto & i : correct_cards) {
-			if (isHigher(card, deck_[i], superior)) {
-				tmp.push_back(i);
-			}
-		}
-		return tmp;
-	}
+	return correct_cards;
 }
 
 std::size_t PlayerDeck::getMaxValue(bool isLateBid)
@@ -235,7 +204,7 @@ bool PlayerDeck::findCard(figures figure, suits suit) const
 	return false;
 }
 
-bool PlayerDeck::isHigher(const Card & played, const Card deck_card, suits superior)
+bool PlayerDeck::isHigher(const Card & played, const Card & deck_card, suits superior) const
 {
 	if (deck_card.getIsUsed()) {
 		return false;
@@ -614,7 +583,7 @@ Room::Room(int room_id, GameManager & man)
 	, room_id_(room_id)
 	, stage_(ADDING)
 {
-	employees_.push_back(new LeaveBuster(deck_, players_));
+	employees_.push_back(new LeaveBuster(deck_, players_, employees_));
 	employees_.push_back(new ChatBox(deck_, players_));
 	employees_.push_back(new Adder(deck_, players_));
 	employees_.push_back(new Bidder(deck_, players_));
@@ -716,14 +685,18 @@ Controller::Controller(Deck & deck, PlayersCollection & players)
 Controller::~Controller()
 {}
 
+void Controller::reset()
+{}
+
 // </Class Controller>
 
 
 
 // <Class LeaveBuster>
 
-LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players) 
+LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players, std::vector<Controller*>& controllers)
 	: Controller(deck, players)
+	, controllers_(controllers)
 {}
 
 LeaveBuster::~LeaveBuster()
@@ -737,6 +710,12 @@ stage LeaveBuster::changeModel(const json & msg, const stage stage_)
 			break;
 		}
 	}
+	if (stage_ != ADDING) {
+		for (auto& i : controllers_) {
+			i->reset();
+		}
+	}
+
 	players_.resetPlayerAttributes(true);
 	deck_.reset();
 	if (stage_ != ADDING && stage_ != ENDING) {
@@ -830,6 +809,7 @@ request_type Adder::createMessages(const json & msg, const stage stage_)
 	request.push_back(acceptNewPlayer(msg, stage_));
 	return request;
 }
+
 
 bool Adder::isFull() const
 {
@@ -941,6 +921,11 @@ void Starter::setIsFull(bool is_full)
 	is_full_ = is_full;
 }
 
+void Starter::reset()
+{
+	is_full_ = false;
+}
+
 bool Starter::isReadyToStart() const
 {
 	if (players_.getArray().size() != MAX_PLAYERS) {
@@ -1008,6 +993,11 @@ stage Bidder::bid(const json & msg, const stage stage_)
 		return DEALING;
 	}
 	return BIDDING;
+}
+void Bidder::reset()
+{
+	additional_cards_.clear();
+	starter_.reset();
 }
 stage Bidder::changeModel(const json & msg, const stage stage_)
 {

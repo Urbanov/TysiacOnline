@@ -97,13 +97,13 @@ public:
 	Card(Card&&);
 	Card operator=(const Card&);
 	Card operator=(Card&&);
-	bool operator==(const Card& other);
+	bool operator==(const Card& other) const;
 	~Card();
 	bool getIsUsed() const;
 	void setIsUsed(bool) const;
 	const figures getFigure() const;
 	const suits getSuit() const;
-	const Card & isBigger(const Card & other, suits suit);
+	const Card & isBigger(const Card & other, suits suit) const;
 private:
 	mutable bool is_used_;
 	figures figure_;
@@ -119,9 +119,9 @@ public:
 	void addCard(const Card&);
 	const Card & playCard(std::size_t) const;
 	bool doesHavePair(suits);
-	std::vector<int> getAllValidCards(std::vector<Card> &, suits);
+	const std::vector<int> getAllValidCards(const std::vector<Card> &, suits) const;
 	std::size_t getMaxValue(bool);
-	bool isHigher(const Card &, const Card, suits);
+	bool isHigher(const Card &, const Card & deck_card, suits) const;
 private:
 	bool findCard(figures figure, suits suit) const;
 	std::vector<Card> deck_;
@@ -209,6 +209,7 @@ public:
 	virtual ~Controller();
 	virtual stage changeModel(const json & msg, const stage stage_) = 0;
 	virtual request_type createMessages(const json & msg, const stage stage_) = 0;
+	virtual void reset();
 protected:
 	Deck & deck_;
 	PlayersCollection & players_;
@@ -216,10 +217,12 @@ protected:
 
 class LeaveBuster : public Controller {
 public:
-	LeaveBuster(Deck &, PlayersCollection &);
+	LeaveBuster(Deck &, PlayersCollection &, std::vector<Controller*>& controllers);
 	virtual ~LeaveBuster();
 	virtual stage changeModel(const json & msg, const stage stage_);
 	virtual request_type createMessages(const json & msg, const stage stage_);
+private:	
+	std::vector<Controller*>& controllers_;
 };
 
 class ChatBox : public Controller {
@@ -252,6 +255,7 @@ public:
 	json createStartMessage(const json & msg) const;
 	bool getIsFull() const;
 	void setIsFull(bool);
+	virtual void reset();
 private:
 	bool isReadyToStart() const;
 	void prepareToStart(stage);
@@ -266,6 +270,7 @@ public:
 	virtual stage changeModel(const json& msg, const stage stage_);
 	virtual request_type createMessages(const json & msg, const stage stage_);
 	stage bid(const json & msg, const stage stage_);
+	virtual void reset();
 private:
 	request_type createUpdateInfo(const json & msg) const;
 	request_type createSpecialInfo(const json & msg) const;
@@ -287,7 +292,7 @@ public:
 	virtual request_type createMessages(const json & msg, const stage stage_);
 	stage giveCardToPeer(int player_id, std::size_t card_number);
 	void dealCards();
-	void reset();
+	virtual void reset();
 private:
 	request_type createMessage(const json &);
 	json createFinalBidMessage();
@@ -321,7 +326,7 @@ public:
 	int compareCardsAndPassToWinner();
 	void setSuperiorSuit();
 	void setStartingPlayer(int);
-	void reset();
+	virtual void reset();
 private:
 	SumScore score_;
 	std::vector<std::pair<int, Card> > vec_;

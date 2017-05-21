@@ -19,6 +19,8 @@ void SessionManager::interpret(size_t id, const std::string& message)
 		for(auto id : msg.second) {
 			if (auto session = sessions_.at(id).lock()) {
 				session->write(msg.first);
+			} else {
+				throw std::runtime_error("SessionManager: trying to send data to non-existing session");
 			}
 		}
 	}

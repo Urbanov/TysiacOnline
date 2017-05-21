@@ -23,7 +23,10 @@ void Session::run()
 
 void Session::acceptHandler(const boost::system::error_code& error_code)
 {
-	//TODO: handle errors
+	if (error_code) {
+		return;
+	}
+
 	manager_.registerSession(shared_from_this());
 	welcome();
 	websocket_.async_read(opcode_, buffer_, std::bind(&Session::readHandler, shared_from_this(), beast::asio::placeholders::error));
@@ -31,12 +34,12 @@ void Session::acceptHandler(const boost::system::error_code& error_code)
 
 void Session::readHandler(const boost::system::error_code& error_code)
 {
-	//TODO: handle errors
+	// close connection
 	if (error_code) {
-		manager_.unregisterSession(id_);
 		disconnect();
 		return;
 	}
+
 	websocket_.async_read(opcode_, buffer_, std::bind(&Session::readHandler, shared_from_this(), beast::asio::placeholders::error));
 	auto message = beast::to_string(buffer_.data());
 	const std::string msg(message);
@@ -55,7 +58,11 @@ void Session::write(const std::string& message)
 
 void Session::writeHandler(const boost::system::error_code& error_code)
 {
-	//TODO: handle errors
+	if (error_code) {
+		disconnect();
+		return;
+	}
+
 	queue_.pop();
 	if (!queue_.empty()) {
 		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error));
@@ -79,6 +86,7 @@ void Session::welcome()
 
 void Session::disconnect() const
 {
+	manager_.unregisterSession(id_);
 	nlohmann::json msg;
 	msg["action"] = "disconnect";
 	manager_.interpret(id_, msg.dump());

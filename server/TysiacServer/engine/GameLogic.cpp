@@ -483,6 +483,11 @@ void Deck::shuffle()
 	std::shuffle(deck_.begin(), deck_.end(), engine);
 }
 
+void Deck::reset()
+{
+	deck_it_ = deck_.begin();
+}
+
 // </Class Deck>
 
 
@@ -733,6 +738,7 @@ stage LeaveBuster::changeModel(const json & msg, const stage stage_)
 		}
 	}
 	players_.resetPlayerAttributes(true);
+	deck_.reset();
 	if (stage_ != ADDING && stage_ != ENDING) {
 		return LEAVING;
 	}

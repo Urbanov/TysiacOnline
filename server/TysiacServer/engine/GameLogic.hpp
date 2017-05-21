@@ -178,6 +178,7 @@ public:
 	void dealCards(players&);
 	json addBonusCards(Player &);
 	void shuffle();
+	void reset();
 private:
 	std::random_device rd_;
 	std::vector<Card> deck_;

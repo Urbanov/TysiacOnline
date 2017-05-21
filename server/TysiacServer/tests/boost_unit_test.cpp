@@ -67,6 +67,30 @@ std::string createReadyMessage(int player_id = -1)
 	return ready.dump();
 }
 
+void readyToAll(GameManager & man, std::vector<int> id)
+{
+	json feedback;
+	feedback["action"] = "ready";
+	for (auto& i : id) {
+		man.doWork(i, feedback.dump());
+	}
+}
+
+void addPlayersByAddMessage(GameManager & man, std::vector<int> id, int server_id)
+{
+	int new_id;
+	if (server_id == -1) {
+		man.doWork(id[0], createAddRequest(server_id))[0].first;
+		new_id = 0;
+	}
+	else {
+		new_id = server_id;
+		man.doWork(id[0], createAddRequest(new_id));
+	}
+	man.doWork(id[1], createAddRequest(new_id));
+	man.doWork(id[2], createAddRequest(new_id));
+}
+
 std::string createBidMessage(int bid)
 {
 	json msg = {
@@ -147,6 +171,14 @@ void addCards(Player & player, std::vector<Card> vec)
 	for (const auto & i : vec) {
 		player.getPlayerDeck().addCard(i);
 	}
+}
+
+std::string createLeaveMessage()
+{
+	json feedback = {
+		{"action", "disconnect"}
+	};
+	return feedback.dump();
 }
 
 BOOST_AUTO_TEST_SUITE(CardTests)
@@ -578,6 +610,7 @@ BOOST_AUTO_TEST_CASE(AddTwoAndGetAllMessageBack)
 	BOOST_CHECK_EQUAL(feedback2[1].first, createAddAnswer({ 0, 1 }, true, false));
 	BOOST_CHECK_EQUAL(feedback2[0].first, createAddAnswer({ 1 }, false, false));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(GameManagerTests)
@@ -713,4 +746,16 @@ BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers2)
 	BOOST_CHECK_EQUAL(expected, returned);
 }
 
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(LeaveBusterTests)
+BOOST_AUTO_TEST_CASE(AddThreeStartGameThenLeaveAndStartGameAgain)
+{
+	GameManager man;
+	addPlayersByAddMessage(man, { 0,1,2 }, -1);
+	readyToAll(man, { 0,1,2 });
+	man.doWork(0, createLeaveMessage());
+	man.doWork(0, createAddRequest(0));
+	readyToAll(man, { 0,1,2 });
+}
 BOOST_AUTO_TEST_SUITE_END()

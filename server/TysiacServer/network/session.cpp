@@ -1,6 +1,7 @@
 #include <beast/websocket/stream.hpp>
 #include <beast/core/placeholders.hpp>
 #include <beast/core.hpp>
+#include <json.hpp>
 
 #include "session.h"
 #include "manager.h"
@@ -32,8 +33,8 @@ void Session::readHandler(const boost::system::error_code& error_code)
 {
 	//TODO: handle errors
 	if (error_code) {
-		disconnect();
 		manager_.unregisterSession(id_);
+		disconnect();
 		return;
 	}
 	websocket_.async_read(opcode_, buffer_, std::bind(&Session::readHandler, shared_from_this(), beast::asio::placeholders::error));
@@ -63,17 +64,22 @@ void Session::writeHandler(const boost::system::error_code& error_code)
 	}
 }
 
-std::size_t Session::getId() const
+size_t Session::getId() const
 {
 	return id_;
 }
 
 void Session::welcome()
 {
-	write("{\"action\":\"welcome\",\"data\":" + std::to_string(id_) + "}");
+	nlohmann::json msg;
+	msg["action"] = "welcome";
+	msg["data"] = id_;
+	write(msg.dump());
 }
 
 void Session::disconnect() const
 {
-	manager_.interpret(id_, "{\"action\":\"disconnect\"}");
+	nlohmann::json msg;
+	msg["action"] = "disconnect";
+	manager_.interpret(id_, msg.dump());
 }

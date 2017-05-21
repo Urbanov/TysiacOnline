@@ -7,7 +7,9 @@ void SessionManager::registerSession(const std::shared_ptr<Session>& session)
 
 void SessionManager::unregisterSession(size_t id)
 {
-	sessions_.erase(id);
+	if (!sessions_.erase(id)) {
+		throw std::runtime_error("SessionManager: trying to unregister non-existing session");
+	}
 }
 
 void SessionManager::interpret(size_t id, const std::string& message)
@@ -18,7 +20,11 @@ void SessionManager::interpret(size_t id, const std::string& message)
 			if (auto session = sessions_.at(id).lock()) {
 				session->write(msg.first);
 			}
-			//sessions_.at(id).lock()->write(msg.first);
 		}
 	}
+}
+
+size_t SessionManager::connected() const
+{
+	return sessions_.size();
 }

@@ -33,6 +33,11 @@ void Server::run(const std::string& address, size_t port)
 	acceptor_.async_accept(socket_, endpoint_, std::bind(&Server::acceptHandler, this, beast::asio::placeholders::error));
 }
 
+size_t Server::connected() const
+{
+	return manager_.connected();
+}
+
 void Server::acceptHandler(const boost::system::error_code& error_code)
 {
 	if (error_code) {

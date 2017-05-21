@@ -159,7 +159,6 @@ const std::vector<int> PlayerDeck::getAllValidCards(const std::vector<Card> & ve
 				correct_cards.push_back(i);
 			}
 		}
-		//return correct_cards;
 	}
 	return correct_cards;
 }
@@ -312,7 +311,7 @@ void Score::roundScore()
 int Score::round(int number) const
 {
 	int temp = number % 10;
-	if (temp) {
+	if (temp!= 0) {
 		if (temp >=5) {
 			number += (10 - temp);
 		}
@@ -1079,14 +1078,12 @@ request_type Bidder::createBid(const json & msg, stage stage_) const
 	if (stage_ == BIDDING || stage_ == SUMMING_UP) {
 		request = createUpdateInfo(msg);
 	}
-	else if (stage_ == PLAYING || stage_ == DEALING ) {
-		request = createSpecialInfo(msg);
-		if (stage_ == PLAYING) {
+	else if (stage_ == PLAYING) {
 			request.push_back(starter_.createStartMessage(msg));
-		}
-		else {
-			request.push_back(createStock(msg));
-		}
+	}
+	else if(stage_ == DEALING) {
+		request = createSpecialInfo(msg);
+		request.push_back(createStock(msg));
 	}
 	return request;
 }
@@ -1126,7 +1123,7 @@ request_type Bidder::createStarterMessages(const json & msg, stage stage_)
 {
 	request_type tmp, request;
 	if (!starter_.getIsFull()) {
-		if (stage_ == BIDDING) {
+		if (stage_ == ADDING) {
 			request = starter_.createMessages(msg, stage_);
 		}
 		if (stage_ == BIDDING || stage_ == SUMMING_UP) {

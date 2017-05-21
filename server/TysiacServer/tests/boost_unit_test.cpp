@@ -665,6 +665,7 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBid)
 	for (int i = 0; i < 3; ++i) {
 		man.doWork(i, createAddRequest(i > 0 ? 0 : -1));
 	}
+
 	for (int i = 0; i < 3; ++i) {
 		man.doWork(i, createReadyMessage());
 	}
@@ -693,7 +694,7 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 	json msg = json::parse(feedback[1].first.begin(), feedback[1].first.end());
 	BOOST_CHECK_EQUAL(msg["action"], "stock");
 	BOOST_CHECK_EQUAL(msg["data"].size(), 3);
-	BOOST_CHECK_EQUAL(feedback[1].second.size(), 3);
+	BOOST_CHECK_EQUAL(feedback[0].second.size(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack1)

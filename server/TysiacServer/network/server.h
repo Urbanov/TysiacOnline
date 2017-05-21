@@ -13,6 +13,8 @@ public:
 	Server(const Server& server) = delete;
 	Server& operator=(const Server& server) = delete;
 	void run(const std::string& address, size_t port);
+	void stop();
+	bool isAccepting() const;
 
 private:
 	boost::asio::io_service ios_;

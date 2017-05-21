@@ -1504,7 +1504,7 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 		}
 	}
 	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
+		std::cout << "GameManager: " << e.what() << std::endl;
 	}
 	return server_response_;
 }

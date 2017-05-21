@@ -13,10 +13,7 @@ Server::Server()
 
 Server::~Server()
 {
-	boost::system::error_code error_code;
-	work_ = boost::none;
-	ios_.dispatch([&] { acceptor_.close(error_code); });
-	thread_.join();
+	stop();
 }
 
 void Server::run(const std::string& address, size_t port)
@@ -33,9 +30,21 @@ void Server::run(const std::string& address, size_t port)
 	acceptor_.async_accept(socket_, endpoint_, std::bind(&Server::acceptHandler, this, beast::asio::placeholders::error));
 }
 
-size_t Server::connected() const
+void Server::stop()
 {
-	return manager_.connected();
+	boost::system::error_code error_code;
+	if (isAccepting()) {
+		ios_.dispatch([&] { acceptor_.close(error_code); });
+	}
+	work_ = boost::none;
+	if (thread_.joinable()) {
+		thread_.join();
+	}
+}
+
+bool Server::isAccepting() const
+{
+	return acceptor_.is_open();
 }
 
 void Server::acceptHandler(const boost::system::error_code& error_code)

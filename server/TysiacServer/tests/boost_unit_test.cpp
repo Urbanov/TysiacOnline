@@ -1,6 +1,8 @@
 #define BOOST_TEST_MODULE game_engine_test
 #include <boost/test/unit_test.hpp>
-#include "../engine/GameLogic.hpp"
+#include "../engine/GameManager.hpp"
+#include "../engine/Room.hpp"
+#include "../engine/Controller.hpp"
 
 std::string createAddRequest(int server_id)
 {
@@ -134,7 +136,7 @@ Player createPlayerWithAppropriateCards(suits type)
 	Player player(type, str);
 	std::vector<figures> figures = { NINE, JACK, QUEEN, KING, TEN, ACE };
 	for (const auto& i : figures) {
-		player.getPlayerDeck().addCard(Card(i, type));
+		player.getPlayersDeck().addCard(Card(i, type));
 	}
 	return player;
 }
@@ -169,7 +171,7 @@ std::vector<int> getScoreOfPlayers(PlayersCollection & players)
 void addCards(Player & player, std::vector<Card> vec)
 {
 	for (const auto & i : vec) {
-		player.getPlayerDeck().addCard(i);
+		player.getPlayersDeck().addCard(i);
 	}
 }
 
@@ -207,7 +209,7 @@ BOOST_AUTO_TEST_CASE(CreateCardAndSetIfUsed)
 BOOST_AUTO_TEST_SUITE_END()
 
 
-BOOST_FIXTURE_TEST_SUITE(PlayerDeckTests, PlayerDeck)
+BOOST_FIXTURE_TEST_SUITE(PlayerDeckTests, PlayersDeck)
 BOOST_AUTO_TEST_CASE(AddCardCheckDeckLengthAndClearDeck)
 {
 	Card c1(NINE, CLUBS);
@@ -463,11 +465,11 @@ BOOST_AUTO_TEST_CASE(HandOutCards)
 	for (int i = 0; i < 3; ++i) {
 		players_array.push_back(p1);
 	}
-	BOOST_REQUIRE(players_array[0].getPlayerDeck().getDeck().size() == 0);
+	BOOST_REQUIRE(players_array[0].getPlayersDeck().getDeck().size() == 0);
 	dealCards(players_array);
-	BOOST_REQUIRE(players_array[0].getPlayerDeck().getDeck().size() == 7);
+	BOOST_REQUIRE(players_array[0].getPlayersDeck().getDeck().size() == 7);
 	addBonusCards(players_array[0]);
-	BOOST_CHECK(players_array[0].getPlayerDeck().getDeck().size() == 10);
+	BOOST_CHECK(players_array[0].getPlayersDeck().getDeck().size() == 10);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -508,7 +510,7 @@ BOOST_AUTO_TEST_CASE(Return120MaxValue)
 	std::string test = "test";
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS }, { QUEEN, DIAMONDS}, {KING, SPADES}, { QUEEN, CLUBS } });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 120);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 120);
 }
 
 BOOST_AUTO_TEST_CASE(Return160MaxValue)
@@ -516,7 +518,7 @@ BOOST_AUTO_TEST_CASE(Return160MaxValue)
 	std::string test = "test";
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ QUEEN, SPADES } });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 160);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 160);
 }
 
 BOOST_AUTO_TEST_CASE(Return180MaxValue)
@@ -525,7 +527,7 @@ BOOST_AUTO_TEST_CASE(Return180MaxValue)
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
 	{ KING, CLUBS },{ QUEEN, CLUBS} });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 180);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 180);
 }
 
 BOOST_AUTO_TEST_CASE(Return200MaxValue)
@@ -534,7 +536,7 @@ BOOST_AUTO_TEST_CASE(Return200MaxValue)
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
 	{ KING, CLUBS },{ KING, DIAMONDS } });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 200);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 200);
 }
 
 BOOST_AUTO_TEST_CASE(Return220MaxValue)
@@ -543,7 +545,7 @@ BOOST_AUTO_TEST_CASE(Return220MaxValue)
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, SPADES },{ ACE, SPADES },
 	{ KING, HEARTS },{ QUEEN, CLUBS } });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 220);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 220);
 }
 
 BOOST_AUTO_TEST_CASE(Return300MaxValue)
@@ -552,7 +554,7 @@ BOOST_AUTO_TEST_CASE(Return300MaxValue)
 	Player p(0, test);
 	addCards(p, { { QUEEN, HEARTS },{ QUEEN, DIAMONDS },{ KING, DIAMONDS },{ ACE, SPADES },
 	{ KING, HEARTS },{ QUEEN, CLUBS } });
-	BOOST_CHECK_EQUAL(p.getPlayerDeck().getMaxValue(false), 300);
+	BOOST_CHECK_EQUAL(p.getPlayersDeck().getMaxValue(false), 300);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -699,9 +701,10 @@ BOOST_AUTO_TEST_CASE(PlayersGetReadyAndBidNegative)
 
 BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack1)
 {
+	std::vector<PController> vec;
 	PlayersCollection players;
 	Deck deck;
-	Game game(deck, players);
+	Game game(deck, players, vec);
 	players.getArray().push_back(createPlayerWithAppropriateCards(SPADES));
 	players.getArray().push_back(createPlayerWithAppropriateCards(DIAMONDS));
 	players.getArray().push_back(createPlayerWithAppropriateCards(HEARTS));
@@ -717,14 +720,15 @@ BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack1)
 
 BOOST_AUTO_TEST_CASE(PlayThreeCardsAndGetCorrectMessageBack2)
 {
+	std::vector<PController> vec;
 	PlayersCollection players;
 	Deck deck;
-	Game game(deck, players);
+	Game game(deck, players, vec);
 	json msg;
 	players.getArray().push_back(createPlayerWithAppropriateCards(SPADES));
 	players.getArray().push_back(createPlayerWithAppropriateCards(DIAMONDS));
 	players.getArray().push_back(createPlayerWithAppropriateCards(HEARTS));
-	players.getArray()[1].getPlayerDeck().addCard(Card(ACE, SPADES));
+	players.getArray()[1].getPlayersDeck().addCard(Card(ACE, SPADES));
 	players.prepareGame(true);
 	players.getNextPlayer(CURRENT);
 	players.getNextPlayer(CURRENT);
@@ -746,9 +750,10 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(SumTestClassTests)
 BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers1)
 {
+	std::vector<PController> vec;
 	PlayersCollection players;
 	Deck deck;
-	SumScore score(deck, players);
+	SumScore score(deck, players, vec);
 	addScoreToPlayers(players, { { 140, 120 },{ -1, 36 },{ -1, 14 } });
 	score.sumUpScore();
 	json expected = { -140, 40, 10 }, returned = getScoreOfPlayers(players);
@@ -757,9 +762,10 @@ BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers1)
 
 BOOST_AUTO_TEST_CASE(AddScoreToAllPlayers2)
 {
+	std::vector<PController> vec;
 	PlayersCollection players;
 	Deck deck;
-	SumScore score(deck, players);
+	SumScore score(deck, players, vec);
 	addScoreToPlayers(players, { { 140, 144 },{ -1, 36 },{ -1, 14 } });
 	score.sumUpScore();
 	json expected = { 140, 40, 10 }, returned = getScoreOfPlayers(players);

@@ -224,7 +224,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="engine\GameLogic.cpp" />
+    <ClCompile Include="engine\Adder.cpp" />
+    <ClCompile Include="engine\Bidder.cpp" />
+    <ClCompile Include="engine\Card.cpp" />
+    <ClCompile Include="engine\ChatBox.cpp" />
+    <ClCompile Include="engine\Controller.cpp" />
+    <ClCompile Include="engine\Dealer.cpp" />
+    <ClCompile Include="engine\Deck.cpp" />
+    <ClCompile Include="engine\Game.cpp" />
+    <ClCompile Include="engine\GameManager.cpp" />
+    <ClCompile Include="engine\LeaveBuster.cpp" />
+    <ClCompile Include="engine\Player.cpp" />
+    <ClCompile Include="engine\PlayersCollection.cpp" />
+    <ClCompile Include="engine\PlayersDeck.cpp" />
+    <ClCompile Include="engine\Room.cpp" />
+    <ClCompile Include="engine\Score.cpp" />
+    <ClCompile Include="engine\Starter.cpp" />
+    <ClCompile Include="engine\SumScore.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
@@ -248,7 +264,24 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="engine\GameLogic.hpp" />
+    <ClInclude Include="engine\Adder.hpp" />
+    <ClInclude Include="engine\Bidder.hpp" />
+    <ClInclude Include="engine\Card.hpp" />
+    <ClInclude Include="engine\ChatBox.hpp" />
+    <ClInclude Include="engine\ConstDefinitions.hpp" />
+    <ClInclude Include="engine\Controller.hpp" />
+    <ClInclude Include="engine\Dealer.hpp" />
+    <ClInclude Include="engine\Deck.hpp" />
+    <ClInclude Include="engine\Game.hpp" />
+    <ClInclude Include="engine\GameManager.hpp" />
+    <ClInclude Include="engine\LeaveBuster.hpp" />
+    <ClInclude Include="engine\Player.hpp" />
+    <ClInclude Include="engine\PlayersCollection.hpp" />
+    <ClInclude Include="engine\PlayersDeck.hpp" />
+    <ClInclude Include="engine\Room.hpp" />
+    <ClInclude Include="engine\Score.hpp" />
+    <ClInclude Include="engine\Starter.hpp" />
+    <ClInclude Include="engine\SumScore.hpp" />
     <ClInclude Include="network\manager.h" />
     <ClInclude Include="network\server.h" />
     <ClInclude Include="network\session.h" />

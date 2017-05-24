@@ -146,7 +146,7 @@ class Controller {
 		}
 		var full_text = this.self.nick + ": " + text;
 
-		this.view.addMessage(text);
+		this.view.addMessage(full_text);
 		var msg = {
 			action: "chat",
 			data: full_text

@@ -1,6 +1,6 @@
 #pragma once
 #include "Controller.hpp"
-#include "SumScore.hpp"
+#include "sum_score.hpp"
 
 const int MAX_TURNS = 8;
 

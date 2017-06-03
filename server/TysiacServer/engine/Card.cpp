@@ -1,4 +1,4 @@
-#include "Card.hpp"
+#include "card.hpp"
 
 
 Card::Card(figures fig, suits s)

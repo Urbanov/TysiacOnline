@@ -1,4 +1,4 @@
-#include "Game.hpp"
+#include "game.hpp"
 
 Game::Game(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
 	: score_(deck, players, controllers)

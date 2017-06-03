@@ -1,4 +1,4 @@
-#include "ChatBox.hpp"
+#include "chat_box.hpp"
 
 ChatBox::ChatBox(Deck & deck, PlayersCollection & players)
 	: Controller(deck, players)

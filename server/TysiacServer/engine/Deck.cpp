@@ -1,4 +1,4 @@
-#include "Deck.hpp"
+#include "deck.hpp"
 
 Deck::Deck(const std::vector<Card>& deck)
 	: deck_(deck)

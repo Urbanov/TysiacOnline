@@ -1,9 +1,9 @@
 #pragma once
 #include <json.hpp>
 #include <vector>
-#include "Player.hpp"
-#include "Controller.hpp"
-#include "Room.hpp"
+#include "player.hpp"
+#include "controller.hpp"
+#include "room.hpp"
 
 class Room;
 

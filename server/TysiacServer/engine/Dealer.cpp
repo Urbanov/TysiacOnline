@@ -1,4 +1,4 @@
-#include "Dealer.hpp"
+#include "dealer.hpp"
 
 Dealer::Dealer(Deck & deck, PlayersCollection & players)
 	: user_id_(-1)

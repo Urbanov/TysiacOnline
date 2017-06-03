@@ -1,4 +1,4 @@
-#include "Controller.hpp"
+#include "controller.hpp"
 
 Controller::Controller(Deck & deck, PlayersCollection & players)
 	: deck_(deck)

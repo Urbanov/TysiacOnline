@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "ConstDefinitions.hpp"
+#include "const_definitions.hpp"
 
 class GameManager {
 public:

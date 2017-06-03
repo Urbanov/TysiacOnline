@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Card.hpp"
+#include "card.hpp"
 
 const int MIN_VALUE = 120;
 

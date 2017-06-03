@@ -1,5 +1,5 @@
 #pragma once
-#include "Controller.hpp"
+#include "controller.hpp"
 
 const int TWO_CARDS = 2;
 

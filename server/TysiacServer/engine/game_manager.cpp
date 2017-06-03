@@ -1,4 +1,4 @@
-#include "GameManager.hpp"
+#include "game_manager.hpp"
 
 GameManager::GameManager()
 	: room_counter_(0)

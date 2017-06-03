@@ -1,4 +1,4 @@
-#include "PlayersDeck.hpp"
+#include "players_deck.hpp"
 
 PlayersDeck::PlayersDeck()
 	: max_value_(0)

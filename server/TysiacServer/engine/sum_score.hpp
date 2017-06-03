@@ -1,5 +1,5 @@
 #pragma once
-#include "Controller.hpp"
+#include "controller.hpp"
 
 const int POINTS_WINNING_CAP = 1000;
 

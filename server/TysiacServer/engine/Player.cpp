@@ -1,4 +1,4 @@
-#include "Player.hpp"
+#include "player.hpp"
 
 Player::Player(int player_id, std::string & nick)
 	: ready_(false)

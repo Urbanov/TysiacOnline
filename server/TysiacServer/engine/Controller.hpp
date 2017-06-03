@@ -1,6 +1,6 @@
 #pragma once
-#include "Deck.hpp"
-#include "PlayersCollection.hpp"
+#include "deck.hpp"
+#include "players_collection.hpp"
 
 class Controller;
 

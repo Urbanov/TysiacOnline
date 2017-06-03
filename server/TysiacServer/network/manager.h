@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include "../engine/GameManager.hpp"
+#include "../engine/game_manager.hpp"
 #include "session.h"
 
 class SessionManager {

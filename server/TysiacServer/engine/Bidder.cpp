@@ -8,6 +8,13 @@ Bidder::Bidder(Deck & deck, PlayersCollection & players)
 Bidder::~Bidder()
 {}
 
+/**
+*@brief checks if player attempting to bid does it during his turn and if the amount is correct
+*
+*@param msg bid message from the most recent bidding player
+*@msg informtion about last player
+s bid statitics
+*/
 stage Bidder::bid(const json & msg, const stage stage_)
 {
 	if (players_.getPlayer(CURRENT).getPlayerId() != msg["player"]) {
@@ -36,11 +43,24 @@ stage Bidder::bid(const json & msg, const stage stage_)
 	}
 	return BIDDING;
 }
+
+/**
+*@brief resets value of class members
+*used before each round
+*/
 void Bidder::reset()
 {
 	additional_cards_.clear();
 	starter_.reset();
 }
+
+/**
+*@brief calls either starter, or bid method
+*
+*@param msg message from bidding player
+*@param stage_ current server's stage
+*@return stage return new server's stage
+*/
 stage Bidder::changeModel(const json & msg, const stage stage_)
 {
 	if (stage_ == ADDING || stage_ == SUMMING_UP) {
@@ -51,6 +71,11 @@ stage Bidder::changeModel(const json & msg, const stage stage_)
 	}
 }
 
+/**
+*@brief creates message informing players about bid called by one of them
+*
+*@return vector of messages that will be broadcasted to all players in the room
+*/
 request_type Bidder::createMessages(const json & msg, stage stage_)
 {
 	request_type request, tmp;
@@ -61,6 +86,12 @@ request_type Bidder::createMessages(const json & msg, stage stage_)
 	return request;
 }
 
+/**
+*@brief creates bid message that informs player that the bidding is over
+*
+*@param message sent by most recent bidding player
+*@return vector of messages 
+*/
 request_type Bidder::createSpecialInfo(const json & msg) const
 {
 	request_type request;
@@ -78,6 +109,12 @@ request_type Bidder::createSpecialInfo(const json & msg) const
 	return request;
 }
 
+/**
+*@brief creates special message containing information about possible min and max value player can bid
+*
+*@param msg bid message sent by previous bidder
+*@return vector of messages to be sent to players
+*/
 request_type Bidder::createUpdateInfo(const json & msg) const
 {
 	json feedback;
@@ -102,6 +139,12 @@ request_type Bidder::createUpdateInfo(const json & msg) const
 	return request;
 }
 
+/**
+*@brief creates messages containing deteiled information about stock cards
+*
+*@param msg message sent by previous bidder
+*@return message including stock cards details
+*/
 json Bidder::createStock(const json & msg) const
 {
 	json feedback;
@@ -115,6 +158,13 @@ json Bidder::createStock(const json & msg) const
 	return feedback;
 }
 
+/**
+*@brief creates different kind of messages depending on current server's stage
+*
+*@param msg message sent by previous bidder
+*@param stage_ current server's stage
+*@return vector of messages that will be sent to players
+*/
 request_type Bidder::createBid(const json & msg, stage stage_) const
 {
 	request_type request;
@@ -131,6 +181,9 @@ request_type Bidder::createBid(const json & msg, stage stage_) const
 	return request;
 }
 
+/**
+*@brief creates first bid with unique value - 100
+*/
 request_type Bidder::firstBid(stage stage_)
 {
 	json feedback;
@@ -141,6 +194,11 @@ request_type Bidder::firstBid(stage stage_)
 	return request;
 }
 
+/**
+*@brief creates information about received cards for every player
+*
+*@return vector of messages that will be sent to players
+*/
 request_type Bidder::createCardDealingMessages() const
 {
 	json feedback;
@@ -162,6 +220,13 @@ request_type Bidder::createCardDealingMessages() const
 	return request;
 }
 
+/**
+*@brief depending on current server's stage, creates messages for players 
+*
+*@param msg most recent message sent by any player
+*@param stage_ current server's stage
+*@return a vector of messages that will be sent to players
+*/
 request_type Bidder::createStarterMessages(const json & msg, stage stage_)
 {
 	request_type tmp, request;

@@ -7,6 +7,13 @@ Adder::Adder(Deck & deck, PlayersCollection & players)
 Adder::~Adder()
 {}
 
+/**
+*@brief adds new player to a room
+*
+*@param msg add request sent by a player
+*@param stage current server's stage
+*@return new server's stage
+*/
 stage Adder::changeModel(const json & msg, const stage stage_)
 {
 	std::string tmp = msg["data"];
@@ -16,6 +23,14 @@ stage Adder::changeModel(const json & msg, const stage stage_)
 	return ADDING;
 }
 
+/**
+*@brief creates messages updating player's information
+about players in room
+*
+*@param msg add request sent to room by player
+*@param stage_ current server's stage
+*@return a vector of messages 
+*/
 request_type Adder::createMessages(const json & msg, const stage stage_)
 {
 	json feedback;
@@ -31,6 +46,13 @@ bool Adder::isFull() const
 	return (players_.getArray().size() == MAX_PLAYERS);
 }
 
+/**
+*@brief creating add request response
+*
+*@param msg add request sent to room by player
+*@param stage_ current server's stage
+*@return a response for player's add request
+*/
 json Adder::acceptNewPlayer(const json & msg, stage stage_)
 {
 	json feedback;
@@ -49,6 +71,13 @@ json Adder::acceptNewPlayer(const json & msg, stage stage_)
 	return feedback;
 }
 
+/**
+*@brief creates message containing information about new player who joined the room
+*
+*@parm msg an add request
+*@param stage_ current server's stage
+*@return a vector of messages that will update client side
+*/
 request_type Adder::informOtherPlayers(const json & msg, stage stage_)
 {
 	request_type request, player_info = players_.getPlayerInfo();

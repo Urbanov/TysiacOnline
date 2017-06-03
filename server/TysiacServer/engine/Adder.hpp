@@ -1,6 +1,10 @@
 #pragma once
 #include "controller.hpp"
 
+
+/**
+*@brief part of controller, adds players to the room
+*/
 class Adder : public Controller {
 public:
 	Adder(Deck &, PlayersCollection &);

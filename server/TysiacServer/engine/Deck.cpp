@@ -24,6 +24,11 @@ Deck::Deck()
 
 Deck::~Deck() {}
 
+/**
+*@brief deal out cards to players
+*
+*@param players collection of players who are to be given cards from Deck
+*/
 void Deck::dealCards(players& players)
 {
 	shuffle();
@@ -35,6 +40,12 @@ void Deck::dealCards(players& players)
 	}
 }
 
+/**
+*@brief gives three cards to player who bade highest
+*
+*@param player is the one who bade highest
+*@return message containing given cards' details
+*/
 json Deck::addBonusCards(Player & player)
 {
 	json msg;
@@ -50,12 +61,18 @@ json Deck::addBonusCards(Player & player)
 	return msg;
 }
 
+/**
+*@brief does random shuffle on the deck
+*/
 void Deck::shuffle()
 {
 	std::mt19937 engine(rd_());
 	std::shuffle(deck_.begin(), deck_.end(), engine);
 }
 
+/**
+*@brief resets position of iterator (used after giving additional cards)
+*/
 void Deck::reset()
 {
 	deck_it_ = deck_.begin();

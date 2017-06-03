@@ -67,6 +67,13 @@ const suits Card::getSuit() const
 	return suit_;
 }
 
+/**
+*@brief checks which card is higher, where the card which calls the method has slight advantage as "attacking" card
+*
+*@param other other card to compare with
+*@param trump current trumpsuit
+*@return higher card
+*/
 const Card & Card::isBigger(const Card & other, suits trump) const
 {
 	//If both cards are the same suit, a card with higher figure is higher

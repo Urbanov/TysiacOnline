@@ -9,6 +9,14 @@ Dealer::Dealer(Deck & deck, PlayersCollection & players)
 Dealer::~Dealer()
 {}
 
+/**
+*@brief responsible for parsing message and passing card from one player to another
+*
+*@param msg message from player who gives away a card
+*@param stage current server's stage
+*
+*@return new server's stage
+*/
 stage Dealer::changeModel(const json & msg, const stage stage_)
 {
 	for (const auto& i : msg["data"]) {
@@ -17,6 +25,11 @@ stage Dealer::changeModel(const json & msg, const stage stage_)
 	return DEALING;
 }
 
+/**
+*@brief Create messages that will be sent to users
+*
+*@param msg message from player 
+*/
 request_type Dealer::createMessages(const json & msg, stage stage_)
 {
 	request_type request = createMessage(msg);
@@ -24,7 +37,12 @@ request_type Dealer::createMessages(const json & msg, stage stage_)
 	return request;
 }
 
-
+/**
+*@brief removes card from owner's deck and adds it to another player
+*
+*@param player_id id of a new owner
+*@param card_number index of tramsfered card in owner's deck
+*/
 stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 {
 	if (player_id == (players_.getPlayer(HIGHEST)).getPlayerId() || (player_id == user_id_ &&
@@ -41,12 +59,21 @@ stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 	return DEALING;
 }
 
+/**
+*@brief calling Deck::dealcards()
+*/
 void Dealer::dealCards()
 {
-	deck_.shuffle();
+	//deck_.shuffle();
 	deck_.dealCards(players_.getArray());
 }
 
+/**
+*@brief creates messages containing information about the result of dealing cards for other players in a room
+*
+*@param msg message from player
+*@return vector of created messages
+*/
 request_type Dealer::createMessage(const json & msg)
 {
 	request_type request;
@@ -66,12 +93,20 @@ request_type Dealer::createMessage(const json & msg)
 	return request;
 }
 
+/**
+*@brief used after every round
+*/
 void Dealer::reset()
 {
 	user_id_ = -1;
 	counter = 0;
 }
 
+/**
+*@brief create message for bidding winner, calling him to make final bid
+*
+*@return message containing information about his maximum and minimum possible bid
+*/
 json Dealer::createFinalBidMessage()
 {
 	json feedback;

@@ -7,6 +7,10 @@ class Controller;
 using PController = std::unique_ptr<Controller>;
 using req = std::vector<std::pair<std::string, std::vector<int> > >;
 
+
+/**
+*@brief commands used in messages sent to and received from players
+*/
 enum commands {
 	LEAVE = 0,
 	DISCONNECT = 15,
@@ -18,6 +22,9 @@ enum commands {
 	CHAT = 1
 };
 
+/**
+*@brief possible server's stages
+*/
 enum stage {
 	FAIL,
 	LEAVING,
@@ -30,6 +37,9 @@ enum stage {
 	ENDING
 };
 
+/**
+*@brief abstract class, part of controller
+*/
 class Controller {
 public:
 	Controller(Deck & deck, PlayersCollection & players);

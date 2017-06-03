@@ -1,8 +1,11 @@
 #pragma once
 #include "controller.hpp"
 
-const int TWO_CARDS = 2;
-
+const int TWO_CARDS = 2; ///max number f cards a player can give to others
+/**
+*@brief part of controller, responsible for distributing cards and creating messages
+*
+*/
 class Dealer : public Controller {
 public:
 	Dealer(Deck &, PlayersCollection &);
@@ -16,6 +19,6 @@ private:
 	request_type createMessage(const json &);
 	json createFinalBidMessage();
 
-	int user_id_;
-	int counter;
+	int user_id_;/// keeps id of player that was recently given a card
+	int counter; /// counts how many cards have been given so far
 };

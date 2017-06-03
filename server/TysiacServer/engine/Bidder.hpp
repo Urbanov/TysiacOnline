@@ -2,8 +2,11 @@
 #include "controller.hpp"
 #include "starter.hpp"
 
-const int MIN_RAISE = 10;
+const int MIN_RAISE = 10;///minimum raise of claim 
 
+/**
+*@brief class manages biddinge and gives cards to a player who bade the highest
+*/
 class Bidder : public Controller {
 public:
 	Bidder(Deck &, PlayersCollection &);
@@ -22,6 +25,6 @@ private:
 	request_type createCardDealingMessages() const;
 	request_type createStarterMessages(const json & msg, stage stage_);
 
-	mutable json additional_cards_;
-	Starter starter_;
+	mutable json additional_cards_; /// cards which are given to bidding winner
+	Starter starter_; 
 };

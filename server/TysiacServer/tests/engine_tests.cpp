@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
-#include "../engine/GameManager.hpp"
-#include "../engine/Room.hpp"
-#include "../engine/Controller.hpp"
+#include "../engine/game_manager.hpp"
+#include "../engine/room.hpp"
+#include "../engine/controller.hpp"
 
 std::string createAddRequest(int server_id)
 {

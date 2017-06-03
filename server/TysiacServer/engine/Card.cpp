@@ -40,6 +40,11 @@ bool Card::operator==(const Card & other) const
 	return (suit_ == other.suit_ && figure_ == other.figure_);
 }
 
+bool Card::operator!=(const Card& other) const
+{
+	return suit_ != other.suit_ || figure_ != other.figure_;
+}
+
 Card::~Card() {}
 
 bool Card::getIsUsed() const
@@ -62,19 +67,17 @@ const suits Card::getSuit() const
 	return suit_;
 }
 
-const Card & Card::isBigger(const Card & other, suits suit) const
+const Card & Card::isBigger(const Card & other, suits trump) const
 {
+	//If both cards are the same suit, a card with higher figure is higher
 	if (suit_ == other.suit_) {
-		if (figure_ > other.figure_) {
-			return *this;
-		}
-		else {
-			return other;
-		}
+		return figure_ > other.figure_ ? *this : other;
 	}
-	else if (other.suit_ == suit) {
+	//if suit doesn't match, check if the second card is trump
+	else if (other.suit_ == trump) {
 		return other;
 	}
+	//if it was not trump, this card has to be higher
 	return *this;
 }
 

@@ -1,12 +1,12 @@
 #include "player.hpp"
 
-Player::Player(int player_id, std::string & nick)
+Player::Player(int player_id, std::string& nick)
 	: ready_(false)
 	, player_id_(player_id)
 	, nick_(nick)
 {}
 
-Player::Player(const Player & other)
+Player::Player(const Player& other)
 	: ready_(other.ready_)
 	, score_(other.score_)
 	, player_id_(other.player_id_)
@@ -14,7 +14,7 @@ Player::Player(const Player & other)
 	, players_deck_(other.players_deck_)
 {}
 
-Player& Player::operator=(const Player & other)
+Player& Player::operator=(const Player& other)
 {
 	ready_ = other.ready_;
 	score_ = other.score_;
@@ -26,7 +26,7 @@ Player& Player::operator=(const Player & other)
 
 Player::~Player() {}
 
-bool Player::operator==(const Player & other) const
+bool Player::operator==(const Player& other) const
 {
 	return (player_id_ == other.player_id_);
 }

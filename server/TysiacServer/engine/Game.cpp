@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
+Game::Game(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers)
 	: score_(deck, players, controllers)
 	, turn_counter_(0)
 	, super_suit_(NONE)
@@ -11,7 +11,7 @@ Game::Game(Deck & deck, PlayersCollection & players, std::vector<PController>& c
 Game::~Game()
 {}
 
-stage Game::changeModel(const json & msg, const stage stage_)
+stage Game::changeModel(const json& msg, const stage stage_)
 {
 	if (manageTurn(msg["player"], msg["data"]) == SUMMING_UP) {
 		return score_.sumUpScore();
@@ -19,7 +19,7 @@ stage Game::changeModel(const json & msg, const stage stage_)
 	return PLAYING;
 }
 
-request_type Game::createMessages(const json & msg, stage stage_)
+request_type Game::createMessages(const json& msg, stage stage_)
 {
 	request_type request = createMessage(stage_);
 	if (stage_ == SUMMING_UP || stage_ == ADDING) {

@@ -1,6 +1,6 @@
 #include "room.hpp"
 
-Room::Room(int room_id, GameManager & man)
+Room::Room(int room_id, GameManager& man)
 	: man_(man)
 	, room_id_(room_id)
 	, stage_(ADDING)
@@ -23,7 +23,7 @@ void Room::changeStage(stage new_stage)
 	stage_ = new_stage;
 }
 
-bool Room::runGame(const json & msg)
+bool Room::runGame(const json& msg)
 {
 	request_type request, tmp;
 	stage temp_stage;
@@ -51,7 +51,7 @@ bool Room::runGame(const json & msg)
 
 }
 
-int Room::parse(const std::string & str)
+int Room::parse(const std::string& str) const
 {
 	json command = { { "add", ADD },{ "deal", DEAL },{ "bid", BID },
 	{ "play", PLAY },{ "chat", CHAT },{ "ready", BID },

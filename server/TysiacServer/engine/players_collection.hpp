@@ -18,16 +18,16 @@ enum iterators {
 class PlayersCollection {
 public:
 	PlayersCollection();
-	PlayersCollection(const PlayersCollection &);
+	PlayersCollection(const PlayersCollection& other);
 	~PlayersCollection();
-	bool addPlayer(int, std::string &);
-	size_t getNextPlayer(iterators);
+	bool addPlayer(int player_id, std::string& nick);
+	size_t getNextPlayer(iterators it);
 	request_type getPlayerInfo() const;
-	players & getArray();
-	Player & getPlayer(iterators, size_t = 0);
-	void setPlayer(iterators, size_t);
-	void prepareGame(bool);
-	void resetPlayerAttributes(bool);
+	players& getArray();
+	Player& getPlayer(iterators it, size_t player_id = 0);
+	void setPlayer(iterators it, size_t player_id);
+	void prepareGame(bool isFirst);
+	void resetPlayerAttributes(bool isFinal);
 private:
 	players players_;
 	std::vector<size_t> it_;

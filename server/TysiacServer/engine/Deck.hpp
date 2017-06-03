@@ -10,17 +10,17 @@ const int MAX_CARDS = 7; /// Number of cards to deal to each player when a round
 
 
 /** 
-*	@brief class representing deck of cards which are dealt to players during game
-*
-*/
+ * @brief class representing deck of cards which are dealt to players during game
+ *
+ */
 class Deck {
 public:
-	Deck(const std::vector<Card>&);
+	Deck(const std::vector<Card>& deck);
 	Deck(const Deck& other);
 	Deck();
 	~Deck();
-	void dealCards(players&);
-	json addBonusCards(Player &);
+	void dealCards(players& players);
+	json addBonusCards(Player& player);
 	void shuffle();
 	void reset();
 private:

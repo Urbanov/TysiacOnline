@@ -1,6 +1,6 @@
 #include "sum_score.hpp"
 
-SumScore::SumScore(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
+SumScore::SumScore(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers)
 	: Controller(deck, players)
 	, controllers_(controllers)
 {}
@@ -20,12 +20,12 @@ stage SumScore::sumUpScore()
 	return SUMMING_UP;
 }
 
-stage SumScore::changeModel(const json & msg, const stage stage_)
+stage SumScore::changeModel(const json& msg, const stage stage_)
 {
 	return sumUpScore();
 }
 
-request_type SumScore::createMessages(const json & msg, stage stage_)
+request_type SumScore::createMessages(const json& msg, stage stage_)
 {
 	return createMessage(stage_);
 }

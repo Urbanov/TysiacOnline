@@ -2,12 +2,12 @@
 #include "controller.hpp"
 
 /**
-*@brief part of controller, responsible for broadcasting chat messages
-*/
+ *@ brief part of controller, responsible for broadcasting chat messages
+ */
 class ChatBox : public Controller {
 public:
-	ChatBox(Deck&, PlayersCollection&);
+	ChatBox(Deck& deck, PlayersCollection& players);
 	virtual ~ChatBox();
 	virtual stage changeModel(const json& msg, const stage stage_);
-	virtual request_type createMessages(const json & msg, const stage stage_);
+	virtual request_type createMessages(const json& msg, const stage stage_);
 };

@@ -5,17 +5,17 @@
 
 class Player {
 public:
-	Player(int, std::string &);
+	Player(int player_id, std::string& nick);
 	Player(const Player& other);
-	Player & operator=(const Player & other);
+	Player & operator=(const Player& other);
 	~Player();
-	bool operator==(const Player &) const;
-	PlayersDeck & getPlayersDeck();
+	bool operator==(const Player& other) const;
+	PlayersDeck& getPlayersDeck();
 	size_t getPlayerId() const;
-	const std::string & getPlayersNick() const;
-	Score & getScoreClass();
+	const std::string& getPlayersNick() const;
+	Score& getScoreClass();
 	bool getReady() const;
-	void setReady(bool);
+	void setReady(bool ready);
 private:
 	bool ready_;
 	Score score_;

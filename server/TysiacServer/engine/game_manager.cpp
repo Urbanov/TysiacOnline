@@ -7,7 +7,7 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {}
 
-req GameManager::doWork(std::size_t player_id, const std::string & message)
+req GameManager::doWork(std::size_t player_id, const std::string& message)
 {
 	server_response_.clear();
 	feedback_.clear();
@@ -41,7 +41,7 @@ void GameManager::removeIfLeaveCalled(const json& msg, int player_id)
 	}
 }
 
-void GameManager::returnExistingRooms(const json & msg)
+void GameManager::returnExistingRooms(const json& msg)
 {
 	json resp = {
 		{ "action", "show" }
@@ -68,7 +68,7 @@ void GameManager::attachClientIdsToMessage()
 	}
 }
 
-void GameManager::pushMessage(const request_type & msg)
+void GameManager::pushMessage(const request_type& msg)
 {
 	feedback_ = msg;
 }
@@ -85,7 +85,7 @@ int GameManager::findGameId(size_t player_id) const
 	return -1;
 }
 
-void GameManager::addPlayer(const json & msg)
+void GameManager::addPlayer(const json& msg)
 {
 	if (msg["id"] == -1) {
 		if (!useEmptyRoom(msg)) {
@@ -101,7 +101,7 @@ void GameManager::addPlayer(const json & msg)
 	}
 }
 
-bool GameManager::runGame(const json & msg)
+bool GameManager::runGame(const json& msg)
 {
 	if (msg["action"] == "add") {
 		addPlayer(msg);
@@ -117,7 +117,7 @@ bool GameManager::runGame(const json & msg)
 	return false;
 }
 
-void GameManager::createNewRoom(const json & msg)
+void GameManager::createNewRoom(const json& msg)
 {
 	active_games_.emplace_back(std::make_unique<Room>(room_counter_++, *this));
 	if (active_games_.back()->runGame(msg)) {
@@ -127,7 +127,7 @@ void GameManager::createNewRoom(const json & msg)
 	attachClientIdsToMessage();
 }
 
-bool GameManager::useEmptyRoom(const json & msg)
+bool GameManager::useEmptyRoom(const json& msg)
 {
 	for (size_t i = 0; i < active_games_.size(); ++i) {
 		if (active_games_[i]->isEmpty()) {

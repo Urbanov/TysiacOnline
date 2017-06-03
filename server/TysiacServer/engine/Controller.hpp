@@ -5,12 +5,12 @@
 class Controller;
 
 using PController = std::unique_ptr<Controller>;
-using req = std::vector<std::pair<std::string, std::vector<int> > >;
+using req = std::vector<std::pair<std::string, std::vector<int>>>;
 
 
 /**
-*@brief commands used in messages sent to and received from players
-*/
+ * @brief commands used in messages sent to and received from players
+ */
 enum commands {
 	LEAVE = 0,
 	DISCONNECT = 15,
@@ -23,8 +23,8 @@ enum commands {
 };
 
 /**
-*@brief possible server's stages
-*/
+ * @brief possible server's stages
+ */
 enum stage {
 	FAIL,
 	LEAVING,
@@ -38,16 +38,16 @@ enum stage {
 };
 
 /**
-*@brief abstract class, part of controller
-*/
+ * @brief abstract class, part of controller
+ */
 class Controller {
 public:
-	Controller(Deck & deck, PlayersCollection & players);
+	Controller(Deck& deck, PlayersCollection& players);
 	virtual ~Controller();
-	virtual stage changeModel(const json & msg, const stage stage_) = 0;
-	virtual request_type createMessages(const json & msg, const stage stage_) = 0;
+	virtual stage changeModel(const json& msg, const stage stage_) = 0;
+	virtual request_type createMessages(const json& msg, const stage stage_) = 0;
 	virtual void reset();
 protected:
-	Deck & deck_;
-	PlayersCollection & players_;
+	Deck& deck_;
+	PlayersCollection& players_;
 };

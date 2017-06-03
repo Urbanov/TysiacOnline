@@ -1,6 +1,6 @@
 #include "starter.hpp"
 
-Starter::Starter(Deck & deck, PlayersCollection & players)
+Starter::Starter(Deck& deck, PlayersCollection& players)
 	: Controller(deck, players)
 	, is_full_(false)
 {}
@@ -8,7 +8,7 @@ Starter::Starter(Deck & deck, PlayersCollection & players)
 Starter::~Starter()
 {}
 
-stage Starter::changeModel(const json & msg, const stage stage_)
+stage Starter::changeModel(const json& msg, const stage stage_)
 {
 	if (stage_ == SUMMING_UP) {
 		prepareToStart(stage_);
@@ -22,7 +22,7 @@ stage Starter::changeModel(const json & msg, const stage stage_)
 	return ADDING;
 }
 
-request_type Starter::createMessages(const json & msg, const stage stage_)
+request_type Starter::createMessages(const json& msg, const stage stage_)
 {
 	json feedback;
 	request_type request;
@@ -37,7 +37,7 @@ request_type Starter::createMessages(const json & msg, const stage stage_)
 	return request;
 }
 
-json Starter::createStartMessage(const json & msg) const
+json Starter::createStartMessage(const json& msg) const
 {
 	json feedback;
 	feedback["action"] = "start";

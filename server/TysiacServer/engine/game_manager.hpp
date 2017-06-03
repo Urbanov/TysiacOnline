@@ -6,17 +6,17 @@ class GameManager {
 public:
 	GameManager();
 	~GameManager();
-	req doWork(std::size_t, const std::string &);
-	void pushMessage(const request_type &);
+	req doWork(std::size_t player_id, const std::string& message);
+	void pushMessage(const request_type& msg);
 protected:
 	void removeIfLeaveCalled(const json& msg, int player_id);
-	void returnExistingRooms(const json &);
+	void returnExistingRooms(const json& msg);
 	void attachClientIdsToMessage();
-	int findGameId(size_t) const;
-	void addPlayer(const json &);
+	int findGameId(size_t player_id) const;
+	void addPlayer(const json& msg);
 	bool runGame(const json& msg);
-	void createNewRoom(const json & msg);
-	bool useEmptyRoom(const json & msg);
+	void createNewRoom(const json& msg);
+	bool useEmptyRoom(const json& msg);
 
 	std::vector<std::vector<size_t> > players_;
 	std::vector<PRoom> active_games_;

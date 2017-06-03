@@ -11,7 +11,7 @@ std::vector<Card>& PlayersDeck::getDeck()
 	return deck_;
 }
 
-void PlayersDeck::addCard(const Card & card)
+void PlayersDeck::addCard(const Card& card)
 {
 	deck_.push_back(card);
 	deck_.back().setIsUsed(false);
@@ -29,12 +29,12 @@ const Card & PlayersDeck::playCard(std::size_t card_number) const
 	return deck_[card_number];
 }
 
-bool PlayersDeck::doesHavePair(suits suit)
+bool PlayersDeck::doesHavePair(suits suit) const
 {
 	return (findCard(KING, suit) || findCard(QUEEN, suit));
 }
 
-const std::vector<int> PlayersDeck::getAllValidCards(const std::vector<Card> & vec, suits superior) const
+const std::vector<int> PlayersDeck::getAllValidCards(const std::vector<Card>& vec, suits superior) const
 {
 	std::vector<int> correct_cards, tmp;
 	if (vec.empty()) {
@@ -118,7 +118,7 @@ bool PlayersDeck::findCard(figures figure, suits suit) const
 	return false;
 }
 
-bool PlayersDeck::isHigher(const Card & played, const Card & deck_card, suits superior) const
+bool PlayersDeck::isHigher(const Card& played, const Card& deck_card, suits superior) const
 {
 	if (deck_card.getIsUsed()) {
 		return false;

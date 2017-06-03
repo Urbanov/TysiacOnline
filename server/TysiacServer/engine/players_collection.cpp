@@ -3,7 +3,7 @@
 PlayersCollection::PlayersCollection()
 {}
 
-PlayersCollection::PlayersCollection(const PlayersCollection & other)
+PlayersCollection::PlayersCollection(const PlayersCollection& other)
 	: players_(other.players_)
 {}
 
@@ -16,7 +16,7 @@ players & PlayersCollection::getArray()
 	return players_;
 }
 
-bool PlayersCollection::addPlayer(int player_id, std::string & nick)
+bool PlayersCollection::addPlayer(int player_id, std::string& nick)
 {
 	if (players_.size() < MAX_PLAYERS) {
 		players_.push_back(Player(player_id, nick));

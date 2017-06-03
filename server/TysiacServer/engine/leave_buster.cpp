@@ -1,6 +1,6 @@
 #include "leave_buster.hpp"
 
-LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
+LeaveBuster::LeaveBuster(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers)
 	: Controller(deck, players)
 	, controllers_(controllers)
 {}
@@ -8,7 +8,7 @@ LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players, std::vector<P
 LeaveBuster::~LeaveBuster()
 {}
 
-stage LeaveBuster::changeModel(const json & msg, const stage stage_)
+stage LeaveBuster::changeModel(const json& msg, const stage stage_)
 {
 	for (auto i = players_.getArray().begin(); i != players_.getArray().end(); ++i) {
 		if ((*i).getPlayerId() == msg["player"]) {
@@ -30,7 +30,7 @@ stage LeaveBuster::changeModel(const json & msg, const stage stage_)
 	else return ADDING;
 }
 
-request_type LeaveBuster::createMessages(const json & msg, const stage stage_)
+request_type LeaveBuster::createMessages(const json& msg, const stage stage_)
 {
 	json feedback;
 	request_type request;

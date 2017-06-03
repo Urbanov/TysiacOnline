@@ -5,7 +5,7 @@ Deck::Deck(const std::vector<Card>& deck)
 	, deck_it_(deck_.begin())
 {}
 
-Deck::Deck(const Deck & other)
+Deck::Deck(const Deck& other)
 	: deck_(other.deck_)
 	, deck_it_(deck_.begin())
 {}
@@ -25,10 +25,10 @@ Deck::Deck()
 Deck::~Deck() {}
 
 /**
-*@brief deal out cards to players
-*
-*@param players collection of players who are to be given cards from Deck
-*/
+ * @brief deal out cards to players
+ *
+ * @param players collection of players who are to be given cards from Deck
+ */
 void Deck::dealCards(players& players)
 {
 	shuffle();
@@ -41,12 +41,12 @@ void Deck::dealCards(players& players)
 }
 
 /**
-*@brief gives three cards to player who bade highest
-*
-*@param player is the one who bade highest
-*@return message containing given cards' details
-*/
-json Deck::addBonusCards(Player & player)
+ * @brief gives three cards to player who bade highest
+ *
+ * @param player is the one who bade highest
+ * @return message containing given cards' details
+ */
+json Deck::addBonusCards(Player& player)
 {
 	json msg;
 	while (deck_it_ != deck_.end()) {
@@ -62,8 +62,8 @@ json Deck::addBonusCards(Player & player)
 }
 
 /**
-*@brief does random shuffle on the deck
-*/
+ * @brief does random shuffle on the deck
+ */
 void Deck::shuffle()
 {
 	std::mt19937 engine(rd_());
@@ -71,10 +71,9 @@ void Deck::shuffle()
 }
 
 /**
-*@brief resets position of iterator (used after giving additional cards)
-*/
+ * @brief resets position of iterator (used after giving additional cards)
+ */
 void Deck::reset()
 {
 	deck_it_ = deck_.begin();
 }
-

@@ -12,17 +12,17 @@ class GameManager;
 
 class Room {
 public:
-	Room(int, GameManager&);
+	Room(int room_id, GameManager& man);
 	~Room();
-	void changeStage(stage);
-	bool runGame(const json &);
-	int parse(const std::string &);
+	void changeStage(stage new_stage);
+	bool runGame(const json& msg);
+	int parse(const std::string& str) const;
 	bool isEmpty();
 	size_t getRoomId() const;
 	json getPlayersInfo() const;
 private:
 	std::vector<PController> employees_;
-	GameManager & man_;
+	GameManager& man_;
 	size_t room_id_;
 	Deck deck_;
 	PlayersCollection players_;

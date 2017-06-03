@@ -8,13 +8,13 @@ public:
 	Score();
 	~Score();
 	int getScore() const;
-	void addScore(int);
-	void addToTurnScore(int);
+	void addScore(int score);
+	void addToTurnScore(int temp_score);
 	int getTurnScore() const;
-	bool setClaim(int, bool);
+	bool setClaim(int claim, bool isFinal);
 	int getClaim() const;
-	void reset(bool);
-	int round(int) const;
+	void reset(bool isFinal);
+	int round(int number) const;
 	void roundScore();
 private:
 

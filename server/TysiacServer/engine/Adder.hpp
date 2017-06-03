@@ -3,17 +3,17 @@
 
 
 /**
-*@brief part of controller, adds players to the room
-*/
+ *@brief part of controller, adds players to the room
+ */
 class Adder : public Controller {
 public:
-	Adder(Deck &, PlayersCollection &);
+	Adder(Deck& deck, PlayersCollection& players);
 	virtual ~Adder();
-	virtual stage changeModel(const json& msg, const stage stage_);
-	virtual request_type createMessages(const json & msg, const stage stage_);
+	stage changeModel(const json& msg, const stage stage_);
+	virtual request_type createMessages(const json& msg, const stage stage_);
 	bool isFull() const;
 
 private:
-	json acceptNewPlayer(const json & msg, stage stage_);
-	request_type informOtherPlayers(const json & msg, stage stage_);
+	json acceptNewPlayer(const json& msg, stage stage_) const;
+	request_type informOtherPlayers(const json& msg, stage stage_) const;
 };

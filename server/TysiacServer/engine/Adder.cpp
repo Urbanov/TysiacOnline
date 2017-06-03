@@ -1,6 +1,6 @@
 #include "adder.hpp"
 
-Adder::Adder(Deck & deck, PlayersCollection & players)
+Adder::Adder(Deck& deck, PlayersCollection& players)
 	: Controller(deck, players)
 {}
 
@@ -8,13 +8,13 @@ Adder::~Adder()
 {}
 
 /**
-*@brief adds new player to a room
-*
-*@param msg add request sent by a player
-*@param stage current server's stage
-*@return new server's stage
-*/
-stage Adder::changeModel(const json & msg, const stage stage_)
+ * @brief adds new player to a room
+ *
+ * @param msg add request sent by a player
+ * @param stage_ current server's stage
+ * @return new server's stage
+ */
+stage Adder::changeModel(const json& msg, const stage stage_)
 {
 	std::string tmp = msg["data"];
 	if (!players_.addPlayer(msg["player"], tmp)) {
@@ -24,14 +24,14 @@ stage Adder::changeModel(const json & msg, const stage stage_)
 }
 
 /**
-*@brief creates messages updating player's information
-about players in room
-*
-*@param msg add request sent to room by player
-*@param stage_ current server's stage
-*@return a vector of messages 
-*/
-request_type Adder::createMessages(const json & msg, const stage stage_)
+ * @brief creates messages updating player's information
+ about players in room
+ *
+ * @param msg add request sent to room by player
+ * @param stage_ current server's stage
+ * @return a vector of messages 
+ */
+request_type Adder::createMessages(const json& msg, const stage stage_)
 {
 	json feedback;
 	request_type request;
@@ -47,13 +47,13 @@ bool Adder::isFull() const
 }
 
 /**
-*@brief creating add request response
-*
-*@param msg add request sent to room by player
-*@param stage_ current server's stage
-*@return a response for player's add request
-*/
-json Adder::acceptNewPlayer(const json & msg, stage stage_)
+ * @brief creates add request response
+ *
+ * @param msg add request sent to room by player
+ * @param stage_ current server's stage
+ * @return a response for player's add request
+ */
+json Adder::acceptNewPlayer(const json& msg, stage stage_) const
 {
 	json feedback;
 	request_type request, player_info = players_.getPlayerInfo();
@@ -72,13 +72,13 @@ json Adder::acceptNewPlayer(const json & msg, stage stage_)
 }
 
 /**
-*@brief creates message containing information about new player who joined the room
-*
-*@parm msg an add request
-*@param stage_ current server's stage
-*@return a vector of messages that will update client side
-*/
-request_type Adder::informOtherPlayers(const json & msg, stage stage_)
+ * @brief creates message containing information about new player who joined the room
+ *
+ * @parm msg an add request
+ * @param stage_ current server's stage
+ * @return a vector of messages that will update client side
+ */
+request_type Adder::informOtherPlayers(const json& msg, stage stage_) const
 {
 	request_type request, player_info = players_.getPlayerInfo();
 	json feedback;

@@ -7,19 +7,19 @@ Card::Card(figures fig, suits s)
 	, is_used_(false)
 {}
 
-Card::Card(const Card & other)
+Card::Card(const Card& other)
 	: figure_(other.figure_)
 	, suit_(other.suit_)
 	, is_used_(other.is_used_)
 {}
 
-Card::Card(Card && other)
+Card::Card(Card&& other)
 	: figure_(std::move(other.figure_))
 	, suit_(std::move(other.suit_))
 	, is_used_(std::move(other.is_used_))
 {}
 
-Card Card::operator=(const Card & card)
+Card Card::operator=(const Card& card)
 {
 	this->figure_ = card.figure_;
 	this->suit_ = card.suit_;
@@ -27,7 +27,7 @@ Card Card::operator=(const Card & card)
 	return *this;
 }
 
-Card Card::operator=(Card && card)
+Card Card::operator=(Card&& card)
 {
 	this->figure_ = card.figure_;
 	this->suit_ = card.suit_;
@@ -35,7 +35,7 @@ Card Card::operator=(Card && card)
 	return *this;
 }
 
-bool Card::operator==(const Card & other) const
+bool Card::operator==(const Card& other) const
 {
 	return (suit_ == other.suit_ && figure_ == other.figure_);
 }
@@ -68,12 +68,12 @@ const suits Card::getSuit() const
 }
 
 /**
-*@brief checks which card is higher, where the card which calls the method has slight advantage as "attacking" card
-*
-*@param other other card to compare with
-*@param trump current trumpsuit
-*@return higher card
-*/
+ * @brief checks which card is higher, where the card which calls the method has slight advantage as "attacking" card
+ *
+ * @param other other card to compare with
+ * @param trump current trumpsuit
+ * @return higher card
+ */
 const Card & Card::isBigger(const Card & other, suits trump) const
 {
 	//If both cards are the same suit, a card with higher figure is higher
@@ -87,4 +87,3 @@ const Card & Card::isBigger(const Card & other, suits trump) const
 	//if it was not trump, this card has to be higher
 	return *this;
 }
-

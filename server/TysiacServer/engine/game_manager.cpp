@@ -16,7 +16,7 @@ req GameManager::doWork(std::size_t player_id, const std::string & message)
 	try {
 		if (!runGame(msg)) {
 			active_games_[findGameId(player_id)]->runGame(msg);
-			removeIfLeaveCalled(msg, player_id);
+			removeIfLeaveCalled(msg, static_cast<int>(player_id));
 			attachClientIdsToMessage();
 		}
 	}
@@ -78,7 +78,7 @@ int GameManager::findGameId(size_t player_id) const
 	for (size_t i = 0; i < players_.size(); ++i) {
 		for (auto& j : players_[i]) {
 			if (j == player_id) {
-				return i;
+				return static_cast<int>(i);
 			}
 		}
 	}

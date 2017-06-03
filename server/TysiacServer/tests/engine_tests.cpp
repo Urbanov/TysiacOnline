@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE game_engine_test
 #include <boost/test/unit_test.hpp>
+
 #include "../engine/game_manager.hpp"
 #include "../engine/room.hpp"
 #include "../engine/controller.hpp"
@@ -7,9 +7,9 @@
 std::string createAddRequest(int server_id)
 {
 	json req0 = {
-		 { "action", "add" }
-		,{ "data" , "test_nick" }
-		,{ "id", server_id }
+		{ "action", "add" },
+		{ "data" , "test_nick" },
+		{ "id", server_id }
 	};
 	return req0.dump();
 }
@@ -29,8 +29,8 @@ std::string createAddAnswer(std::vector<int> server_id, bool is_add_or_new_playe
 	else {
 		res0["action"] = "new_player";
 		json tmp = {
-			{"id", server_id[0]}
-			,{"nick", "test_nick"}
+			{"id", server_id[0]},
+			{"nick", "test_nick"}
 		};
 		res0["data"] = tmp;
 		res0.erase("error");
@@ -38,8 +38,8 @@ std::string createAddAnswer(std::vector<int> server_id, bool is_add_or_new_playe
 	}
 	for (auto i : server_id) {
 		json player = {
-			{ "id", i }
-			,{ "nick", "test_nick" }
+			{ "id", i },
+			{ "nick", "test_nick" }
 		};
 		res0["data"].push_back(player);
 	}
@@ -49,8 +49,8 @@ std::string createAddAnswer(std::vector<int> server_id, bool is_add_or_new_playe
 std::string createTextMessage(std::string& msg, int player_id = -1)
 {
 	json chat_message = {
-		 {"action", "chat"}
-		,{"data", msg }
+		{"action", "chat"},
+		{"data", msg }
 	};
 	if (player_id != -1) {
 		chat_message["player"] = player_id;

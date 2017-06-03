@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
+
 #include <beast/core.hpp>
 #include <json.hpp>
-
 #include "../network/server.h"
 
 // simple sync client for server testing
@@ -57,13 +57,15 @@ BOOST_AUTO_TEST_CASE(CreateSessionsAndGiveThemIds)
 	SessionManager manager;
 	boost::asio::ip::tcp::socket socket(ios);
 
-	// create 2 sessions
+	// create 3 sessions
 	std::shared_ptr<Session> session1 = std::make_shared<Session>(manager, std::move(socket));
 	std::shared_ptr<Session> session2 = std::make_shared<Session>(manager, std::move(socket));
+	std::shared_ptr<Session> session3 = std::make_shared<Session>(manager, std::move(socket));
 
 	// chceck whether their IDs are correct
-	BOOST_CHECK_EQUAL(session1->getId(), 0);
-	BOOST_CHECK_EQUAL(session2->getId(), 1);
+	size_t base_id = session1->getId();
+	BOOST_CHECK_EQUAL(session2->getId(), base_id + 1);
+	BOOST_CHECK_EQUAL(session3->getId(), base_id + 2);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

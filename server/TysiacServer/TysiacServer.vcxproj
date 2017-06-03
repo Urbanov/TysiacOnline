@@ -236,7 +236,7 @@
     <ClCompile Include="engine\leave_buster.cpp" />
     <ClCompile Include="engine\player.cpp" />
     <ClCompile Include="engine\players_deck.cpp" />
-    <ClCompile Include="engine\player_collection.cpp" />
+    <ClCompile Include="engine\players_collection.cpp" />
     <ClCompile Include="engine\room.cpp" />
     <ClCompile Include="engine\score.cpp" />
     <ClCompile Include="engine\starter.cpp" />
@@ -248,7 +248,7 @@
     <ClCompile Include="network\manager.cpp" />
     <ClCompile Include="network\server.cpp" />
     <ClCompile Include="network\session.cpp" />
-    <ClCompile Include="tests\boost_unit_test.cpp">
+    <ClCompile Include="tests\engine_tests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -261,6 +261,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="tests\test_main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -284,13 +292,12 @@
     <ClInclude Include="engine\sum_score.hpp" />
     <ClInclude Include="network\manager.h" />
     <ClInclude Include="network\server.h" />
+    <ClInclude Include="network\session.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\client\client.html" />
     <None Include="..\..\client\scripts\card.js" />
     <None Include="..\..\client\scripts\controller.js" />
-    <None Include="..\..\client\scripts\handlers.js" />
-    <None Include="..\..\client\scripts\lobby.js" />
     <None Include="..\..\client\scripts\main.js" />
     <None Include="..\..\client\scripts\player.js" />
     <None Include="..\..\client\scripts\game.js" />

@@ -55,7 +55,6 @@ class SelfPlayer extends Player {
 	useCard(event) {
 		var id = Number(event.data.value);
 
-		////////////////////////////
 		var test = ">>> USECARD: " + event.data.value;
 		console.log(test);
 

@@ -236,7 +236,7 @@
     <ClCompile Include="engine\leave_buster.cpp" />
     <ClCompile Include="engine\player.cpp" />
     <ClCompile Include="engine\players_deck.cpp" />
-    <ClCompile Include="engine\player_collection.cpp" />
+    <ClCompile Include="engine\players_collection.cpp" />
     <ClCompile Include="engine\room.cpp" />
     <ClCompile Include="engine\score.cpp" />
     <ClCompile Include="engine\starter.cpp" />

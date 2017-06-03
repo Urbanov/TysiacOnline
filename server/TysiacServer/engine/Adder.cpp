@@ -1,4 +1,4 @@
-#include "Adder.hpp"
+#include "adder.hpp"
 
 Adder::Adder(Deck & deck, PlayersCollection & players)
 	: Controller(deck, players)

@@ -1,4 +1,4 @@
-#include "LeaveBuster.hpp"
+#include "leave_buster.hpp"
 
 LeaveBuster::LeaveBuster(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
 	: Controller(deck, players)

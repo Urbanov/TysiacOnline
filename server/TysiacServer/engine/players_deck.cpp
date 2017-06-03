@@ -1,4 +1,4 @@
-#include "PlayersDeck.hpp"
+#include "players_deck.hpp"
 
 PlayersDeck::PlayersDeck()
 	: max_value_(0)
@@ -40,7 +40,7 @@ const std::vector<int> PlayersDeck::getAllValidCards(const std::vector<Card> & v
 	if (vec.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
 			if (!deck_[i].getIsUsed()) {
-				correct_cards.push_back(i);
+				correct_cards.push_back(static_cast<int>(i));
 			}
 		}
 		return correct_cards;
@@ -51,27 +51,27 @@ const std::vector<int> PlayersDeck::getAllValidCards(const std::vector<Card> & v
 	}
 	for (size_t i = 0; i < deck_.size(); ++i) {
 		if (isHigher(card, deck_[i], superior) && card.getSuit() == deck_[i].getSuit()) {
-			correct_cards.push_back(i);
+			correct_cards.push_back(static_cast<int>(i));
 		}
 	}
 	if (correct_cards.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
 			if ((vec[0].getSuit() == deck_[i].getSuit() && !deck_[i].getIsUsed())) {
-				correct_cards.push_back(i);
+				correct_cards.push_back(static_cast<int>(i));
 			}
 		}
 	}
 	if (correct_cards.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
 			if (isHigher(card, deck_[i], superior)) {
-				correct_cards.push_back(i);
+				correct_cards.push_back(static_cast<int>(i));
 			}
 		}
 	}
 	if (correct_cards.empty()) {
 		for (size_t i = 0; i < deck_.size(); ++i) {
 			if (!deck_[i].getIsUsed()) {
-				correct_cards.push_back(i);
+				correct_cards.push_back(static_cast<int>(i));
 			}
 		}
 	}

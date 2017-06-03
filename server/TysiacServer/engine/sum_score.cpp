@@ -1,4 +1,4 @@
-#include "SumScore.hpp"
+#include "sum_score.hpp"
 
 SumScore::SumScore(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
 	: Controller(deck, players)

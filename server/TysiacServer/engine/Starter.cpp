@@ -1,4 +1,4 @@
-#include "Starter.hpp"
+#include "starter.hpp"
 
 Starter::Starter(Deck & deck, PlayersCollection & players)
 	: Controller(deck, players)

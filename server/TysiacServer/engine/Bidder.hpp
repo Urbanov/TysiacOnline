@@ -1,6 +1,6 @@
 #pragma once
-#include "Controller.hpp"
-#include "Starter.hpp"
+#include "controller.hpp"
+#include "starter.hpp"
 
 const int MIN_RAISE = 10;
 

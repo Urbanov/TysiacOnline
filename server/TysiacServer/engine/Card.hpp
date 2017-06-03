@@ -26,6 +26,7 @@ public:
 	Card operator=(const Card&);
 	Card operator=(Card&&);
 	bool operator==(const Card& other) const;
+	bool operator!=(const Card & other) const;
 	~Card();
 	bool getIsUsed() const;
 	void setIsUsed(bool) const;

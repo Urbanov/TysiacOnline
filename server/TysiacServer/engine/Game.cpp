@@ -1,4 +1,4 @@
-#include "Game.hpp"
+#include "game.hpp"
 
 Game::Game(Deck & deck, PlayersCollection & players, std::vector<PController>& controllers)
 	: score_(deck, players, controllers)
@@ -97,7 +97,7 @@ request_type Game::createMessage(const stage stage_)
 void Game::setSuperiorSuit()
 {
 	int score = 0;
-	if (vec_.size() == 1 && vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN) {
+	if (vec_.size() == 1 && (vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN)) {
 		if (players_.getPlayer(X, vec_[0].first).getPlayersDeck().doesHavePair(
 			vec_[0].second.getSuit())) {
 			super_suit_ = vec_[0].second.getSuit();
@@ -112,9 +112,9 @@ void Game::setSuperiorSuit()
 
 int Game::compareCardsAndPassToWinner()
 {
-	Card tmp = vec_[0].second.isBigger(vec_[1].second.isBigger(vec_[2].second, super_suit_), super_suit_);
+	Card winning_card = findSuperiorCard();
 	for (const auto& i : vec_) {
-		if (tmp == i.second) {
+		if (winning_card == i.second) {
 			current_starting_player_ = i.first;
 		}
 	}
@@ -122,6 +122,13 @@ int Game::compareCardsAndPassToWinner()
 		players_.getPlayer(X, current_starting_player_).getScoreClass().addToTurnScore(i.second.getFigure());
 	}
 	return current_starting_player_;
+}
+
+Card Game::findSuperiorCard()
+{
+	Card first_winner = vec_[0].second.isBigger(vec_[1].second, super_suit_); 
+	Card second_winner = vec_[0].second.isBigger(vec_[2].second, super_suit_);
+	return first_winner.isBigger(second_winner, super_suit_);
 }
 
 void Game::setStartingPlayer(int new_starting_player)

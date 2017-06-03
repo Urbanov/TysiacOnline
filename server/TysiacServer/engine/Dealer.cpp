@@ -1,4 +1,4 @@
-#include "Dealer.hpp"
+#include "dealer.hpp"
 
 Dealer::Dealer(Deck & deck, PlayersCollection & players)
 	: user_id_(-1)
@@ -34,7 +34,7 @@ stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
 	Card tmp = players_.getPlayer(HIGHEST).getPlayersDeck().playCard(card_number);
 	tmp.setIsUsed(false);
 	players_.getPlayer(X, player_id).getPlayersDeck().addCard(tmp);
-	user_id_ = players_.getPlayer(X, player_id).getPlayerId();
+	user_id_ = static_cast<int>(players_.getPlayer(X, player_id).getPlayerId());
 	if (++counter == TWO_CARDS) {
 		return PLAYING;
 	}

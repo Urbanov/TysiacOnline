@@ -1,4 +1,4 @@
-#include "PlayersCollection.hpp"
+#include "players_collection.hpp"
 
 PlayersCollection::PlayersCollection()
 {}

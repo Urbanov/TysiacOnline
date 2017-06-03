@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include "Score.hpp"
-#include "PlayersDeck.hpp"
+#include "score.hpp"
+#include "players_deck.hpp"
 
 class Player {
 public:

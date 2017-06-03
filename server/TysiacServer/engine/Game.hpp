@@ -1,6 +1,6 @@
 #pragma once
 #include "Controller.hpp"
-#include "SumScore.hpp"
+#include "sum_score.hpp"
 
 const int MAX_TURNS = 8;
 
@@ -18,6 +18,7 @@ public:
 	void setStartingPlayer(int);
 	virtual void reset();
 private:
+	Card findSuperiorCard();
 	SumScore score_;
 	std::vector<std::pair<int, Card> > vec_;
 	int turn_counter_;

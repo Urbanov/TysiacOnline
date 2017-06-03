@@ -1,5 +1,5 @@
 #pragma once
-#include "Controller.hpp"
+#include "controller.hpp"
 
 class Adder : public Controller {
 public:

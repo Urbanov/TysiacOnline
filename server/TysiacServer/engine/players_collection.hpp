@@ -1,5 +1,5 @@
 #pragma once
-#include "Player.hpp"
+#include "player.hpp"
 #include <json.hpp>
 
 using json = nlohmann::json;

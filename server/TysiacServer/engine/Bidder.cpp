@@ -1,4 +1,4 @@
-#include "Bidder.hpp"
+#include "bidder.hpp"
 
 Bidder::Bidder(Deck & deck, PlayersCollection & players)
 	: Controller(deck, players)

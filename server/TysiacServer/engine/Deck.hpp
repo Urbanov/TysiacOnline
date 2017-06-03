@@ -2,7 +2,7 @@
 #include <vector>
 #include <random>
 #include "Card.hpp"
-#include "PlayersCollection.hpp"
+#include "players_collection.hpp"
 
 using players = std::vector<Player>;
 

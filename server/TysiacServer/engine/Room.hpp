@@ -1,12 +1,12 @@
 #pragma once
-#include "Controller.hpp"
-#include "GameManager.hpp"
-#include "LeaveBuster.hpp"
-#include "ChatBox.hpp"
-#include "Adder.hpp"
-#include "Bidder.hpp"
-#include "Dealer.hpp"
-#include "Game.hpp"
+#include "controller.hpp"
+#include "game_manager.hpp"
+#include "leave_buster.hpp"
+#include "chat_box.hpp"
+#include "adder.hpp"
+#include "bidder.hpp"
+#include "dealer.hpp"
+#include "game.hpp"
 
 class GameManager;
 

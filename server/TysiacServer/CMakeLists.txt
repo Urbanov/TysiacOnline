@@ -1,14 +1,21 @@
-cmake_minimum_required (VERSION 2.6)
-project (TysiacServer)
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
+cmake_minimum_required(VERSION 2.6)
+project(TysiacServer)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+add_definitions(-DBOOST_ALL_NO_LIB)
 
-set(Boost_USE_STATIC_LIBS ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost COMPONENTS system thread) 
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED unit_test_framework system)
 
-if(Boost_FOUND)
-	include_directories(${Boost_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/lib)
-	link_directories(${Boost_LIBRARY_DIRS})
-	add_executable(TysiacServer main.cpp engine/GameLogic.cpp engine/GameLogic.hpp network/manager.h network/manager.cpp network/server.h network/server.cpp network/session.h network/session.cpp)
-	target_link_libraries(TysiacServer ${Boost_LIBRARIES})
-endif()
+include_directories(${Boost_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/lib)
+
+add_subdirectory(engine)
+add_subdirectory(network)
+add_subdirectory(tests)
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} engine network)
+
+set(TEST_PROJECT_NAME "${PROJECT_NAME}_test")
+add_executable(${TEST_PROJECT_NAME} EXCLUDE_FROM_ALL tests/test_main.cpp)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} engine network tests)

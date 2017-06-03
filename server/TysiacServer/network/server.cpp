@@ -19,7 +19,9 @@ Server::~Server()
 void Server::run(const std::string& address, size_t port)
 {
 	boost::system::error_code error_code;
-	boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(address), port);
+	boost::asio::ip::tcp::endpoint endpoint(
+		boost::asio::ip::address::from_string(address), static_cast<unsigned short>(port)
+	);
 	acceptor_.open(endpoint.protocol(), error_code);
 	acceptor_.set_option(boost::asio::socket_base::reuse_address(true), error_code);
 	acceptor_.bind(endpoint, error_code);

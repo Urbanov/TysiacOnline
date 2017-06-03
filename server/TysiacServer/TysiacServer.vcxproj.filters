@@ -13,144 +13,159 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{e1b354ba-3559-4b3f-93da-17d193848972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tests">
+      <UniqueIdentifier>{26d3eb72-5240-4070-9e4e-f779225740fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine">
+      <UniqueIdentifier>{355f2a04-82d6-4177-a27c-c42a18111837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\network">
+      <UniqueIdentifier>{b540c07f-bd67-46b6-87c3-4c5a71735f15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\network">
+      <UniqueIdentifier>{a301037f-71ba-4f71-8228-a454cd878010}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="network\server.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="network\session.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="network\manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\boost_unit_test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\server_tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Card.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\PlayersDeck.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Score.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Deck.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\PlayersCollection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Controller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\LeaveBuster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\ChatBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\Adder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\Starter.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="engine\Bidder.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Card.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\ChatBox.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Controller.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="engine\Dealer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Deck.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="engine\Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\SumScore.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="engine\GameManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\LeaveBuster.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Player.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\PlayersCollection.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\PlayersDeck.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="engine\Room.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Score.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\Starter.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\SumScore.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="network\manager.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\server.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\session.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\server_tests.cpp">
+      <Filter>Source Files\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\test_main.cpp">
+      <Filter>Source Files\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\engine_tests.cpp">
+      <Filter>Source Files\tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="network\server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="network\session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="network\manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tests\TestFeatures.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Card.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Score.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\PlayersDeck.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Deck.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Player.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\PlayersCollection.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Controller.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\LeaveBuster.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\ChatBox.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\Adder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Starter.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="engine\Bidder.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="engine\Dealer.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="engine\Card.hpp">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="engine\SumScore.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\Room.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="engine\GameManager.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="engine\ChatBox.hpp">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="engine\ConstDefinitions.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Controller.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Dealer.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Deck.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Game.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\GameManager.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\LeaveBuster.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Player.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\PlayersCollection.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\PlayersDeck.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Room.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Score.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\Starter.hpp">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="network\manager.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\server.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\session.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\SumScore.hpp">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -158,12 +173,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\client\client.html">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\client\scripts\handlers.js">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\client\scripts\lobby.js">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\client\scripts\main.js">

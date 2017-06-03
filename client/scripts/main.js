@@ -1,4 +1,3 @@
-// global variable
 var controller;
 
 $(document).ready(function () {

@@ -74,7 +74,7 @@ const suits Card::getSuit() const
  * @param trump current trumpsuit
  * @return higher card
  */
-const Card & Card::isBigger(const Card & other, suits trump) const
+const Card& Card::isBigger(const Card& other, suits trump) const
 {
 	//If both cards are the same suit, a card with higher figure is higher
 	if (suit_ == other.suit_) {

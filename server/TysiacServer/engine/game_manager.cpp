@@ -31,7 +31,7 @@ void GameManager::removeIfLeaveCalled(const json& msg, int player_id)
 	if (msg["action"] != "leave") {
 		return;
 	}
-	for (auto & i : players_) {
+	for (auto& i : players_) {
 		for (auto it = i.begin(); it != i.end(); ++it) {
 			if (*it == player_id) {
 				i.erase(it);

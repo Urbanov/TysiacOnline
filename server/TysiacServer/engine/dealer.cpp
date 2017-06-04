@@ -77,7 +77,7 @@ void Dealer::dealCards()
 request_type Dealer::createMessage(const json& msg) const
 {
 	request_type request;
-	for (const auto & i : msg["data"]) {
+	for (const auto& i : msg["data"]) {
 		json feedback = {
 			{ "action", "deal" },
 			{ "who", i["player"] }

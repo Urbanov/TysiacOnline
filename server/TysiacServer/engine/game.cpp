@@ -24,14 +24,14 @@ request_type Game::createMessages(const json& msg, stage stage_)
 	request_type request = createMessage(stage_);
 	if (stage_ == SUMMING_UP || stage_ == ADDING) {
 		request_type tmp = score_.createMessages(msg, stage_);
-		for (const auto & i : tmp) {
+		for (const auto& i : tmp) {
 			request.push_back(i);
 		}
 	}
 	return request;
 }
 
-const Card & Game::playTurn(int player, std::size_t card)
+const Card& Game::playTurn(int player, std::size_t card)
 {
 	return players_.getPlayer(X, player).getPlayersDeck().playCard(card);
 }

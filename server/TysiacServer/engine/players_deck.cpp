@@ -18,7 +18,7 @@ void PlayersDeck::addCard(const Card& card)
 	deck_.back().setIsUsed(false);
 }
 
-const Card & PlayersDeck::playCard(std::size_t card_number) const
+const Card& PlayersDeck::playCard(std::size_t card_number) const
 {
 	if (card_number >= deck_.size()) {
 		throw std::out_of_range("No card with such index in player's deck");

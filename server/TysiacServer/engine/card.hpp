@@ -35,13 +35,13 @@ public:
 	Card operator=(const Card& card);
 	Card operator=(Card&& card);
 	bool operator==(const Card& other) const;
-	bool operator!=(const Card & other) const;
+	bool operator!=(const Card& other) const;
 	~Card();
 	bool getIsUsed() const;
 	void setIsUsed(bool is_used) const;
 	const figures getFigure() const;
 	const suits getSuit() const;
-	const Card & isBigger(const Card& other, suits suit) const;
+	const Card& isBigger(const Card& other, suits suit) const;
 private:
 	mutable bool is_used_; ///cards are not deleted from user decks, this variable defines whether they are still in use, or not
 	figures figure_; ///card's parameter

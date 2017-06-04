@@ -38,7 +38,7 @@ bool Room::runGame(const json& msg)
 	if (temp_stage == SUMMING_UP) {
 		employees_[BID]->changeModel(msg, SUMMING_UP);
 		tmp = employees_[BID]->createMessages(msg, SUMMING_UP);
-		for (const auto & i : tmp) {
+		for (const auto& i : tmp) {
 			request.push_back(i);
 		}
 		stage_ = BIDDING;

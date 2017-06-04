@@ -69,7 +69,7 @@ std::string createReadyMessage(int player_id = -1)
 	return ready.dump();
 }
 
-void readyToAll(GameManager & man, std::vector<int> id)
+void readyToAll(GameManager& man, std::vector<int> id)
 {
 	json feedback;
 	feedback["action"] = "ready";
@@ -78,7 +78,7 @@ void readyToAll(GameManager & man, std::vector<int> id)
 	}
 }
 
-void addPlayersByAddMessage(GameManager & man, std::vector<int> id, int server_id)
+void addPlayersByAddMessage(GameManager& man, std::vector<int> id, int server_id)
 {
 	int new_id;
 	if (server_id == -1) {
@@ -149,7 +149,7 @@ void addPlayers(PlayersCollection& players)
 	}
 }
 
-void addScoreToPlayers(PlayersCollection & players, std::vector<std::pair<int, int> > vec)
+void addScoreToPlayers(PlayersCollection& players, std::vector<std::pair<int, int> > vec)
 {
 	addPlayers(players);
 	players.prepareGame(true);
@@ -159,18 +159,18 @@ void addScoreToPlayers(PlayersCollection & players, std::vector<std::pair<int, i
 	}
 }
 
-std::vector<int> getScoreOfPlayers(PlayersCollection & players)
+std::vector<int> getScoreOfPlayers(PlayersCollection& players)
 {
 	std::vector<int> vec;
-	for (auto & i : players.getArray()) {
+	for (auto& i : players.getArray()) {
 		vec.push_back(i.getScoreClass().getScore());
 	}
 	return vec;
 }
 
-void addCards(Player & player, std::vector<Card> vec)
+void addCards(Player& player, std::vector<Card> vec)
 {
-	for (const auto & i : vec) {
+	for (const auto& i : vec) {
 		player.getPlayersDeck().addCard(i);
 	}
 }
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed1)
 	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed2)
 	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed3)
 	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed4)
 	std::vector<suits> suit = { CLUBS, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, KING, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed5)
 	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed6)
 	std::vector<suits> suit = { CLUBS, SPADES, DIAMONDS, HEARTS };
 	std::vector<figures> figure = { NINE, TEN, QUEEN, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed7)
 	std::vector<suits> suit = { CLUBS };
 	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed8)
 	std::vector<suits> suit = { CLUBS };
 	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -367,7 +367,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed9)
 	std::vector<suits> suit = { CLUBS };
 	std::vector<figures> figure = { NINE, JACK, QUEEN, KING, TEN, ACE };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(ReturnAllCardsThatCanBePlayed10)
 	std::vector<suits> suit = { CLUBS, DIAMONDS };
 	std::vector<figures> figure = { NINE, QUEEN, KING, TEN };
 	for (const auto& i : suit) {
-		for (const auto & j : figure) {
+		for (const auto& j : figure) {
 			addCard(Card(j, i));
 		}
 	}

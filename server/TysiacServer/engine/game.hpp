@@ -10,7 +10,7 @@ public:
 	virtual ~Game();
 	virtual stage changeModel(const json& msg, const stage stage_);
 	virtual request_type createMessages(const json& msg, const stage stage_);
-	const Card & playTurn(int player, std::size_t card);
+	const Card& playTurn(int player, std::size_t card);
 	stage manageTurn(int player, int card);
 	request_type createMessage(const stage stage_);
 	int compareCardsAndPassToWinner();

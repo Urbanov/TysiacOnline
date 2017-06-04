@@ -11,7 +11,7 @@ PlayersCollection::~PlayersCollection()
 {}
 
 
-players & PlayersCollection::getArray()
+players& PlayersCollection::getArray()
 {
 	return players_;
 }
@@ -55,7 +55,7 @@ request_type PlayersCollection::getPlayerInfo() const
 	return vec;
 }
 
-Player & PlayersCollection::getPlayer(iterators it, size_t player_id)
+Player& PlayersCollection::getPlayer(iterators it, size_t player_id)
 {
 	if (players_.size() != MAX_PLAYERS) {
 		throw std::out_of_range("Game has not started");

@@ -233,11 +233,11 @@ request_type Bidder::createStarterMessages(const json& msg, stage stage_)
 		}
 		if (stage_ == BIDDING || stage_ == SUMMING_UP) {
 			tmp = createCardDealingMessages();
-			for (const auto & i : tmp) {
+			for (const auto& i : tmp) {
 				request.push_back(i);
 			}
 			tmp = firstBid(stage_);
-			for (const auto & i : tmp) {
+			for (const auto& i : tmp) {
 				request.push_back(i);
 			}
 			starter_.setIsFull(true);

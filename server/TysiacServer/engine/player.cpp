@@ -31,7 +31,7 @@ bool Player::operator==(const Player& other) const
 	return (player_id_ == other.player_id_);
 }
 
-PlayersDeck & Player::getPlayersDeck()
+PlayersDeck& Player::getPlayersDeck()
 {
 	return players_deck_;
 }
@@ -41,12 +41,12 @@ size_t Player::getPlayerId() const
 	return player_id_;
 }
 
-const std::string & Player::getPlayersNick() const
+const std::string& Player::getPlayersNick() const
 {
 	return nick_;
 }
 
-Score & Player::getScoreClass()
+Score& Player::getScoreClass()
 {
 	return score_;
 }

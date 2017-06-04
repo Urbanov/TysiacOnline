@@ -7,7 +7,7 @@ class Player {
 public:
 	Player(int player_id, std::string& nick);
 	Player(const Player& other);
-	Player & operator=(const Player& other);
+	Player& operator=(const Player& other);
 	~Player();
 	bool operator==(const Player& other) const;
 	PlayersDeck& getPlayersDeck();

@@ -105,7 +105,6 @@ class View {
 	}
 
 	drawTurns() {
-		console.log(" >>> drawing turns");
 		$("#data_left .nick").css({
 			"color": controller.self.getLeftPlayer().turn ? "#fff" : "#bbb",
 			"font-weight": controller.self.getLeftPlayer().turn ? "bold" : "normal"
@@ -149,7 +148,6 @@ class View {
 	}
 
 	clearTable() {
-		console.log("a");
 		this.drawTrump(Suits.NONE);
 		this.clearTop();
 		this.clearBottom();

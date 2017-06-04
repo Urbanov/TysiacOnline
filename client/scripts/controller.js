@@ -17,8 +17,6 @@ class Controller {
 		this.ws.onmessage = $.proxy(function (event) {
 			var msg = JSON.parse(event.data);
 
-			console.log(">>> RECEIVED: " + JSON.stringify(msg));
-
 			switch (msg.action) {
 				case "welcome":
 					this.handleWelcome(msg);
@@ -73,14 +71,12 @@ class Controller {
 					break;
 
 				default:
-					console.log(">>> UNUSED: " + JSON.stringify(msg));
 					break;
 			}
 		}, this);
 	}
 
 	sendToServer(msg) {
-		console.log("vvvvvvvv" + JSON.stringify(msg));
 		this.ws.send(JSON.stringify(msg));
 	}
 
@@ -292,7 +288,6 @@ class Controller {
 		}
 		this.view.drawBids();
 		if (msg.player == this.self.id) {
-			console.log(">>> jedziesz");
 			this.self.allAvailable();
 		}
 	}
@@ -310,7 +305,6 @@ class Controller {
 
 		this.view.displayCard(msg.data.prev);
 		if (this.self.id == msg.player) {
-			console.log(">>> jedziesz");
 			this.self.someAvailable(msg.data.available);
 		}
 	}

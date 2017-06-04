@@ -55,11 +55,7 @@ class SelfPlayer extends Player {
 	useCard(event) {
 		var id = Number(event.data.value);
 
-		var test = ">>> USECARD: " + event.data.value;
-		console.log(test);
-
 		if (!this.cards[id].available) {
-			console.log(">>> USECARD: card is not available");
 			return;
 		}
 
@@ -98,7 +94,6 @@ class SelfPlayer extends Player {
 				card: Number(second_card)
 			}]
 		};
-		console.log(">>> give cards: " + JSON.stringify(msg));
 		controller.sendToServer(msg);
 	}
 
@@ -108,7 +103,6 @@ class SelfPlayer extends Player {
 			action: "play",
 			data: id
 		};
-		console.log(">>> send play: " + JSON.stringify(msg));
 		controller.sendToServer(msg);
 	}
 

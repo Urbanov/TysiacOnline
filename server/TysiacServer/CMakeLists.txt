@@ -15,7 +15,3 @@ add_subdirectory(tests)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} engine network)
-
-set(TEST_PROJECT_NAME "${PROJECT_NAME}_test")
-add_executable(${TEST_PROJECT_NAME} EXCLUDE_FROM_ALL tests/test_main.cpp)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} engine network tests)

@@ -4,5 +4,4 @@ set(network_sources
 	session.cpp
 )
 
-
 add_library(network ${network_sources})

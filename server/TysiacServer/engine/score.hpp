@@ -3,6 +3,9 @@
 
 const int NO_TAX_CAP = 800;
 
+/**
+ * @brief class representing player's score
+ */
 class Score {
 public:
 	Score();
@@ -18,7 +21,7 @@ public:
 	void roundScore();
 private:
 
-	int score_;
-	int temp_score_;
-	int claim_;
+	int score_; /// player's overall score
+	int temp_score_; /// player's turn score
+	int claim_; /// player's claim's value
 };

@@ -6,15 +6,18 @@ using json = nlohmann::json;
 using players = std::vector<Player>;
 using request_type = std::vector<json>;
 
-const int MAX_PLAYERS = 3;
+const int MAX_PLAYERS = 3; /// max number of players per room
 
 enum iterators {
-	X = -1,
-	CURRENT = 0,
-	COMPULSORY = 1,
-	HIGHEST = 2,
+	X = -1, /// want to find player based of his ID
+	CURRENT = 0, /// find current player (in terms of playing turn)
+	COMPULSORY = 1, /// find player who has to bid 100 this round
+	HIGHEST = 2, /// find player who bid the highest
 };
 
+/**
+ * class keeps all players' data and modifies it
+ */
 class PlayersCollection {
 public:
 	PlayersCollection();
@@ -29,6 +32,6 @@ public:
 	void prepareGame(bool isFirst);
 	void resetPlayerAttributes(bool isFinal);
 private:
-	players players_;
-	std::vector<size_t> it_;
+	players players_; /// vector of Player class objects
+	std::vector<size_t> it_; /// vector of variables that are used to get proper player based on game's stage
 };

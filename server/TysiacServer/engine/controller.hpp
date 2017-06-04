@@ -44,8 +44,23 @@ class Controller {
 public:
 	Controller(Deck& deck, PlayersCollection& players);
 	virtual ~Controller();
+	/**
+	 * @brief method used to parse every type of message
+	 *
+	 * @param msg player's message
+	 * @param stage_ current server's stage
+	 */
 	virtual stage changeModel(const json& msg, const stage stage_) = 0;
+	/**
+	* @brief method used to create reponse to every type of player's message
+	*
+	* @param msg player's message
+	* @param stage_ current server's stage
+	*/
 	virtual request_type createMessages(const json& msg, const stage stage_) = 0;
+	/**
+	 * @brief resets all members in case of ending game
+	 */
 	virtual void reset();
 protected:
 	Deck& deck_;

@@ -14,6 +14,7 @@ Deck::Deck()
 {
 	std::vector<figures> figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
 	std::vector<suits> suit_ = { DIAMONDS, CLUBS, HEARTS, SPADES };
+	//Create standard 52 card deck
 	for (auto& i : figure_) {
 		for (auto& j : suit_) {
 			deck_.emplace_back(i, j);
@@ -25,7 +26,7 @@ Deck::Deck()
 Deck::~Deck() {}
 
 /**
- * @brief deal out cards to players
+ * @brief shuffle and then deal out cards to players
  *
  * @param players collection of players who are to be given cards from Deck
  */
@@ -55,7 +56,8 @@ json Deck::addBonusCards(Player& player)
 			{ "suit", (*deck_it_).getSuit() }
 		};
 		msg.push_back(tmp);
-		player.getPlayersDeck().addCard(*deck_it_++);
+		player.getPlayersDeck().addCard(*deck_it_);
+		++deck_it_;
 	}
 	deck_it_ = deck_.begin();
 	return msg;

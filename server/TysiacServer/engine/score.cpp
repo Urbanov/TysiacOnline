@@ -14,11 +14,22 @@ int Score::getScore() const
 	return score_;
 }
 
+/**
+ * @brief adds points to player's score
+ *
+ * @param score amount of points to add
+ */
 void Score::addScore(int score)
 {
 	score_ += score;
 }
 
+
+/**
+* @brief adds points to player's temporary score
+*
+* @param temp_score amount of points to add
+*/
 void Score::addToTurnScore(int temp_score)
 {
 	temp_score_ += temp_score;
@@ -29,6 +40,11 @@ int Score::getTurnScore() const
 	return temp_score_;
 }
 
+/**
+ * @brief resets points player has achieved (either temporary or all)
+ *
+ * @param isFinal reset depends on the situation, if game is over isFinal is set to true and all score is cleared
+ */
 void Score::reset(bool isFinal)
 {
 	temp_score_ = 0;
@@ -38,6 +54,12 @@ void Score::reset(bool isFinal)
 	}
 }
 
+/**
+ * @brief set player's new claim, can be only higher than previous
+ * 
+ * @param claim new value to set
+ * @param isFinal set to true if it's final bid after regular bidding
+ */
 bool Score::setClaim(int claim, bool isFinal)
 {
 	if (isFinal) {
@@ -58,6 +80,10 @@ int Score::getClaim() const
 	return claim_;
 }
 
+
+/**
+ * @brief calculates whether player achieved claimed bid value or not
+ */
 void Score::roundScore()
 {
 	if (claim_ != -1) {
@@ -76,6 +102,9 @@ void Score::roundScore()
 	}
 }
 
+/**
+ * @brief round turn score to value divisible by ten
+ */
 int Score::round(int number) const
 {
 	int temp = number % 10;

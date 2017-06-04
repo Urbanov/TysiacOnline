@@ -47,7 +47,7 @@ bool Adder::isFull() const
 }
 
 /**
- * @brief creates add request response
+ * @brief creates response for player's add request
  *
  * @param msg add request sent to room by player
  * @param stage_ current server's stage

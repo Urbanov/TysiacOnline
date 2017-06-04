@@ -9,38 +9,91 @@ Bidder::~Bidder()
 {}
 
 /**
- * @brief checks if player attempting to bid does it during his turn and if the amount is correct
+ * @brief responsible for checking if player's bid is correct and executing it
  *
  * @param msg bid message from the most recent bidding player
- * @msg informtion about last player's bid statitics
+ * @param stage current server's stage
+ * @return new server's stage
  */
 stage Bidder::bid(const json& msg, const stage stage_) const
 {
-	if (players_.getPlayer(CURRENT).getPlayerId() != msg["player"]) {
-		throw std::logic_error("Player trying to bid not at his turn");
-	}
-	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() > static_cast<int>(msg["data"])
-		&& msg["data"] != -1) {
-		throw std::logic_error("Player bids less than current highest bid");
-	}
-	if (players_.getPlayer(CURRENT).getPlayerId() == players_.getPlayer(HIGHEST).getPlayerId()) {
-		players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], true);
+	checkIfBidIsCorrect(msg);
+	if (checkIfFinalBid(msg)) {
 		return PLAYING;
 	}
-	players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], false);
-	if (msg["data"] != -1) {
-		players_.setPlayer(HIGHEST, msg["player"]);
-	}
-	players_.getNextPlayer(CURRENT);
-	while (players_.getPlayer(CURRENT).getScoreClass().getClaim() == -1) {
-		players_.getNextPlayer(CURRENT);
-	}
-	if (players_.getPlayer(CURRENT).getPlayerId() ==
-		players_.getPlayer(HIGHEST).getPlayerId()) {
+	makeBidAndSetHighest(msg);
+	getNextPlayer();
+	if (checkIfHighestIsCurrent()) {
 		additional_cards_ = deck_.addBonusCards(players_.getPlayer(HIGHEST));
 		return DEALING;
 	}
 	return BIDDING;
+}
+
+/**
+ * @brief add to model bid given message contains, if it is not pass message set message's author as a highest bidder
+ *
+ * @param msg player's message
+ */
+void Bidder::makeBidAndSetHighest(const json& msg) const
+{
+	players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], false);
+	if (msg["data"] != -1) {
+		players_.setPlayer(HIGHEST, msg["player"]);
+	}
+}
+
+/**
+ * @brief checks if the player to claim is the one who has claimed the highest, needed to find specific situations
+ */
+bool Bidder::checkIfHighestIsCurrent() const
+{
+	return players_.getPlayer(CURRENT).getPlayerId() ==
+		players_.getPlayer(HIGHEST).getPlayerId();
+}
+
+/**
+ * @brief if player who bids is the one who has the highest bid, it means that it is the final bid done after regular bid
+ *
+ * @param msg message sent from player
+ * @return true if it is the final bid
+ */
+bool Bidder::checkIfFinalBid(const json& msg) const
+{
+	if (checkIfHighestIsCurrent()) {
+		players_.getPlayer(CURRENT).getScoreClass().setClaim(msg["data"], true);
+		return true;
+	}
+	return false;
+}
+
+/**
+ * @brief looks for a next player that did not resign from bidding
+ */
+void Bidder::getNextPlayer() const
+{
+	players_.getNextPlayer(CURRENT);
+	while (players_.getPlayer(CURRENT).getScoreClass().getClaim() == -1) {
+		players_.getNextPlayer(CURRENT);
+	}
+}
+
+/**
+ * @brief throws if command in player's message violates rules of game
+ *
+ * @param msg player's message
+ */
+void Bidder::checkIfBidIsCorrect(const json& msg) const
+{
+	//if message was sent by player not in his turn
+	if (players_.getPlayer(CURRENT).getPlayerId() != msg["player"]) {
+		throw std::logic_error("Player trying to bid not at his turn");
+	}
+	//if player is trying to claim less than he can
+	if (players_.getPlayer(HIGHEST).getScoreClass().getClaim() > static_cast<int>(msg["data"])
+		&& msg["data"] != -1) {
+		throw std::logic_error("Player bids less than current highest bid");
+	}
 }
 
 /**
@@ -114,8 +167,31 @@ request_type Bidder::createSpecialInfo(const json& msg) const
  */
 request_type Bidder::createUpdateInfo(const json& msg) const
 {
-	json feedback;
+	json feedback = constructBidMessage(msg);
 	request_type request;
+	request.push_back(feedback);
+	constructAdvancedBidMessage(feedback);
+	request.push_back(feedback);
+	return request;
+}
+
+/**
+ * @brief construct bid message with min and max value next player can bid given standard message
+ */
+void Bidder::constructAdvancedBidMessage(json& feedback) const
+{
+	feedback.erase("who");
+	feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
+	feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
+	feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayersDeck().getMaxValue(false);
+}
+
+/**
+ * @brief constructing standard bid message
+ */
+json Bidder::constructBidMessage(const json& msg) const
+{
+	json feedback;
 	for (auto i : players_.getArray()) {
 		if (i.getPlayerId() != players_.getPlayer(CURRENT).getPlayerId()) {
 			feedback["who"].push_back(i.getPlayerId());
@@ -127,13 +203,7 @@ request_type Bidder::createUpdateInfo(const json& msg) const
 		{ "value", msg["data"] },
 		{ "id", msg["player"] }
 	};
-	request.push_back(feedback);
-	feedback.erase("who");
-	feedback["who"] = players_.getPlayer(CURRENT).getPlayerId();
-	feedback["data"]["min"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim() + MIN_RAISE;
-	feedback["data"]["max"] = players_.getPlayer(CURRENT).getPlayersDeck().getMaxValue(false);
-	request.push_back(feedback);
-	return request;
+	return feedback;
 }
 
 /**

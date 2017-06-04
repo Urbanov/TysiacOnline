@@ -8,6 +8,15 @@ Starter::Starter(Deck& deck, PlayersCollection& players)
 Starter::~Starter()
 {}
 
+/**
+ * @brief part of controller, modifies model, handle all start type messages
+ * @see Controller
+ *
+ * @param msg start type message received from player
+ * @param stage_ current Room's stage
+ *
+ * @return new Room's stage
+ */
 stage Starter::changeModel(const json& msg, const stage stage_)
 {
 	if (stage_ == SUMMING_UP) {
@@ -22,6 +31,14 @@ stage Starter::changeModel(const json& msg, const stage stage_)
 	return ADDING;
 }
 
+/**
+ * @brief creates ready-type update messages for all users in room 
+ *
+ * @param msg message received from player
+ * @param stage_ current room's stage
+ * 
+ * @return vector of messages that will be sent to players
+ */
 request_type Starter::createMessages(const json& msg, const stage stage_)
 {
 	json feedback;
@@ -37,6 +54,13 @@ request_type Starter::createMessages(const json& msg, const stage stage_)
 	return request;
 }
 
+/**
+* @brief creates start-type update messages for all users in room
+*
+* @param msg message received from player
+*
+* @return start-type update message that will be sent to players
+*/
 json Starter::createStartMessage(const json& msg) const
 {
 	json feedback;
@@ -64,6 +88,12 @@ void Starter::reset()
 	is_full_ = false;
 }
 
+/**
+ * @brief checks if there are enough players to start a game
+ * 
+ * @return true if number of players is equal MAX_PLAYERS
+ * @see MAX_PLAYERS
+ */
 bool Starter::isReadyToStart() const
 {
 	if (players_.getArray().size() != MAX_PLAYERS) {
@@ -77,6 +107,11 @@ bool Starter::isReadyToStart() const
 	return true;
 }
 
+/**
+ * @brief prepares game to start
+ *
+ * @param stage_ current room's stage
+ */
 void Starter::prepareToStart(stage stage_)
 {
 	is_full_ = false;

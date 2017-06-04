@@ -2,14 +2,21 @@
 #include <string>
 #include "const_definitions.hpp"
 
+/**
+ * @brief class receiving messages from clients and passing them to proper rooms, also managing all room objects @see Room
+ */
 class GameManager {
 public:
 	GameManager();
 	~GameManager();
 	req doWork(std::size_t player_id, const std::string& message);
 	void pushMessage(const request_type& msg);
-protected:
+
+private:
+	json parseMessage(std::size_t player_id, const std::string & message);
 	void removeIfLeaveCalled(const json& msg, int player_id);
+	json createExistingRoomsHeading(const json & msg);
+	json createExistingRoomsMessage(const json & msg);
 	void returnExistingRooms(const json& msg);
 	void attachClientIdsToMessage();
 	int findGameId(size_t player_id) const;

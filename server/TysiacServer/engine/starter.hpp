@@ -1,5 +1,10 @@
 #pragma once
 #include "controller.hpp"
+
+/**
+ * @brief part of the controller, handles all ready-type messages
+ * @see Controller
+ */
 class Starter : public Controller {
 public:
 	Starter(Deck& deck, PlayersCollection& players);
@@ -13,5 +18,5 @@ public:
 private:
 	bool isReadyToStart() const;
 	void prepareToStart(stage stage_);
-	bool is_full_;
+	bool is_full_; /// set to true if room is full
 };

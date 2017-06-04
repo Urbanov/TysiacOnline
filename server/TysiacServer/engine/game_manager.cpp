@@ -7,16 +7,20 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {}
 
+/**
+ * @brief attaches player's id to message sent by player, either tries to add player to a room or sends message to a room player belongs to
+ * 
+ * @param player_id id of message's author
+ * @param message message sent by player before parsing
+ * @return vector of messages and IDs of each addressee
+ */
 req GameManager::doWork(std::size_t player_id, const std::string& message)
 {
-	server_response_.clear();
-	feedback_.clear();
-	json msg = json::parse(message.begin(), message.end());
-	msg["player"] = player_id;
+	json parsedMessage = parseMessage(player_id, message);
 	try {
-		if (!runGame(msg)) {
-			active_games_[findGameId(player_id)]->runGame(msg);
-			removeIfLeaveCalled(msg, static_cast<int>(player_id));
+		if (!runGame(parsedMessage)) {
+			active_games_[findGameId(player_id)]->runGame(parsedMessage);
+			removeIfLeaveCalled(parsedMessage, static_cast<int>(player_id));
 			attachClientIdsToMessage();
 		}
 	}
@@ -26,6 +30,24 @@ req GameManager::doWork(std::size_t player_id, const std::string& message)
 	return server_response_;
 }
 
+/**
+ * @brief given string message creates json message and attaches player's ID to it
+ */
+json GameManager::parseMessage(std::size_t player_id, const std::string& message)
+{
+	server_response_.clear();
+	feedback_.clear();
+	json msg = json::parse(message.begin(), message.end());
+	msg["player"] = player_id;
+	return msg;
+}
+
+/**
+ * @brief removes player if the message type is "leave"
+ *
+ * @param msg player's message
+ * @param player_id players's ID
+ */
 void GameManager::removeIfLeaveCalled(const json& msg, int player_id)
 {
 	if (msg["action"] != "leave") {
@@ -41,21 +63,49 @@ void GameManager::removeIfLeaveCalled(const json& msg, int player_id)
 	}
 }
 
-void GameManager::returnExistingRooms(const json& msg)
+/**
+ * @brief returns heading of message sent to player containing existing rooms detailed info 
+ *
+ * @param msg message from player
+ */
+json GameManager::createExistingRoomsHeading(const json& msg)
 {
 	json resp = {
 		{ "action", "show" }
 		,{ "who", msg["player"] }
 	};
+	return resp;
+}
+
+/**
+ * @brief returns message sent to player containing existing rooms detailed info 
+ *
+ * @param msg message from player
+ */
+json GameManager::createExistingRoomsMessage(const json& msg)
+{
+	json resp = createExistingRoomsHeading(msg);
 	for (auto& i : active_games_) {
 		if (!i->isEmpty()) {
 			resp["data"].push_back(i->getPlayersInfo());
 		}
 	}
+	return resp;
+}
+
+/**
+ * @brief creates message sent to player containing existing rooms detailed info
+ */
+void GameManager::returnExistingRooms(const json& msg)
+{
+	json resp = createExistingRoomsMessage(msg);
 	feedback_.push_back(resp);
 	attachClientIdsToMessage();
 }
 
+/**
+ * @brief removes addrressee from messages and creates sepearate vector of IDs
+ */
 void GameManager::attachClientIdsToMessage()
 {
 	for (auto& i : feedback_) {
@@ -68,11 +118,21 @@ void GameManager::attachClientIdsToMessage()
 	}
 }
 
+/**
+ * @brief method used by rooms to pass messages to the manager
+ *
+ * @param vector of messages to be sent to players
+ */
 void GameManager::pushMessage(const request_type& msg)
 {
 	feedback_ = msg;
 }
 
+/**
+ * @brief look for a game with given ID
+ *
+ * @return index of game in game's vector, or -1 if not found
+ */
 int GameManager::findGameId(size_t player_id) const
 {
 	for (size_t i = 0; i < players_.size(); ++i) {
@@ -85,6 +145,11 @@ int GameManager::findGameId(size_t player_id) const
 	return -1;
 }
 
+/**
+ * @brief add played to the game or create new room depending on sent message
+ *
+ * @param msg message's message (ADD type)
+ */
 void GameManager::addPlayer(const json& msg)
 {
 	if (msg["id"] == -1) {
@@ -101,6 +166,12 @@ void GameManager::addPlayer(const json& msg)
 	}
 }
 
+/**
+ * @brief checks if received message is one of the following types: ADD, SHOW, or DISCONNECT
+ *
+ * @param player's message
+ * @return true if message is any of mentioned types, false otherwise
+ */
 bool GameManager::runGame(const json& msg)
 {
 	if (msg["action"] == "add") {
@@ -117,6 +188,11 @@ bool GameManager::runGame(const json& msg)
 	return false;
 }
 
+/**
+ * @brief creates a new room and adds player who sent request to it
+ *
+ * @param msg create room request from player
+ */
 void GameManager::createNewRoom(const json& msg)
 {
 	active_games_.emplace_back(std::make_unique<Room>(room_counter_++, *this));
@@ -127,6 +203,12 @@ void GameManager::createNewRoom(const json& msg)
 	attachClientIdsToMessage();
 }
 
+/**
+ * @brief look for empty room and add to it a player who requested for creating new room
+ *
+ * @param msg create room request
+ * @return bool if such room is found and used
+ */
 bool GameManager::useEmptyRoom(const json& msg)
 {
 	for (size_t i = 0; i < active_games_.size(); ++i) {

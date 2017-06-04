@@ -14,6 +14,10 @@ public:
 	void resetPlayerAttributes(bool isFinal);
 	bool isFinished() const;
 private:
+	json createScoreMessage() const;
+	void createEndMessage(request_type & request, stage stage_);
+	void resetAll();
+	void createEndMessageBody(json & message, request_type & request);
 	request_type createMessage(stage stages_);
 	std::vector<PController>& controllers_;
 };

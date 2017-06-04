@@ -18,6 +18,20 @@ public:
 	void setStartingPlayer(int);
 	virtual void reset();
 private:
+	void chooseWinningCardAndSetWinningPlayer();
+	void addScoreToPlayerForTakenCards();
+	bool marriageMayOccur() const;
+	bool playerHasKingQueenPair();
+	void addMarriageAndSetTrump();
+	void playCardAndSetNexPlayer(int player, int card);
+	json createPlayedCardDetails() const;
+	json createFeedbackHeader(const stage stage_) const;
+	void ifEndOfTurn();
+	std::vector<Card> cardsOnTable();
+	void createAdvancedMessage(Player& player, json & feedback, request_type & request);
+	void createUpdateMessagesToPlayers(json & feedback, request_type & request);
+	bool allPlayersPlayedCard();
+
 	Card findSuperiorCard();
 	SumScore score_;
 	std::vector<std::pair<int, Card>> vec_;

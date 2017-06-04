@@ -5,6 +5,9 @@
 
 class SessionManager;
 
+/**
+ * @brief wraps websocket sessions and performs operations on them
+ */
 class Session : public std::enable_shared_from_this<Session> {
 public:
 	Session(SessionManager& manager, boost::asio::ip::tcp::socket&& socket);

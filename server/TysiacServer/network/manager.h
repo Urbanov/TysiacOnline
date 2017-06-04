@@ -6,6 +6,9 @@
 #include "../engine/game_manager.hpp"
 #include "session.h"
 
+/**
+ * @brief manages currently valid sessions
+ */
 class SessionManager {
 public:
 	void registerSession(const std::shared_ptr<Session>& session);

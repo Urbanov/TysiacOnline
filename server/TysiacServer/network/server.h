@@ -6,6 +6,10 @@
 
 #include "manager.h"
 
+
+/**
+ * @brief main server class
+ */
 class Server {
 public:
 	Server();

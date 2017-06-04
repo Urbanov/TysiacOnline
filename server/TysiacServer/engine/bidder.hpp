@@ -5,7 +5,7 @@
 const int MIN_RAISE = 10; ///minimum raise of claim 
 
 /**
- * @brief class manages biddinge and gives cards to a player who bade the highest
+ * @brief class manages bidding and gives cards to a player who bade the highest
  */
 class Bidder : public Controller {
 public:

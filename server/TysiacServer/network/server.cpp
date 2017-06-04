@@ -16,6 +16,13 @@ Server::~Server()
 	stop();
 }
 
+
+/**
+ * @brief starts the server on given address and port
+ * 
+ * @param address address of the server
+ * @param port port of the server
+ */
 void Server::run(const std::string& address, size_t port)
 {
 	boost::system::error_code error_code;
@@ -34,6 +41,9 @@ void Server::run(const std::string& address, size_t port)
 	acceptor_.async_accept(socket_, endpoint_, std::bind(&Server::acceptHandler, this, beast::asio::placeholders::error));
 }
 
+/**
+ * @brief stops the server and its thread
+ */
 void Server::stop()
 {
 	boost::system::error_code error_code;
@@ -46,11 +56,17 @@ void Server::stop()
 	}
 }
 
+/**
+ * @brief checks whether server is accepting new connections
+ */
 bool Server::isAccepting() const
 {
 	return acceptor_.is_open();
 }
 
+/**
+ * @brief handles new connections and starts sessions
+ */
 void Server::acceptHandler(const boost::system::error_code& error_code)
 {
 	if (error_code) {

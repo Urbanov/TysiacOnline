@@ -9,13 +9,17 @@
 Session::Session(SessionManager& manager, boost::asio::ip::tcp::socket&& socket)
 	: manager_(manager)
 	, websocket_(std::move(socket))
+	, opcode_()
 	, id_([] {
-		static size_t id = 0;
-		return id++;
-	}())
+			static size_t id = 0;
+			return id++;
+		}())
 	, busy_(false)
 {}
 
+/**
+ * @brief starts a new seesion
+ */
 void Session::run()
 {
 	websocket_.async_accept(std::bind(
@@ -23,6 +27,9 @@ void Session::run()
 	));
 }
 
+/**
+ * @brief handles upgrade from tcp to websocket
+ */
 void Session::acceptHandler(const boost::system::error_code& error_code)
 {
 	if (error_code) {
@@ -36,6 +43,9 @@ void Session::acceptHandler(const boost::system::error_code& error_code)
 	));
 }
 
+/**
+ * @brief handles messages from clients and calls manager to interpret them
+ */
 void Session::readHandler(const boost::system::error_code& error_code)
 {
 	// close connection
@@ -54,6 +64,12 @@ void Session::readHandler(const boost::system::error_code& error_code)
 	manager_.interpret(id_, message);
 }
 
+
+/**
+ * @brief starts async writing to client
+ * 
+ * @param message message passed to client
+ */
 void Session::write(const std::string& message)
 {
 	queue_.push(message);
@@ -65,6 +81,9 @@ void Session::write(const std::string& message)
 	}
 }
 
+/**
+ * @brief handles async writing
+ */
 void Session::writeHandler(const boost::system::error_code& error_code)
 {
 	if (error_code) {
@@ -77,7 +96,8 @@ void Session::writeHandler(const boost::system::error_code& error_code)
 		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(
 			&Session::writeHandler, shared_from_this(), beast::asio::placeholders::error
 		));
-	} else {
+	} 
+	else {
 		busy_ = false;
 	}
 }
@@ -87,6 +107,9 @@ size_t Session::getId() const
 	return id_;
 }
 
+/**
+ * @brief sends a hardcoded welcome message to new client
+ */
 void Session::welcome()
 {
 	nlohmann::json msg;
@@ -95,6 +118,9 @@ void Session::welcome()
 	write(msg.dump());
 }
 
+/**
+ * @brief called after connection to client was closed or there was an error
+ */
 void Session::disconnect() const
 {
 	manager_.unregisterSession(id_);

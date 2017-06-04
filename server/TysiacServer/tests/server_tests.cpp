@@ -32,15 +32,11 @@ struct Client {
 		return message;
 	}
 
-	bool connect()
+	void connect()
 	{
 		boost::system::error_code error_code;
 		boost::asio::connect(socket, resolver.resolve(boost::asio::ip::tcp::resolver::query{ "127.0.0.1", "2137" }), error_code);
-		if (error_code) {
-			return false;
-		}
 		ws.handshake("127.0.0.1", "/", error_code);
-		return !error_code;
 	}
 
 	void disconnect()
@@ -127,20 +123,6 @@ BOOST_AUTO_TEST_CASE(StartAndStopServer)
 	// stop and check again
 	server.stop();
 	BOOST_CHECK(!server.isAccepting());
-}
-
-BOOST_AUTO_TEST_CASE(ConnectToServer)
-{
-	// try to connect to server
-	Server server;
-	server.run("127.0.0.1", 2137);
-	Client client;
-	BOOST_CHECK(client.connect());
-	client.disconnect();
-
-	// stop and try again
-	server.stop();
-	BOOST_CHECK(!client.connect());
 }
 
 BOOST_AUTO_TEST_CASE(WriteAndReadWithWebsocket)

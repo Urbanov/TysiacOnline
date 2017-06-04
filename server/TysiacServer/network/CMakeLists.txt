@@ -5,3 +5,4 @@ set(network_sources
 )
 
 add_library(network ${network_sources})
+target_link_libraries(network engine)

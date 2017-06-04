@@ -1,6 +1,5 @@
 #include "manager.h"
 
-
 /**
  * @brief adds a session to list of valid sessions
  *  

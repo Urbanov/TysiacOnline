@@ -149,7 +149,7 @@ void addPlayers(PlayersCollection& players)
 	}
 }
 
-void addScoreToPlayers(PlayersCollection& players, std::vector<std::pair<int, int> > vec)
+void addScoreToPlayers(PlayersCollection& players, std::vector<std::pair<int, int>> vec)
 {
 	addPlayers(players);
 	players.prepareGame(true);

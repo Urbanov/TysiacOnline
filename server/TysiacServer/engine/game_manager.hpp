@@ -18,7 +18,7 @@ protected:
 	void createNewRoom(const json& msg);
 	bool useEmptyRoom(const json& msg);
 
-	std::vector<std::vector<size_t> > players_;
+	std::vector<std::vector<size_t>> players_;
 	std::vector<PRoom> active_games_;
 	request_type feedback_;
 	req server_response_;

@@ -86,7 +86,7 @@ std::size_t PlayersDeck::getMaxValue(bool isLateBid)
 	}
 	max_value_ = 0;
 	max_value_ += MIN_VALUE;
-	std::vector <std::pair<suits, figures> > vec = {
+	std::vector <std::pair<suits, figures>> vec = {
 		{ DIAMONDS, NOT_A_FIGURE },
 		{ CLUBS, NOT_A_FIGURE },
 		{ HEARTS,NOT_A_FIGURE },

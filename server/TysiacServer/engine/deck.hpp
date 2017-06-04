@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <random>
-#include "Card.hpp"
+#include "card.hpp"
 #include "players_collection.hpp"
 
 using players = std::vector<Player>;

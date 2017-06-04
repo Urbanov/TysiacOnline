@@ -1,5 +1,5 @@
 #pragma once
-#include "Controller.hpp"
+#include "controller.hpp"
 #include "sum_score.hpp"
 
 const int MAX_TURNS = 8;

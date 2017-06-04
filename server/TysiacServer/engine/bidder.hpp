@@ -17,14 +17,14 @@ public:
 	stage bid(const json& msg, const stage stage_) const;
 	virtual void reset();
 private:
-	void makeBidAndSetHighest(const json & msg) const;
+	void makeBidAndSetHighest(const json& msg) const;
 	bool checkIfHighestIsCurrent() const;
 	bool checkIfFinalBid(const json& msg) const;
 	void getNextPlayer() const;
-	void checkIfBidIsCorrect(const json & msg) const;
+	void checkIfBidIsCorrect(const json& msg) const;
 	request_type createUpdateInfo(const json& msg) const;
-	void constructAdvancedBidMessage(json & feedback) const;
-	json constructBidMessage(const json & msg) const;
+	void constructAdvancedBidMessage(json& feedback) const;
+	json constructBidMessage(const json& msg) const;
 	request_type createSpecialInfo(const json& msg) const;
 	json createStock(const json& msg) const;
 	request_type createBid(const json& msg, stage stage_) const;

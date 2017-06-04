@@ -28,8 +28,8 @@ private:
 	json createFeedbackHeader(const stage stage_) const;
 	void ifEndOfTurn();
 	std::vector<Card> cardsOnTable();
-	void createAdvancedMessage(Player& player, json & feedback, request_type & request);
-	void createUpdateMessagesToPlayers(json & feedback, request_type & request);
+	void createAdvancedMessage(Player& player, json& feedback, request_type& request);
+	void createUpdateMessagesToPlayers(json& feedback, request_type& request);
 	bool allPlayersPlayedCard();
 
 	Card findSuperiorCard();

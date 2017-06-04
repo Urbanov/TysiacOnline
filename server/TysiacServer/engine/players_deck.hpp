@@ -21,10 +21,10 @@ public:
 	bool isHigher(const Card& played, const Card& deck_card, suits superior) const;
 private:
 	void addMarriageValue();
-	void lookForMarriage(std::vector<std::pair<suits, figures>>& vec, Card & card);
+	void lookForMarriage(std::vector<std::pair<suits, figures>>& vec, Card& card);
 	std::vector<std::pair<suits, figures>> getMarriageContainer() const;
 	bool findSameSuit(std::vector<int>& correct_cards, const std::vector<Card>& vec) const;
-	bool findAnyHigherCard(std::vector<int>& correct_cards, suits superior, const Card & card) const;
+	bool findAnyHigherCard(std::vector<int>& correct_cards, suits superior, const Card& card) const;
 	bool findAnyCard(std::vector<int>& correct_cards) const;
 	bool onTableEmpty(const std::vector<Card>& vec, std::vector<int>& correct_cards) const;
 	Card highestCardOnTheTable(const std::vector<Card>& vec, suits superior) const;

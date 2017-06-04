@@ -16,7 +16,7 @@ enum iterators {
 };
 
 /**
- * class keeps all players' data and modifies it
+ * @brief class keeps all players' data and modifies it
  */
 class PlayersCollection {
 public:

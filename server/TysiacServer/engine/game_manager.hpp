@@ -13,10 +13,10 @@ public:
 	void pushMessage(const request_type& msg);
 
 private:
-	json parseMessage(std::size_t player_id, const std::string & message);
+	json parseMessage(std::size_t player_id, const std::string& message);
 	void removeIfLeaveCalled(const json& msg, int player_id);
-	json createExistingRoomsHeading(const json & msg);
-	json createExistingRoomsMessage(const json & msg);
+	json createExistingRoomsHeading(const json& msg);
+	json createExistingRoomsMessage(const json& msg);
 	void returnExistingRooms(const json& msg);
 	void attachClientIdsToMessage();
 	int findGameId(size_t player_id) const;

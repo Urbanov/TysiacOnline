@@ -3,7 +3,7 @@
 
 
 /**
- *@brief part of controller, adds players to the room
+ * @brief part of controller, adds players to the room
  */
 class Adder : public Controller {
 public:

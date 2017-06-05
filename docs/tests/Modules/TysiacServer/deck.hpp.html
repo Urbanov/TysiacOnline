@@ -1,0 +1,41 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		deck.hpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#pragma once
+#include &lt;vector&gt;
+#include &lt;random&gt;
+#include "card.hpp"
+#include "players_collection.hpp"
+
+using players = std::vector&lt;Player&gt;;
+
+/** 
+ * @brief class representing deck of cards which are dealt to players during game
+ *
+ */
+class Deck {
+public:
+	Deck(const std::vector&lt;Card&gt;&amp; deck);
+	Deck(const Deck&amp; other);
+	Deck();
+	~Deck();
+	void dealCards(players&amp; players);
+	json addBonusCards(Player&amp; player);
+	void shuffle();
+	void reset();
+private:
+	std::random_device rd_; ///&lt; provides random shuffling of the deck
+	std::vector&lt;Card&gt; deck_; ///&lt; vector containing all cards in a deck
+	std::vector&lt;Card&gt;::iterator deck_it_; ///&lt; used to deal cards and then give additional cards to a player
+<span style = "background-color:#dfd">	const int MAX_CARDS = 7; ///&lt; number of cards to deal to each player when a round starts</span>
+};</pre>
+	</body>
+</html>

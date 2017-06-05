@@ -1,0 +1,91 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		server.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include &lt;beast/websocket/stream.hpp&gt;
+#include &lt;beast/core/placeholders.hpp&gt;
+
+#include "server.h"
+
+Server::Server()
+<span style = "background-color:#dfd">	: socket_(ios_)
+	, acceptor_(ios_)
+	, work_(ios_)
+{
+	thread_ = std::thread([&amp;] { ios_.run(); });
+}</span>
+
+Server::~Server()
+<span style = "background-color:#dfd">{
+	stop();
+}</span>
+
+
+/**
+ * @brief starts the server on given port
+ * 
+ * @param port port of the server
+ */
+void Server::run(size_t port)
+<span style = "background-color:#dfd">{
+	boost::system::error_code error_code;
+	boost::asio::ip::tcp::endpoint endpoint(</span>
+		boost::asio::ip::tcp::v4(), static_cast&lt;unsigned short&gt;(port)
+	);
+<span style = "background-color:#dfd">	acceptor_.open(endpoint.protocol(), error_code);
+	acceptor_.set_option(boost::asio::socket_base::reuse_address(true), error_code);
+	acceptor_.bind(endpoint, error_code);
+	acceptor_.listen(boost::asio::socket_base::max_connections, error_code);</span>
+
+<span style = "background-color:#dfd">	if (error_code) {</span>
+<span style = "background-color:#fdd">		return;</span>
+	}
+
+<span style = "background-color:#dfd">	acceptor_.async_accept(socket_, endpoint_, std::bind(&amp;Server::acceptHandler, this, beast::asio::placeholders::error));
+}</span>
+
+/**
+ * @brief stops the server and its thread
+ */
+void Server::stop()
+<span style = "background-color:#dfd">{
+	boost::system::error_code error_code;
+	if (isAccepting()) {
+		ios_.dispatch([&amp;] { acceptor_.close(error_code); });</span>
+	}
+<span style = "background-color:#dfd">	work_ = boost::none;
+	if (thread_.joinable()) {
+		thread_.join();</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief checks whether server is accepting new connections
+ */
+bool Server::isAccepting() const
+<span style = "background-color:#dfd">{
+	return acceptor_.is_open();
+}</span>
+
+/**
+ * @brief handles new connections and starts sessions
+ */
+void Server::acceptHandler(const boost::system::error_code&amp; error_code)
+<span style = "background-color:#dfd">{
+	if (error_code) {
+		return;</span>
+	}
+
+<span style = "background-color:#dfd">	std::shared_ptr&lt;Session&gt; session = std::make_shared&lt;Session&gt;(manager_, std::move(socket_));
+	session-&gt;run();
+	acceptor_.async_accept(socket_, endpoint_, std::bind(&amp;Server::acceptHandler, this, beast::asio::placeholders::error));
+}</span></pre>
+	</body>
+</html>

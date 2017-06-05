@@ -1,0 +1,59 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		game.hpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#pragma once
+#include "controller.hpp"
+#include "sum_score.hpp"
+
+
+/**
+ * @brief part of controller, class handling gameplay. Handles all play-type messages from clients. Modifies model and creates update messages for players
+ * @see Controller
+ */
+class Game : public Controller {
+public:
+	Game(Deck&amp; deck, PlayersCollection&amp; players, std::vector&lt;PController&gt;&amp; controllers);
+	virtual ~Game();
+	virtual stage changeModel(const json&amp; msg, const stage stage_);
+	virtual request_type createMessages(const json&amp; msg, const stage stage_);
+	const Card&amp; playTurn(int player, std::size_t card);
+	stage manageTurn(int player, int card);
+	request_type createMessage(const stage stage_);
+	int compareCardsAndPassToWinner();
+	void setSuperiorSuit();
+	void setStartingPlayer(int);
+	virtual void reset();
+private:
+	void chooseWinningCardAndSetWinningPlayer();
+	void addScoreToPlayerForTakenCards();
+	bool marriageMayOccur() const;
+	bool playerHasKingQueenPair();
+	void addMarriageAndSetTrump();
+	void playCardAndSetNexPlayer(int player, int card);
+	json createPlayedCardDetails() const;
+	json createFeedbackHeader(const stage stage_) const;
+	void ifEndOfTurn();
+	std::vector&lt;Card&gt; cardsOnTable();
+	void createAdvancedMessage(Player&amp; player, json&amp; feedback, request_type&amp; request);
+	void createUpdateMessagesToPlayers(json&amp; feedback, request_type&amp; request);
+	bool allPlayersPlayedCard();
+
+	Card findSuperiorCard();
+	SumScore score_; ///&lt; representing player's score and claim
+	std::vector&lt;std::pair&lt;int, Card&gt;&gt; vec_; ///&lt; used when calculating the winner of a turn
+	int turn_counter_; ///&lt; counts up to 8, then round is over
+	int current_starting_player_; ///&lt; ID of current player to start a turn
+	suits super_suit_; ///&lt; representing current trumpsuit
+	bool is_marriage_; ///&lt; set to true if there is marriage, used only to produce game-type update messages for clients
+<span style = "background-color:#dfd">	const int MAX_TURNS = 8; ///&lt; number of turns each round</span>
+};</pre>
+	</body>
+</html>

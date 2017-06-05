@@ -1,0 +1,323 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		game.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "game.hpp"
+
+Game::Game(Deck&amp; deck, PlayersCollection&amp; players, std::vector&lt;PController&gt;&amp; controllers)
+<span style = "background-color:#dfd">	: score_(deck, players, controllers)
+	, turn_counter_(0)
+	, super_suit_(NONE)
+	, Controller(deck, players)
+	, is_marriage_(false)
+{}</span>
+
+Game::~Game()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief calls manageTurn() that conducts the game. If manageTurn() returns SUMMING_UP, conducts end or a round
+ *
+ * @param msg player's message
+ * @param stage_ current server's stage
+ * @return new server's stage
+ */
+stage Game::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#fdd">{
+	if (manageTurn(msg["player"], msg["data"]) == SUMMING_UP) {
+		return score_.sumUpScore();</span>
+	}
+<span style = "background-color:#fdd">	return PLAYING;
+}</span>
+
+/**
+ * @brief creates messages that update player's view and call one of them to make a move
+ *
+ * @param msg player's message
+ * @param stage_ current server's stage
+ * @return new server's stage
+ */
+request_type Game::createMessages(const json&amp; msg, stage stage_)
+<span style = "background-color:#dfd">{
+	request_type request = createMessage(stage_);
+	if (stage_ == SUMMING_UP || stage_ == ADDING) {</span>
+<span style = "background-color:#fdd">		request_type tmp = score_.createMessages(msg, stage_);
+		for (const auto&amp; i : tmp) {
+			request.push_back(i);
+		}
+	}</span>
+<span style = "background-color:#dfd">	return request;
+}</span>
+
+/**
+ * @brief plays on the table a card form player's deck
+ */
+const Card&amp; Game::playTurn(int player, std::size_t card)
+<span style = "background-color:#dfd">{
+	return players_.getPlayer(X, player).getPlayersDeck().playCard(card);
+}</span>
+
+/**
+ * @brief plays a card from player's deck on the table, checking if it's a correct action before
+ *
+ * @param player player's id
+ * @param card card's index in player's deck
+ * @return new server's state, depending on model's current state
+ */
+stage Game::manageTurn(int player, int card)
+<span style = "background-color:#dfd">{
+	if (players_.getPlayer(CURRENT).getPlayerId() != player) {</span>
+<span style = "background-color:#fdd">		throw std::logic_error("Not player's turn to play a card");</span>
+	}
+<span style = "background-color:#dfd">	playCardAndSetNexPlayer(player, card);
+	if (allPlayersPlayedCard()) {</span>
+<span style = "background-color:#fdd">		return SUMMING_UP;</span>
+	}
+<span style = "background-color:#dfd">	return PLAYING;
+}</span>
+
+/**
+ * @brief checks if there are three cards on the table and if all 8 turns have been played
+ */
+bool Game::allPlayersPlayedCard()
+<span style = "background-color:#dfd">{
+	if (vec_.size() == MAX_PLAYERS) {
+		players_.setPlayer(CURRENT, compareCardsAndPassToWinner());
+		if (++turn_counter_ == MAX_TURNS) {</span>
+<span style = "background-color:#fdd">			reset();
+			return true;</span>
+		}
+	}
+<span style = "background-color:#dfd">	return false;
+}</span>
+
+/**
+ * @brief gets card from player's deck, places it on the table, sets trump if occurs and sets next player to play a card
+ *
+ * @param player player's id
+ * @param card card's index in player's deck
+ */
+void Game::playCardAndSetNexPlayer(int player, int card)
+<span style = "background-color:#dfd">{
+	vec_.emplace_back(std::make_pair(player, playTurn(player, card)));
+	setSuperiorSuit();
+	players_.getNextPlayer(CURRENT);
+}</span>
+
+/**
+ * @brief creates detailed information about last card used by a player
+ */
+json Game::createPlayedCardDetails() const
+<span style = "background-color:#dfd">{
+	json tmpj = {</span>
+		{ "figure", vec_.back().second.getFigure() },
+		{ "suit", vec_.back().second.getSuit() },
+		{ "player", vec_.back().first },
+		{ "marriage", is_marriage_ }
+	};
+<span style = "background-color:#dfd">	return tmpj;
+}</span>
+
+/**
+ * @brief createst hedaer for play-type message
+ *
+ * @param stage_ current room's stage
+ */
+json Game::createFeedbackHeader(const stage stage_) const
+<span style = "background-color:#dfd">{
+	json feedback = {</span>
+		{ "action", "play" },
+		{ "player", players_.getPlayer(CURRENT).getPlayerId() }
+	};
+<span style = "background-color:#dfd">	if (stage_ == SUMMING_UP) {</span>
+<span style = "background-color:#fdd">		feedback.erase("player");
+		feedback["player"] = -1;</span>
+	}
+<span style = "background-color:#dfd">	return feedback;
+}</span>
+
+/**
+ * @brief checks if the turn is over and clears table if so
+ */
+void Game::ifEndOfTurn()
+<span style = "background-color:#dfd">{
+	if (vec_.size() == MAX_PLAYERS) {
+		vec_.clear();</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief get cards laying on the table
+ */
+std::vector&lt;Card&gt; Game::cardsOnTable()
+<span style = "background-color:#dfd">{
+	std::vector&lt;Card&gt; tmp;
+	for (const auto&amp; i : vec_) {</span>
+<span style = "background-color:#fdd">		tmp.push_back(i.second);</span>
+<span style = "background-color:#dfd">	}
+	return tmp;
+}</span>
+
+/**
+ * @brief creates advanced message for player who will be playing a card next round
+ *
+ * @param player playing card
+ * @param feedback message to the player
+ * @param request vector of messages to players
+ */
+void Game::createAdvancedMessage(Player&amp; player, json&amp; feedback, request_type&amp; request)
+<span style = "background-color:#dfd">{
+	if (feedback["who"] == feedback["player"]) {
+		feedback["data"]["available"] = player.getPlayersDeck().getAllValidCards(cardsOnTable(), super_suit_);
+		request.push_back(feedback);
+		feedback.erase("data");</span>
+	}
+<span style = "background-color:#dfd">	else {
+		request.push_back(feedback);</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief adds addressee of the message and adds info about cards on the table
+ *
+ * @param feedback message already containing a header
+ * @param request a vector of messages to players
+ */
+void Game::createUpdateMessagesToPlayers(json&amp; feedback, request_type&amp; request)
+<span style = "background-color:#dfd">{
+	json previous_cards = createPlayedCardDetails();
+	ifEndOfTurn();
+	for (auto&amp; i : players_.getArray()) {
+		feedback["who"] = i.getPlayerId();
+		feedback["data"]["prev"] = previous_cards;
+		createAdvancedMessage(i, feedback, request);
+		feedback.erase("who");
+	}
+}</span>
+
+/**
+ * @brief creates updating messages for players during gameplay
+ *
+ * @param stage_ current server's stage
+ * @return a vector of messages that have been created
+ */
+request_type Game::createMessage(const stage stage_)
+<span style = "background-color:#dfd">{
+	request_type request;
+	json feedback = createFeedbackHeader(stage_);
+	createUpdateMessagesToPlayers(feedback, request);
+	return request;
+}</span>
+/**
+ * @brief check if there is a chance of setting up a marriage
+ */
+bool Game::marriageMayOccur() const
+<span style = "background-color:#dfd">{
+	return vec_.size() == 1 &amp;&amp; (vec_[0].second.getFigure() == KING || vec_[0].second.getFigure() == QUEEN);
+}</span>
+
+/**
+ * @brief check if first player in a turn has a king or a queen in his hand
+ */
+bool Game::playerHasKingQueenPair()
+<span style = "background-color:#dfd">{
+	return players_.getPlayer(X, vec_[0].first).getPlayersDeck().doesHavePair(</span>
+		vec_[0].second.getSuit());
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief modify model: add points for marriage to the claimer, and set new trumpsuit
+ */
+void Game::addMarriageAndSetTrump()
+<span style = "background-color:#dfd">{
+	super_suit_ = vec_[0].second.getSuit();
+	players_.getPlayer(X, vec_[0].first).getScoreClass().addToTurnScore(super_suit_);
+	is_marriage_ = true;
+}</span>
+/**
+ * @brief checks if a card creates a marriage and sets trumpsuit if so
+ */
+void Game::setSuperiorSuit()
+<span style = "background-color:#dfd">{
+	int score = 0;
+	if (marriageMayOccur() &amp;&amp; playerHasKingQueenPair()) {
+		addMarriageAndSetTrump();</span>
+	}
+<span style = "background-color:#dfd">	else {
+		is_marriage_ = false;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief set winning card and find its owner
+ */
+void Game::chooseWinningCardAndSetWinningPlayer()
+<span style = "background-color:#dfd">{
+	Card winning_card = findSuperiorCard();
+	for (const auto&amp; i : vec_) {
+		if (winning_card == i.second) {
+			current_starting_player_ = i.first;
+		}
+	}
+}</span>
+
+/**
+ * @brief get value of three cards on table and add each value to player's score
+ */
+void Game::addScoreToPlayerForTakenCards()
+<span style = "background-color:#dfd">{
+	for (auto&amp; i : vec_) {
+		players_.getPlayer(X, current_starting_player_).getScoreClass().addToTurnScore(i.second.getFigure());
+	}
+}</span>
+
+/**
+ * @brief compares cards on table and decides which player gets cards
+ *
+ * @return id of winning player
+ */
+int Game::compareCardsAndPassToWinner()
+<span style = "background-color:#dfd">{
+	chooseWinningCardAndSetWinningPlayer();
+	addScoreToPlayerForTakenCards();
+	return current_starting_player_;
+}</span>
+
+/**
+ * @brief find out which card is the highest
+ */
+Card Game::findSuperiorCard()
+<span style = "background-color:#dfd">{
+	Card first_winner = vec_[0].second.isBigger(vec_[1].second, super_suit_); 
+	Card second_winner = vec_[0].second.isBigger(vec_[2].second, super_suit_);
+	return first_winner.isBigger(second_winner, super_suit_);
+}</span>
+
+/**
+ * @brief sets player that is going to start next turn
+ *
+ * @param new_starting_player index of new starting player
+ */
+void Game::setStartingPlayer(int new_starting_player)
+<span style = "background-color:#fdd">{
+	current_starting_player_ = new_starting_player;
+}</span>
+
+/**
+ * @brief clears all variables' values
+ */
+void Game::reset()
+<span style = "background-color:#dfd">{
+	turn_counter_ = 0;
+	current_starting_player_ = 0;
+	super_suit_ = NONE;
+}</span></pre>
+	</body>
+</html>

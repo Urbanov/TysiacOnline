@@ -1,0 +1,312 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		players_deck.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include &lt;stdexcept&gt;
+#include "players_deck.hpp"
+
+PlayersDeck::PlayersDeck()
+<span style = "background-color:#dfd">	: max_value_(0)
+{}</span>
+
+<span style = "background-color:#dfd">PlayersDeck::~PlayersDeck() {}</span>
+
+std::vector&lt;Card&gt;&amp; PlayersDeck::getDeck()
+<span style = "background-color:#dfd">{
+	return deck_;
+}</span>
+
+/**
+ * @brief Adds a card to player's deck and set is an unused
+ *
+ * @param card object added to player's deck
+ */
+void PlayersDeck::addCard(const Card&amp; card)
+<span style = "background-color:#dfd">{
+	deck_.push_back(card);
+	deck_.back().setIsUsed(false);
+}</span>
+
+/**
+ * @brief gets player's deck for card with given index
+ *
+ * @param card_number index of card in card vector deck_
+ * @return Card with found at given index
+ */
+const Card&amp; PlayersDeck::playCard(std::size_t card_number) const
+<span style = "background-color:#dfd">{
+	if (card_number &gt;= deck_.size()) {
+		throw std::out_of_range("No card with such index in player's deck");</span>
+	}
+<span style = "background-color:#dfd">	if (deck_[card_number].getIsUsed()) {
+		throw std::logic_error("Card has already been used, non existing");</span>
+	}
+<span style = "background-color:#dfd">	deck_[card_number].setIsUsed(true);
+	return deck_[card_number];
+}</span>
+
+/**
+ * @brief check if player has unused queen or king of given suit
+ */
+bool PlayersDeck::doesHavePair(suits suit) const
+<span style = "background-color:#dfd">{
+	return (findCard(KING, suit) || findCard(QUEEN, suit));
+}</span>
+
+/**
+ * @brief checks if there are no cards on table, if so returns all unused cards' indices in player's deck
+ * 
+ * @param vec cards on table
+ * @param correct_cards container for correct cards's indices 
+ * @return true if there are no cards on the table
+ */
+bool PlayersDeck::onTableEmpty(const std::vector&lt;Card&gt;&amp; vec, std::vector&lt;int&gt;&amp; correct_cards) const
+<span style = "background-color:#dfd">{
+	if (vec.empty()) {
+		for (std::size_t i = 0; i &lt; deck_.size(); ++i) {
+			if (!deck_[i].getIsUsed()) {
+				correct_cards.push_back(static_cast&lt;int&gt;(i));</span>
+			}
+<span style = "background-color:#dfd">		}
+		return true;</span>
+	}
+<span style = "background-color:#dfd">	return false;
+}</span>
+
+/**
+ * @brief returns highest card on the table
+ *
+ * @param vec contains cards on the table
+ * @param superior current trumpsuit
+ * @return highest card found in vec
+ */
+Card PlayersDeck::highestCardOnTheTable(const std::vector&lt;Card&gt;&amp; vec, suits superior) const
+<span style = "background-color:#dfd">{
+	Card card = vec[0];
+	if (vec.size() == 2 &amp;&amp; vec[0].isBigger(vec[1], superior) == vec[1]) {
+		card = vec[1];</span>
+	}
+<span style = "background-color:#dfd">	return card;
+}</span>
+
+/**
+ * @brief find all cards the same suit as attacker's card and higher figure
+ *
+ * @param correct_cards container for correct cards' indices
+ * @param card the highest card on the table
+ * @param superior current trumpsuit
+ * @return true if there was at least one card that qualified
+ */
+bool PlayersDeck::findSameSuitHigherFigure(std::vector&lt;int&gt;&amp; correct_cards, const Card&amp; card, suits superior) const
+<span style = "background-color:#dfd">{
+	bool return_value = false;
+	for (std::size_t i = 0; i &lt; deck_.size(); ++i) {
+		if (isHigher(card, deck_[i], superior) &amp;&amp; card.getSuit() == deck_[i].getSuit()) {
+			correct_cards.push_back(static_cast&lt;int&gt;(i));
+			return_value = true;</span>
+		}
+<span style = "background-color:#dfd">	}
+	return return_value;
+}</span>
+
+/**
+ * @brief find all cards the same suit as attacker's card
+ *
+ * @param correct_cards container for correct cards' indices
+ * @param vec contains cards on the table
+ * @return true if there was at least one card that qualified
+ */
+bool PlayersDeck::findSameSuit(std::vector&lt;int&gt;&amp; correct_cards, const std::vector&lt;Card&gt;&amp; vec) const
+<span style = "background-color:#dfd">{
+	bool return_value = false;
+		for (std::size_t i = 0; i &lt; deck_.size(); ++i) {
+			if ((vec[0].getSuit() == deck_[i].getSuit() &amp;&amp; !deck_[i].getIsUsed())) {
+				correct_cards.push_back(static_cast&lt;int&gt;(i));
+				return_value = true;</span>
+			}
+<span style = "background-color:#dfd">		}
+	return return_value;
+}</span>
+
+/**
+ * @brief finds all cards higher than highest on the table
+ *
+ * @param correct_cards container for correct cards' indices
+ * @param superior current trumpsuit
+ * @param card highest card on the table
+ * @return true if there was at least one card that qualified
+ */
+bool PlayersDeck::findAnyHigherCard(std::vector&lt;int&gt;&amp; correct_cards, suits superior, const Card&amp; card) const
+<span style = "background-color:#dfd">{
+	bool return_value = false;
+		for (std::size_t i = 0; i &lt; deck_.size(); ++i) {
+			if (isHigher(card, deck_[i], superior)) {
+				correct_cards.push_back(static_cast&lt;int&gt;(i));
+				return_value = true;</span>
+			}
+<span style = "background-color:#dfd">		}
+	return return_value;
+}</span>
+
+
+/**
+* @brief finds all unused cards
+*
+* @param correct_cards container for correct cards' indices
+* @return true if there was at least one card that qualified
+*/
+bool PlayersDeck::findAnyCard(std::vector&lt;int&gt;&amp; correct_cards) const
+<span style = "background-color:#dfd">{
+	bool return_value = false;
+	if (correct_cards.empty()) {
+		for (std::size_t i = 0; i &lt; deck_.size(); ++i) {
+			if (!deck_[i].getIsUsed()) {
+				correct_cards.push_back(static_cast&lt;int&gt;(i));
+				return_value = true;</span>
+			}
+<span style = "background-color:#dfd">		}</span>
+	}
+<span style = "background-color:#dfd">	return return_value;
+}</span>
+
+/**
+ * @brief get all cards that can be played given vec of cards already placed on the table
+ *
+ * @param vec cards on table based on which there are found cards that can be used
+ * @param superior current trump suit
+ * @return vector of indices of cards that can be used by player
+ */
+const std::vector&lt;int&gt; PlayersDeck::getAllValidCards(const std::vector&lt;Card&gt;&amp; vec, suits superior) const
+<span style = "background-color:#dfd">{
+	std::vector&lt;int&gt; correct_cards, tmp;
+	if (onTableEmpty(vec, correct_cards)) {
+		return correct_cards;</span>
+	}
+<span style = "background-color:#dfd">	Card card = highestCardOnTheTable(vec, superior);</span>
+	if (findSameSuitHigherFigure(correct_cards, card, superior) 
+		|| findSameSuit(correct_cards, vec)  
+<span style = "background-color:#dfd">		|| findAnyHigherCard(correct_cards, superior, card)   ) {
+		return correct_cards;</span>
+	}
+<span style = "background-color:#dfd">	findAnyCard(correct_cards);
+	return correct_cards;
+}</span>
+
+/**
+ * @brief creates vector that will store info about existing marriages
+ */
+std::vector &lt;std::pair&lt;suits, figures&gt;&gt; PlayersDeck::getMarriageContainer() const
+<span style = "background-color:#dfd">{
+	std::vector &lt;std::pair&lt;suits, figures&gt;&gt; vec = {</span>
+		{ DIAMONDS, NOT_A_FIGURE },
+		{ CLUBS, NOT_A_FIGURE },
+		{ HEARTS,NOT_A_FIGURE },
+		{ SPADES, NOT_A_FIGURE }
+	};
+<span style = "background-color:#dfd">	return vec;
+}</span>
+
+/** 
+ * @brief calculate the theoretical max value player can try to achieve with his cards
+ * 
+ * @param isLateBid checks if it is the last bid after the regular bidding
+ * @return maximum value of player's cards
+ */
+std::size_t PlayersDeck::getMaxValue(bool isLateBid)
+<span style = "background-color:#dfd">{
+	if (max_value_ != 0 &amp;&amp; !isLateBid) {</span>
+<span style = "background-color:#fdd">		return max_value_;</span>
+	}
+<span style = "background-color:#dfd">	max_value_ = MIN_VALUE;
+	addMarriageValue();
+	return max_value_;
+}</span>
+
+/**
+ * @brief searches for queen or king in player's deck
+ */
+void PlayersDeck::addMarriageValue()
+<span style = "background-color:#dfd">{
+	std::vector &lt;std::pair&lt;suits, figures&gt;&gt; vec = getMarriageContainer();
+	for (auto card : deck_) {
+		if (card.getFigure() == QUEEN || card.getFigure() == KING) {
+			lookForMarriage(vec, card);</span>
+		}
+<span style = "background-color:#dfd">	}
+}</span>
+
+/**
+ * @brief either adds a figure to vec, or if one had been added, adds points to deck's max value
+ *
+ * @param vec contains info about found kings and queens
+ * @param card object whose figure will be added to the vec
+ */
+void PlayersDeck::lookForMarriage(std::vector &lt;std::pair&lt;suits, figures&gt;&gt;&amp; vec, Card&amp; card)
+<span style = "background-color:#dfd">{
+	for (auto&amp; j : vec) {
+		if (j.first == card.getSuit()) {
+			if (j.second != NOT_A_FIGURE) {
+				max_value_ += j.first;</span>
+			}
+<span style = "background-color:#dfd">			else {
+				j.second = card.getFigure();</span>
+			}
+<span style = "background-color:#dfd">		}
+	}
+}</span>
+
+/**
+ * @brief check if player's deck contains a card with given figrure and suit
+ *
+ * @return true if a card was found, false otherwise
+ */
+bool PlayersDeck::findCard(figures figure, suits suit) const
+<span style = "background-color:#dfd">{
+	for (auto&amp; i : deck_) {
+		if (i.getFigure() == figure &amp;&amp; i.getSuit() == suit &amp;&amp; i.getIsUsed() == false) {
+			return true;
+		}
+	}
+	return false;
+}</span>
+
+/**
+ * @brief check if card deck_card is higher than played
+ *
+ * @param played one of the cards in comparison
+ *
+ */
+bool PlayersDeck::isHigher(const Card&amp; played, const Card&amp; deck_card, suits superior) const
+<span style = "background-color:#dfd">{
+	if (deck_card.getIsUsed()) {
+		return false;</span>
+	}
+<span style = "background-color:#dfd">	if (played.getSuit() == deck_card.getSuit()) {
+		return (played.getFigure() &lt; deck_card.getFigure());</span>
+	}
+<span style = "background-color:#dfd">	if (played.getSuit() == superior) {
+		return false;</span>
+	}
+<span style = "background-color:#dfd">	if (deck_card.getSuit() == superior) {
+		return true;</span>
+	}
+<span style = "background-color:#dfd">	return false;
+}</span>
+
+/**
+ * @brief clears deck and resets max value
+ */
+void PlayersDeck::clearDeck()
+<span style = "background-color:#dfd">{
+	deck_.clear();
+	max_value_ = 0;
+}</span></pre>
+	</body>
+</html>

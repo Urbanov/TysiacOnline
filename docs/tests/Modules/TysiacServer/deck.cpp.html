@@ -1,0 +1,94 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		deck.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "deck.hpp"
+
+Deck::Deck(const std::vector&lt;Card&gt;&amp; deck)
+<span style = "background-color:#fdd">	: deck_(deck)
+	, deck_it_(deck_.begin())
+{}</span>
+
+Deck::Deck(const Deck&amp; other)
+<span style = "background-color:#fdd">	: deck_(other.deck_)
+	, deck_it_(deck_.begin())
+{}</span>
+
+Deck::Deck()
+<span style = "background-color:#dfd">{
+	std::vector&lt;figures&gt; figure_ = { NINE, TEN, JACK, QUEEN, KING, ACE };
+	std::vector&lt;suits&gt; suit_ = { DIAMONDS, CLUBS, HEARTS, SPADES };</span>
+	//Create standard 52 card deck
+<span style = "background-color:#dfd">	for (auto&amp; i : figure_) {
+		for (auto&amp; j : suit_) {
+			deck_.emplace_back(i, j);
+		}
+	}
+	deck_it_ = deck_.begin();
+}</span>
+
+<span style = "background-color:#dfd">Deck::~Deck() {}</span>
+
+/**
+ * @brief shuffle and then deal out cards to players
+ *
+ * @param players collection of players who are to be given cards from Deck
+ */
+void Deck::dealCards(players&amp; players)
+<span style = "background-color:#dfd">{
+	shuffle();
+	for (auto&amp; i : players) {
+		i.getPlayersDeck().clearDeck();
+		for (int j = 0; j &lt; MAX_CARDS; ++j) {
+			i.getPlayersDeck().addCard(*deck_it_++);
+		}
+	}
+}</span>
+
+/**
+ * @brief gives three cards to player who bade highest
+ *
+ * @param player is the one who bade highest
+ * @return message containing given cards' details
+ */
+json Deck::addBonusCards(Player&amp; player)
+<span style = "background-color:#dfd">{
+	json msg;
+	while (deck_it_ != deck_.end()) {
+		json tmp = {</span>
+			{ "figure", (*deck_it_).getFigure() },
+			{ "suit", (*deck_it_).getSuit() }
+		};
+<span style = "background-color:#dfd">		msg.push_back(tmp);
+		player.getPlayersDeck().addCard(*deck_it_);
+		++deck_it_;
+	}
+	deck_it_ = deck_.begin();
+	return msg;
+}</span>
+
+/**
+ * @brief does random shuffle on the deck
+ */
+void Deck::shuffle()
+<span style = "background-color:#dfd">{
+	std::mt19937 engine(rd_());
+	std::shuffle(deck_.begin(), deck_.end(), engine);
+}</span>
+
+/**
+ * @brief resets position of iterator (used after giving additional cards)
+ */
+void Deck::reset()
+<span style = "background-color:#dfd">{
+	deck_it_ = deck_.begin();
+}</span></pre>
+	</body>
+</html>

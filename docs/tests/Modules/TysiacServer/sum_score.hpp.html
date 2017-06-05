@@ -1,0 +1,39 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		sum_score.hpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#pragma once
+#include "controller.hpp"
+
+/**
+ * @brief part of controller, class manages calculating and adding players' score, also creating score-type messages for players
+ * @see Controller
+ */
+class SumScore : public Controller {
+public:
+	SumScore(Deck&amp; deck, PlayersCollection&amp; players, std::vector&lt;PController&gt;&amp; controllers);
+	virtual ~SumScore();
+	stage sumUpScore();
+	virtual stage changeModel(const json&amp; msg, const stage stage_);
+	virtual request_type createMessages(const json&amp; msg, const stage stage_);
+	virtual void reset();
+	void resetPlayerAttributes(bool isFinal);
+	bool isFinished() const;
+private:
+	json createScoreMessage() const;
+	void createEndMessage(request_type&amp; request, stage stage_);
+	void resetAll();
+	void createEndMessageBody(json&amp; message, request_type&amp; request);
+	request_type createMessage(stage stages_);
+	std::vector&lt;PController&gt;&amp; controllers_;
+<span style = "background-color:#dfd">	const int POINTS_WINNING_CAP = 1000; ///&lt; if any player gets this amount of points, game is over</span>
+};</pre>
+	</body>
+</html>

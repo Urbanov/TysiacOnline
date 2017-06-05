@@ -1,0 +1,139 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		starter.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "starter.hpp"
+
+Starter::Starter(Deck&amp; deck, PlayersCollection&amp; players)
+<span style = "background-color:#dfd">	: Controller(deck, players)
+	, is_full_(false)
+{}</span>
+
+Starter::~Starter()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief part of controller, modifies model, handle all start type messages
+ * @see Controller
+ *
+ * @param msg start type message received from player
+ * @param stage_ current Room's stage
+ *
+ * @return new Room's stage
+ */
+stage Starter::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	if (stage_ == SUMMING_UP) {</span>
+<span style = "background-color:#fdd">		prepareToStart(stage_);
+		return BIDDING;</span>
+	}
+<span style = "background-color:#dfd">	players_.getPlayer(X, msg["player"]).setReady(true);
+	if (isReadyToStart()) {
+		prepareToStart(stage_);
+		return BIDDING;</span>
+	}
+<span style = "background-color:#dfd">	return ADDING;
+}</span>
+
+/**
+ * @brief creates ready-type update messages for all users in room 
+ *
+ * @param msg message received from player
+ * @param stage_ current room's stage
+ * 
+ * @return vector of messages that will be sent to players
+ */
+request_type Starter::createMessages(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	json feedback;
+	request_type request;
+	feedback["action"] = "ready";
+	feedback["player"] = msg["player"];
+	for (auto i : players_.getArray()) {
+		if (i.getPlayerId() != msg["player"]) {
+			feedback["who"].push_back(i.getPlayerId());</span>
+		}
+<span style = "background-color:#dfd">	}
+	request.push_back(feedback);
+	return request;
+}</span>
+
+/**
+* @brief creates start-type update messages for all users in room
+*
+* @param msg message received from player
+*
+* @return start-type update message that will be sent to players
+*/
+json Starter::createStartMessage(const json&amp; msg) const
+<span style = "background-color:#fdd">{
+	json feedback;
+	feedback["action"] = "start";
+	feedback["data"] = players_.getPlayer(HIGHEST).getScoreClass().getClaim();
+	feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+	for (auto&amp; i : players_.getArray()) {
+		feedback["who"].push_back(i.getPlayerId());
+	}
+	return feedback;
+}</span>
+
+bool Starter::getIsFull() const
+<span style = "background-color:#dfd">{
+	return is_full_;
+}</span>
+
+void Starter::setIsFull(bool is_full)
+<span style = "background-color:#dfd">{
+	is_full_ = is_full;
+}</span>
+
+void Starter::reset()
+<span style = "background-color:#dfd">{
+	is_full_ = false;
+}</span>
+
+/**
+ * @brief checks if there are enough players to start a game
+ * 
+ * @return true if number of players is equal MAX_PLAYERS
+ * @see MAX_PLAYERS
+ */
+bool Starter::isReadyToStart() const
+<span style = "background-color:#dfd">{
+	if (players_.getArray().size() != MAX_PLAYERS) {</span>
+<span style = "background-color:#fdd">		return false;</span>
+	}
+<span style = "background-color:#dfd">	for (auto&amp; i : players_.getArray()) {
+		if (!i.getReady()) {
+			return false;
+		}
+	}
+	return true;
+}</span>
+
+/**
+ * @brief prepares game to start
+ *
+ * @param stage_ current room's stage
+ */
+void Starter::prepareToStart(stage stage_)
+<span style = "background-color:#dfd">{
+	is_full_ = false;
+	if (stage_ == SUMMING_UP) {</span>
+<span style = "background-color:#fdd">		players_.prepareGame(false);</span>
+	}
+<span style = "background-color:#fdd">	else {</span>
+<span style = "background-color:#dfd">		players_.prepareGame(true);</span>
+	}
+<span style = "background-color:#dfd">	deck_.shuffle();
+	deck_.dealCards(players_.getArray());
+}</span></pre>
+	</body>
+</html>

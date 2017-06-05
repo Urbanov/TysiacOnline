@@ -1,0 +1,131 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		leave_buster.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "leave_buster.hpp"
+
+LeaveBuster::LeaveBuster(Deck&amp; deck, PlayersCollection&amp; players, std::vector&lt;PController&gt;&amp; controllers)
+<span style = "background-color:#dfd">	: Controller(deck, players)
+	, controllers_(controllers)
+{}</span>
+
+LeaveBuster::~LeaveBuster()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief methods checks current room's stage, if game had started before player left, controller and model classes have reset() method called
+ *
+ * @param stage_ current game stage
+ */
+void LeaveBuster::resetIfGameHadStarted(const stage stage_)
+<span style = "background-color:#dfd">{
+	if (stage_ != ADDING) {
+		for (auto&amp; i : controllers_) {
+			i-&gt;reset();
+		}</span>
+	}
+<span style = "background-color:#dfd">}</span>
+/**
+ * @brief removes player from room and resets game
+ *
+ * @param msg leave type message sent by player
+ * @param stage_ current game stage
+ */
+stage LeaveBuster::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	eraseLeaverFromRoom(msg["player"]);
+	resetIfGameHadStarted(stage_);
+	return newRoomStage(stage_);
+}</span>
+/**
+ * @brief finds and erases from room's player with given ID
+ *
+ * @param leaver_id ID of player to remove
+ */
+void LeaveBuster::eraseLeaverFromRoom(int leaver_id)
+<span style = "background-color:#dfd">{
+	for (auto i = players_.getArray().begin(); i != players_.getArray().end(); ++i) {
+		if ((*i).getPlayerId() == leaver_id) {
+			players_.getArray().erase(i);
+			break;</span>
+<span style = "background-color:#fdd">		}</span>
+<span style = "background-color:#dfd">	}
+}</span>
+
+/**
+ * @brief returns new room's stage depending on given current stage
+ *
+ * @param stage_ current room's stage
+ * @return new room's stage
+ */
+stage LeaveBuster::newRoomStage(const stage stage_)
+<span style = "background-color:#dfd">{
+	players_.resetPlayerAttributes(true);
+	deck_.reset();
+	if (stage_ != ADDING &amp;&amp; stage_ != ENDING) {
+		return LEAVING;</span>
+	}
+<span style = "background-color:#fdd">	else return ADDING;</span>
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief create messages for all players in room that inform them about player's leave
+ *
+ * @param msg leave type message sent by player
+ * @param stage_ current game stage
+ * @return messages informing other players who left
+ */
+request_type LeaveBuster::createMessages(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	request_type request;
+	json feedback = returnMessageHeader(msg, request);
+	messageIfGameHadStarted(feedback, request, stage_);
+	return request;
+}</span>
+
+/**
+ * @brief returns message leave type header
+ * 
+ * @param msg leave type message from player
+ * @param request vector of messages sent to players
+ * @return message containing header only
+ */
+json LeaveBuster::returnMessageHeader(const json&amp; msg, request_type&amp; request)
+<span style = "background-color:#dfd">{
+	json feedback;
+	feedback["action"] = "leave";
+	feedback["data"] = msg["player"];
+	for (auto&amp; i : players_.getArray()) {
+		feedback["who"].push_back(i.getPlayerId());
+	}
+	request.push_back(feedback);
+	return feedback;
+}</span>
+
+/**
+ * @brief creates additional messages if game had started
+ * 
+ * @param feedback message containing additional information
+ * @param request vector of messages sent to players
+ * @param stage_ current room's stage
+ */
+void LeaveBuster::messageIfGameHadStarted(json&amp; feedback, request_type&amp; request, const stage stage_)
+<span style = "background-color:#dfd">{
+	if (stage_ != ADDING &amp;&amp; stage_ != ENDING) {
+		feedback.erase("action");
+		feedback.erase("data");
+		feedback["player"] = -1;
+		feedback["action"] = "end";
+		request.push_back(feedback);</span>
+	}
+<span style = "background-color:#dfd">}</span>
+</pre>
+	</body>
+</html>

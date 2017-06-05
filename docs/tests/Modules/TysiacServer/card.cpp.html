@@ -1,0 +1,102 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		card.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "card.hpp"
+
+
+Card::Card(figures fig, suits s)
+<span style = "background-color:#dfd">	: figure_(fig)
+	, suit_(s)
+	, is_used_(false)
+{}</span>
+
+Card::Card(const Card&amp; other)
+<span style = "background-color:#dfd">	: figure_(other.figure_)
+	, suit_(other.suit_)
+	, is_used_(other.is_used_)
+{}</span>
+
+Card::Card(Card&amp;&amp; other)
+<span style = "background-color:#dfd">	: figure_(std::move(other.figure_))
+	, suit_(std::move(other.suit_))
+	, is_used_(std::move(other.is_used_))
+{}</span>
+
+Card Card::operator=(const Card&amp; card)
+<span style = "background-color:#dfd">{
+	this-&gt;figure_ = card.figure_;
+	this-&gt;suit_ = card.suit_;
+	this-&gt;is_used_ = card.is_used_;
+	return *this;
+}</span>
+
+Card Card::operator=(Card&amp;&amp; card)
+<span style = "background-color:#dfd">{
+	this-&gt;figure_ = card.figure_;
+	this-&gt;suit_ = card.suit_;
+	this-&gt;is_used_ = card.is_used_;
+	return *this;
+}</span>
+
+bool Card::operator==(const Card&amp; other) const
+<span style = "background-color:#dfd">{
+	return (suit_ == other.suit_ &amp;&amp; figure_ == other.figure_);
+}</span>
+
+bool Card::operator!=(const Card&amp; other) const
+<span style = "background-color:#fdd">{
+	return suit_ != other.suit_ || figure_ != other.figure_;
+}</span>
+
+<span style = "background-color:#dfd">Card::~Card() {}</span>
+
+bool Card::getIsUsed() const
+<span style = "background-color:#dfd">{
+	return is_used_;
+}</span>
+
+void Card::setIsUsed(bool is_used) const
+<span style = "background-color:#dfd">{
+	is_used_ = is_used;
+}</span>
+
+const figures Card::getFigure() const
+<span style = "background-color:#dfd">{
+	return figure_;
+}</span>
+
+const suits Card::getSuit() const
+<span style = "background-color:#dfd">{
+	return suit_;
+}</span>
+
+/**
+ * @brief checks which card is higher, where the card which calls the method has slight advantage as "attacking" card
+ *
+ * @param other other card to compare with
+ * @param trump current trumpsuit
+ * @return higher card
+ */
+const Card&amp; Card::isBigger(const Card&amp; other, suits trump) const
+<span style = "background-color:#dfd">{</span>
+	//If both cards are the same suit, a card with higher figure is higher
+<span style = "background-color:#dfd">	if (suit_ == other.suit_) {
+		return figure_ &gt; other.figure_ ? *this : other;</span>
+	}
+	//if suit doesn't match, check if the second card is trump
+<span style = "background-color:#dfd">	else if (other.suit_ == trump) {
+		return other;</span>
+	}
+	//if it was not trump, this card has to be higher
+<span style = "background-color:#dfd">	return *this;
+}</span></pre>
+	</body>
+</html>

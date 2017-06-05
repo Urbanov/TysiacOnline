@@ -1,0 +1,143 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		session.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include &lt;beast/websocket/stream.hpp&gt;
+#include &lt;beast/core/placeholders.hpp&gt;
+#include &lt;beast/core.hpp&gt;
+#include &lt;json.hpp&gt;
+
+#include "session.h"
+#include "manager.h"
+
+Session::Session(SessionManager&amp; manager, boost::asio::ip::tcp::socket&amp;&amp; socket)
+<span style = "background-color:#dfd">	: manager_(manager)
+	, websocket_(std::move(socket))
+	, opcode_()
+	, id_([] {</span>
+			static size_t id = 0;
+<span style = "background-color:#dfd">			return id++;
+		}())
+	, busy_(false)
+{}</span>
+
+/**
+ * @brief starts a new seesion
+ */
+void Session::run()
+<span style = "background-color:#dfd">{
+	websocket_.async_accept(std::bind(</span>
+		&amp;Session::acceptHandler, shared_from_this(), beast::asio::placeholders::error
+	));
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief handles upgrade from tcp to websocket
+ */
+void Session::acceptHandler(const boost::system::error_code&amp; error_code)
+<span style = "background-color:#dfd">{
+	if (error_code) {</span>
+<span style = "background-color:#fdd">		return;</span>
+	}
+
+<span style = "background-color:#dfd">	manager_.registerSession(shared_from_this());
+	welcome();
+	websocket_.async_read(opcode_, buffer_, std::bind(</span>
+		&amp;Session::readHandler, shared_from_this(), beast::asio::placeholders::error
+	));
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief handles messages from clients and calls manager to interpret them
+ */
+void Session::readHandler(const boost::system::error_code&amp; error_code)
+<span style = "background-color:#dfd">{</span>
+	// close connection
+<span style = "background-color:#dfd">	if (error_code) {
+		disconnect();
+		return;</span>
+	}
+
+<span style = "background-color:#dfd">	websocket_.async_read(opcode_, buffer_, std::bind(</span>
+		&amp;Session::readHandler, shared_from_this(), beast::asio::placeholders::error
+	));
+
+<span style = "background-color:#dfd">	auto message = beast::to_string(buffer_.data());
+	const std::string msg(message);
+	buffer_.consume(buffer_.size());
+	manager_.interpret(id_, message);
+}</span>
+
+
+/**
+ * @brief starts async writing to client
+ * 
+ * @param message message passed to client
+ */
+void Session::write(const std::string&amp; message)
+<span style = "background-color:#dfd">{
+	queue_.push(message);
+	if (!busy_) {
+		busy_ = true;
+		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(</span>
+			&amp;Session::writeHandler, shared_from_this(), beast::asio::placeholders::error
+		));
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief handles async writing
+ */
+void Session::writeHandler(const boost::system::error_code&amp; error_code)
+<span style = "background-color:#dfd">{
+	if (error_code) {</span>
+<span style = "background-color:#fdd">		disconnect();
+		return;</span>
+	}
+
+<span style = "background-color:#dfd">	queue_.pop();
+	if (!queue_.empty()) {</span>
+<span style = "background-color:#fdd">		websocket_.async_write(boost::asio::buffer(queue_.front()), std::bind(</span>
+			&amp;Session::writeHandler, shared_from_this(), beast::asio::placeholders::error
+		));
+	} 
+<span style = "background-color:#fdd">	else {</span>
+<span style = "background-color:#dfd">		busy_ = false;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+size_t Session::getId() const
+<span style = "background-color:#dfd">{
+	return id_;
+}</span>
+
+/**
+ * @brief sends a hardcoded welcome message to new client
+ */
+void Session::welcome()
+<span style = "background-color:#dfd">{
+	nlohmann::json msg;
+	msg["action"] = "welcome";
+	msg["data"] = id_;
+	write(msg.dump());
+}</span>
+
+/**
+ * @brief called after connection to client was closed or there was an error
+ */
+void Session::disconnect() const
+<span style = "background-color:#dfd">{
+	manager_.unregisterSession(id_);
+	nlohmann::json msg;
+	msg["action"] = "disconnect";
+	manager_.interpret(id_, msg.dump());
+}</span></pre>
+	</body>
+</html>

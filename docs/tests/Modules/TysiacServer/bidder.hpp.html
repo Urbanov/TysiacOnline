@@ -1,0 +1,50 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		bidder.hpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#pragma once
+#include "controller.hpp"
+#include "starter.hpp"
+
+
+/**
+ * @brief class manages bidding and gives cards to a player who bade the highest
+ */
+class Bidder : public Controller {
+public:
+	Bidder(Deck&amp; deck, PlayersCollection&amp; players);
+	virtual ~Bidder();
+
+	virtual stage changeModel(const json&amp; msg, const stage stage_);
+	virtual request_type createMessages(const json&amp; msg, const stage stage_);
+	stage bid(const json&amp; msg, const stage stage_) const;
+	virtual void reset();
+private:
+	void makeBidAndSetHighest(const json&amp; msg) const;
+	bool checkIfHighestIsCurrent() const;
+	bool checkIfFinalBid(const json&amp; msg) const;
+	void getNextPlayer() const;
+	void checkIfBidIsCorrect(const json&amp; msg) const;
+	request_type createUpdateInfo(const json&amp; msg) const;
+	void constructAdvancedBidMessage(json&amp; feedback) const;
+	json constructBidMessage(const json&amp; msg) const;
+	request_type createSpecialInfo(const json&amp; msg) const;
+	json createStock(const json&amp; msg) const;
+	request_type createBid(const json&amp; msg, stage stage_) const;
+	request_type firstBid(stage stage_) const;
+	request_type createCardDealingMessages() const;
+	request_type createStarterMessages(const json&amp; msg, stage stage_);
+
+	mutable json additional_cards_; ///&lt; cards which are given to bidding winner
+	Starter starter_;  ///&lt; Manages ready-type messages and tarts the game
+<span style = "background-color:#dfd">	const int MIN_RAISE = 10; ///&lt;minimum raise of claim </span>
+};</pre>
+	</body>
+</html>

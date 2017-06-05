@@ -1,0 +1,138 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		room.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "room.hpp"
+
+Room::Room(int room_id, GameManager&amp; man)
+<span style = "background-color:#dfd">	: man_(man)
+	, room_id_(room_id)
+	, stage_(ADDING)
+{
+	employees_.emplace_back(std::make_unique&lt;LeaveBuster&gt;(deck_, players_, employees_));
+	employees_.emplace_back(std::make_unique&lt;ChatBox&gt;(deck_, players_));
+	employees_.emplace_back(std::make_unique&lt;Adder&gt;(deck_, players_));
+	employees_.emplace_back(std::make_unique&lt;Bidder&gt;(deck_, players_));
+	employees_.emplace_back(std::make_unique&lt;Dealer&gt;(deck_, players_));
+	employees_.emplace_back(std::make_unique&lt;Game&gt;(deck_, players_, employees_));
+}</span>
+
+Room::~Room()
+<span style = "background-color:#dfd">{</span>
+
+<span style = "background-color:#dfd">}</span>
+
+void Room::changeStage(stage new_stage)
+<span style = "background-color:#fdd">{
+	stage_ = new_stage;
+}</span>
+
+/**
+ * @brief parses message's headling, then sends message to proper controller class and sends created messages back
+ * Returns created messages using method on GameManager
+ *
+ * @param msg message received from player
+ * @return true if player was successfully added to the room (return value used for adding feedback only)
+ */
+bool Room::runGame(const json&amp; msg)
+<span style = "background-color:#dfd">{
+	request_type request, tmp;</span>
+	stage temp_stage;
+<span style = "background-color:#dfd">	temp_stage = employees_[parse(msg["action"])]-&gt;changeModel(msg, stage_);
+	request = employees_[parse(msg["action"])]-&gt;createMessages(msg, temp_stage);
+	setNewRoomStage(temp_stage);
+	stageEqualsSummingUp(msg, tmp, request, temp_stage);
+	return pushServerMessages(temp_stage, request);
+}</span>
+
+/**
+ * @brief pushes created messages to manager who sends it to players, returns true if a player was successfully added to the game
+ */
+bool Room::pushServerMessages(stage temp_stage, request_type&amp; request)
+<span style = "background-color:#dfd">{
+	man_.pushMessage(request);
+	if (temp_stage != FAIL) {
+		return true;</span>
+	}
+<span style = "background-color:#dfd">	return false;
+}</span>
+
+/**
+ * @brief sets new room stage
+ */
+void Room::setNewRoomStage(stage temp_stage)
+<span style = "background-color:#dfd">{
+	if (temp_stage == LEAVING) {
+		stage_ = ADDING;</span>
+	}
+<span style = "background-color:#dfd">	else {
+		stage_ = temp_stage;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief if stage equals SUMMING_UP deals cards again
+ */
+void Room::stageEqualsSummingUp(const json&amp; msg, request_type&amp; tmp, request_type&amp; request, stage temp_stage)
+<span style = "background-color:#dfd">{
+	if (temp_stage == SUMMING_UP) {</span>
+<span style = "background-color:#fdd">		employees_[BID]-&gt;changeModel(msg, SUMMING_UP);
+		tmp = employees_[BID]-&gt;createMessages(msg, SUMMING_UP);
+		for (const auto&amp; i : tmp) {
+			request.push_back(i);
+		}
+		stage_ = BIDDING;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief choose correct enum value based on message's heading
+ *
+ * @param heading message's heading containing type of message
+ * @return enum representing type of message that room can make use of
+ */
+int Room::parse(const std::string&amp; heading) const
+<span style = "background-color:#dfd">{
+	json command = { { "add", ADD },{ "deal", DEAL },{ "bid", BID },</span>
+	{ "play", PLAY },{ "chat", CHAT },{ "ready", BID },
+	{ "leave", LEAVE },{ "disconnect", LEAVE }
+	};
+<span style = "background-color:#dfd">	return command[heading];
+}</span>
+
+/**
+ * @brief check if there is any player in the room
+ */
+bool Room::isEmpty()
+<span style = "background-color:#dfd">{
+	return players_.getArray().empty();
+}</span>
+
+size_t Room::getRoomId() const
+<span style = "background-color:#fdd">{
+	return room_id_;
+}</span>
+
+/**
+ * @brief returns json message containing room's id and nicks of players inside
+ *
+ */
+json Room::getPlayersInfo() const
+<span style = "background-color:#fdd">{
+	json players;
+	players["id"] = room_id_;
+	request_type info = players_.getPlayerInfo();
+	for (auto&amp; i : info) {
+		players["nick"].push_back(i["nick"]);
+	}
+	return players;
+}</span></pre>
+	</body>
+</html>

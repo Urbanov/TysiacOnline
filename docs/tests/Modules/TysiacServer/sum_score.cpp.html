@@ -1,0 +1,174 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		sum_score.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "sum_score.hpp"
+
+SumScore::SumScore(Deck&amp; deck, PlayersCollection&amp; players, std::vector&lt;PController&gt;&amp; controllers)
+<span style = "background-color:#dfd">	: Controller(deck, players)
+	, controllers_(controllers)
+{}</span>
+
+SumScore::~SumScore()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief rounds up temporary score of each player, then adds it to their overall score
+ *
+ * @return new Room's stage
+ */
+stage SumScore::sumUpScore()
+<span style = "background-color:#dfd">{
+	for (auto&amp; i : players_.getArray()) {
+		i.getScoreClass().roundScore();
+		i.getScoreClass().addScore(i.getScoreClass().getTurnScore());
+		if (i.getScoreClass().getScore() &gt;= POINTS_WINNING_CAP) {</span>
+<span style = "background-color:#fdd">			return ADDING;</span>
+<span style = "background-color:#dfd">		}
+	}
+	return SUMMING_UP;
+}</span>
+
+/**
+ * @brief calls sumUpScore() method, used to tkae advantage on virtual method mechanism
+ *
+ * @return new Room's stage
+ */
+stage SumScore::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#fdd">{
+	return sumUpScore();
+}</span>
+
+/**
+* @brief calls createMessage method, used to tkae advantage on virtual method mechanism
+*
+* @return vector of messages that will be sent to players
+*/
+request_type SumScore::createMessages(const json&amp; msg, stage stage_)
+<span style = "background-color:#fdd">{
+	return createMessage(stage_);
+}</span>
+
+void SumScore::reset()
+<span style = "background-color:#fdd">{
+	resetPlayerAttributes(true);
+}</span>
+
+/**
+* @brief clears players' game data
+*
+* @param isFinal set to true if for example game is finished or someone leaves room
+*/
+void SumScore::resetPlayerAttributes(bool isFinal)
+<span style = "background-color:#fdd">{
+	players_.resetPlayerAttributes(isFinal);
+	if (isFinal) {
+		return;</span>
+	}
+<span style = "background-color:#fdd">	players_.prepareGame(false);
+}</span>
+
+/**
+* @brief checks if someone's score reached PINTS_WINNING_CAP
+*
+* @return true if someone reaches POINTS_WINNING_CAP
+*/
+bool SumScore::isFinished() const
+<span style = "background-color:#fdd">{
+	for (auto&amp; i : players_.getArray()) {
+		if (i.getScoreClass().getScore() &gt;= POINTS_WINNING_CAP) {
+			return true;
+		}
+	}
+	return false;
+}</span>
+
+
+/**
+ * @brief creates score-type update message for each player
+ *
+ * @return message containing information about score of each player
+ */
+json SumScore::createScoreMessage() const
+<span style = "background-color:#fdd">{
+	json message;
+	message["action"] = "score";
+	for (auto&amp; i : players_.getArray()) {
+		message["who"].push_back(i.getPlayerId());
+		json tmp = {</span>
+			{ "player", i.getPlayerId() },
+			{ "score", i.getScoreClass().getTurnScore() }
+		};
+<span style = "background-color:#fdd">		message["data"].push_back(tmp);
+	}
+	return message;
+}</span>
+	
+/**
+ * @brief create end-type message for all players
+ *
+ * @param request message container
+ * @param stage_ current room's stage
+ */
+void SumScore::createEndMessage(request_type&amp; request, stage stage_)
+<span style = "background-color:#fdd">{
+	if (stage_ == ADDING) {
+		json message = {</span>
+			{ "action", "end" }
+		};
+<span style = "background-color:#fdd">		createEndMessageBody(message, request);
+		resetAll();
+	}
+}</span>
+
+/**
+ * @brief reset all controller and model classes
+ */
+void SumScore::resetAll()
+<span style = "background-color:#fdd">{
+	for (auto&amp; i : controllers_) {
+		i-&gt;reset();
+	}
+}</span>
+
+/**
+ * @brief creates boddy for end-type message containing ID and points of winner
+ *
+ * @param message end-type message heading that needs to be filled with data
+ * @param request message container
+ */
+void SumScore::createEndMessageBody(json&amp; message, request_type&amp; request)
+<span style = "background-color:#fdd">{
+	for (auto&amp; i : players_.getArray()) {
+		if (i.getScoreClass().getScore() &gt;= POINTS_WINNING_CAP) {
+			message["data"] = i.getScoreClass().getScore();
+			message["player"] = i.getPlayerId();</span>
+		}
+<span style = "background-color:#fdd">		message["who"].push_back(i.getPlayerId());
+	}
+	request.push_back(message);
+}</span>
+
+/**
+ * @brief creates score-type message, if stage is ADDING creates also end-type message
+ *
+ * @param stage_ current room's stage
+ * @return vector of messages which will be sent to players
+ */
+request_type SumScore::createMessage(stage stage_)
+<span style = "background-color:#fdd">{
+	request_type request;
+	request.push_back(createScoreMessage());
+	reset();
+	createEndMessage(request, stage_);
+	return request;
+}</span></pre>
+	</body>
+</html>

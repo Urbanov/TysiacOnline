@@ -1,0 +1,46 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		chat_box.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "chat_box.hpp"
+
+ChatBox::ChatBox(Deck&amp; deck, PlayersCollection&amp; players)
+<span style = "background-color:#dfd">	: Controller(deck, players)
+{}</span>
+
+ChatBox::~ChatBox()
+<span style = "background-color:#dfd">{}</span>
+
+stage ChatBox::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	return stage_;
+}</span>
+
+/**
+ * @brief creating message for every room member, containing message sent by one of them
+ */
+request_type ChatBox::createMessages(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	request_type request;
+	json response = {</span>
+		{ "action", "chat" },
+		{ "player", msg["player"] },
+		{ "data", msg["data"] },
+	};
+<span style = "background-color:#dfd">	for (auto&amp; i : players_.getArray()) {
+		if (i.getPlayerId() != msg["player"]) {
+			response["who"].push_back(i.getPlayerId());
+		}
+	}
+	request.push_back(response);
+	return request;
+}</span></pre>
+	</body>
+</html>

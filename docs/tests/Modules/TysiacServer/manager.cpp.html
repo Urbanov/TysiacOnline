@@ -1,0 +1,70 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		manager.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "manager.h"
+
+/**
+ * @brief adds a session to list of valid sessions
+ *  
+ * @param session session to be registered
+ */
+void SessionManager::registerSession(const std::shared_ptr&lt;Session&gt;&amp; session)
+<span style = "background-color:#dfd">{
+	sessions_.insert(std::make_pair(session-&gt;getId(), session));
+}</span>
+
+
+/**
+ * @brief removes session from list of valid sessions
+ * 
+ * @param id id of session to be removed
+ */
+void SessionManager::unregisterSession(size_t id)
+<span style = "background-color:#dfd">{
+	if (!sessions_.erase(id)) {
+		throw std::runtime_error("SessionManager: trying to unregister non-existing session");</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+
+/**
+ * @brief calls game engine to interpret the message and sends a response to clients
+ * 
+ * @param id id of client who sent the message
+ * @param message actual message
+ */
+void SessionManager::interpret(size_t id, const std::string&amp; message)
+<span style = "background-color:#dfd">{
+	auto return_data = game_.doWork(id, message);
+	for (auto&amp; msg : return_data) {
+		for (auto user_id : msg.second) {
+			if (auto session = sessions_.at(user_id).lock()) {
+				session-&gt;write(msg.first);</span>
+			} 
+<span style = "background-color:#dfd">			else {</span>
+<span style = "background-color:#fdd">				throw std::runtime_error("SessionManager: trying to send data to non-existing session");</span>
+<span style = "background-color:#dfd">			}
+		}
+	}
+}</span>
+
+
+/**
+ * @brief returns the number of connected clients
+ * 
+ * @return number of valid sessions
+ */
+size_t SessionManager::connected() const
+<span style = "background-color:#dfd">{
+	return sessions_.size();
+}</span></pre>
+	</body>
+</html>

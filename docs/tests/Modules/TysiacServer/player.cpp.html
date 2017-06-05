@@ -1,0 +1,76 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		player.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "player.hpp"
+
+Player::Player(int player_id, std::string&amp; nick)
+<span style = "background-color:#dfd">	: ready_(false)
+	, player_id_(player_id)
+	, nick_(nick)
+{}</span>
+
+Player::Player(const Player&amp; other)
+<span style = "background-color:#dfd">	: ready_(other.ready_)
+	, score_(other.score_)
+	, player_id_(other.player_id_)
+	, nick_(other.nick_)
+	, players_deck_(other.players_deck_)
+{}</span>
+
+Player&amp; Player::operator=(const Player&amp; other)
+<span style = "background-color:#dfd">{
+	ready_ = other.ready_;
+	score_ = other.score_;
+	player_id_ = other.player_id_;
+	nick_ = other.nick_;
+	players_deck_ = other.players_deck_;
+	return *this;
+}</span>
+
+<span style = "background-color:#dfd">Player::~Player() {}</span>
+
+bool Player::operator==(const Player&amp; other) const
+<span style = "background-color:#fdd">{
+	return (player_id_ == other.player_id_);
+}</span>
+
+PlayersDeck&amp; Player::getPlayersDeck()
+<span style = "background-color:#dfd">{
+	return players_deck_;
+}</span>
+
+size_t Player::getPlayerId() const
+<span style = "background-color:#dfd">{
+	return player_id_;
+}</span>
+
+const std::string&amp; Player::getPlayersNick() const
+<span style = "background-color:#dfd">{
+	return nick_;
+}</span>
+
+Score&amp; Player::getScoreClass()
+<span style = "background-color:#dfd">{
+	return score_;
+}</span>
+
+bool Player::getReady() const
+<span style = "background-color:#dfd">{
+	return ready_;
+}</span>
+
+void Player::setReady(bool ready)
+<span style = "background-color:#dfd">{
+	ready_ = ready;
+}</span>
+</pre>
+	</body>
+</html>

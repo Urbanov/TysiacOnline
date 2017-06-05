@@ -1,0 +1,70 @@
+<html>
+    <title>
+        TysiacServer.exe
+    </title>
+    <head>
+        <link rel="stylesheet" type="text/css" href="third-party/css/style.css">
+        <script src="third-party/RGraph/libraries/RGraph.common.core.js" ></script>
+        <script src="third-party/RGraph/libraries/RGraph.common.dynamic.js" ></script>
+        <script src="third-party/RGraph/libraries/RGraph.common.tooltips.js"></script>
+        <script src="third-party/RGraph/libraries/RGraph.pie.js" ></script>
+
+        <script src="third-party/JQuery/jquery-1.11.1.min.js"></script>
+    </head>
+    <body>
+    <script>
+        $(document).ready(function ()
+        {
+            
+            new RGraph.Pie('pi_25c454f2-fe83-4172-9ef1-403536d641fa', [1821, 234])
+                .set('labels', ['Cover 88%','Uncover 12%'])
+                .set('colors', ['rgb(0,255,0)','rgb(255,0,0)'])
+                .set('linewidth', 1)
+                .set('shadow', true)
+                .set('tooltips', ['cover 1821 lines (88%)', 'uncover 234 lines (12%)'])
+                .set('tooltips.event', 'onmousemove')
+                .set('labels.sticks', true)
+                .set('labels.sticks.length', 10)
+                .draw();
+            
+
+      })
+    </script>
+    
+        <h1>
+        TysiacServer.exe
+        </h1>
+        <h4>
+        
+        </h4>
+        <table id="rounded-corner">
+            <thead>
+                <tr>
+                    <th scope="col" class="rounded-left">Coverage</th>
+                    <th scope="col">Total lines</th>
+                    <th scope="col" class="rounded-right">Items</th>
+                </tr>
+            </thead> 
+            <tfoot>
+                <tr>
+                <td colspan="2" class="rounded-foot-left"></td>
+                <td class="rounded-foot-right"></td>
+                </tr>
+            </tfoot>            
+            <tbody>
+                
+                <tr>
+                    <td>
+            <canvas id="pi_25c454f2-fe83-4172-9ef1-403536d641fa" width="280" height="100">Cover 88%</canvas>
+                    </td>            
+                    <td>2055</td>
+                    <td>            
+                       <a href="Modules/TysiacServer.html">C:\Users\Admin\Source\Repos\TysiacOnline\server\TysiacServer\x64\Test\TysiacServer.exe</a> 
+                      
+                    </td>
+                </tr>        
+                
+            </tbody>
+        </table>
+    </body>
+</html>

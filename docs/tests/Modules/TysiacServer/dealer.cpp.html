@@ -1,0 +1,136 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		dealer.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "dealer.hpp"
+
+Dealer::Dealer(Deck&amp; deck, PlayersCollection&amp; players)
+<span style = "background-color:#dfd">	: user_id_(-1)
+	, counter(0)
+	, Controller(deck, players)
+{}</span>
+
+Dealer::~Dealer()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief responsible for parsing message and passing card from one player to another
+ *
+ * @param msg message from player who gives away a card
+ * @param stage_ current server's stage
+ *
+ * @return new server's stage
+ */
+stage Dealer::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#fdd">{
+	for (const auto&amp; i : msg["data"]) {
+		giveCardToPeer(i["player"], i["card"]);
+	}
+	return DEALING;
+}</span>
+
+/**
+ * @brief Create messages that will be sent to users
+ *
+ * @param msg message from player 
+ */
+request_type Dealer::createMessages(const json&amp; msg, stage stage_)
+<span style = "background-color:#fdd">{
+	request_type request = createMessage(msg);
+	request.push_back(createFinalBidMessage());
+	return request;
+}</span>
+
+/**
+ * @brief removes card from owner's deck and adds it to another player
+ *
+  *@param player_id id of a new owner
+ * @param card_number index of tramsfered card in owner's deck
+ */
+stage Dealer::giveCardToPeer(int player_id, std::size_t card_number)
+<span style = "background-color:#dfd">{
+	if (player_id == (players_.getPlayer(HIGHEST)).getPlayerId() || (player_id == user_id_ &amp;&amp;</span>
+		counter == 1)) {
+<span style = "background-color:#fdd">		throw std::logic_error("Giving card to the wrong player");</span>
+	}
+<span style = "background-color:#dfd">	Card tmp = players_.getPlayer(HIGHEST).getPlayersDeck().playCard(card_number);</span>
+<span style = "background-color:#fdd">	tmp.setIsUsed(false);
+	players_.getPlayer(X, player_id).getPlayersDeck().addCard(tmp);
+	user_id_ = static_cast&lt;int&gt;(players_.getPlayer(X, player_id).getPlayerId());
+	if (++counter == TWO_CARDS) {
+		return PLAYING;</span>
+	}
+<span style = "background-color:#fdd">	return DEALING;
+}</span>
+
+/**
+ * @brief calling Deck::dealcards()
+ */
+void Dealer::dealCards()
+<span style = "background-color:#fdd">{</span>
+	//deck_.shuffle();
+<span style = "background-color:#fdd">	deck_.dealCards(players_.getArray());
+}</span>
+
+/**
+ * @brief creates messages containing information about the result of dealing cards for other players in a room
+ *
+ * @param msg message from player
+ * @return vector of created messages
+ */
+request_type Dealer::createMessage(const json&amp; msg) const
+<span style = "background-color:#fdd">{
+	request_type request;
+	for (const auto&amp; i : msg["data"]) {
+		json feedback = {</span>
+			{ "action", "deal" },
+			{ "who", i["player"] }
+		};
+<span style = "background-color:#fdd">		Card tmp = players_.getPlayer(X, i["player"]).getPlayersDeck().getDeck().back();
+		json tmp1 = {</span>
+			{ "figure", tmp.getFigure() },
+			{ "suit", tmp.getSuit() }
+		};
+<span style = "background-color:#fdd">		feedback["data"].push_back(tmp1);
+		request.push_back(feedback);
+	}
+	return request;
+}</span>
+
+/**
+ *@ brief used after every round
+ */
+void Dealer::reset()
+<span style = "background-color:#dfd">{
+	user_id_ = -1;
+	counter = 0;
+}</span>
+
+/**
+ * @brief create message for bidding winner, calling him to make final bid
+ *
+ * @return message containing information about his maximum and minimum possible bid
+ */
+json Dealer::createFinalBidMessage() const
+<span style = "background-color:#fdd">{
+	json feedback;
+	feedback["action"] = "bid";
+	feedback["player"] = players_.getPlayer(HIGHEST).getPlayerId();
+	feedback["data"] = {</span>
+		{ "value", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+		{ "id", feedback["player"] },
+		{ "min", players_.getPlayer(HIGHEST).getScoreClass().getClaim() },
+		{ "max", players_.getPlayer(HIGHEST).getPlayersDeck().getMaxValue(true) }
+	};
+<span style = "background-color:#fdd">	feedback["who"] = feedback["player"];
+	return feedback;
+}</span></pre>
+	</body>
+</html>

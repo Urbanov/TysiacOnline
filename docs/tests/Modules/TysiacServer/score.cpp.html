@@ -1,0 +1,134 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		score.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "score.hpp"
+
+Score::Score()
+<span style = "background-color:#dfd">	: score_(0)
+	, temp_score_(0)
+	, claim_(0)
+{}</span>
+
+Score::~Score()
+<span style = "background-color:#dfd">{}</span>
+
+int Score::getScore() const
+<span style = "background-color:#dfd">{
+	return score_;
+}</span>
+
+/**
+ * @brief adds points to player's score
+ *
+ * @param score amount of points to add
+ */
+void Score::addScore(int score)
+<span style = "background-color:#dfd">{
+	score_ += score;
+}</span>
+
+
+/**
+* @brief adds points to player's temporary score
+*
+* @param temp_score amount of points to add
+*/
+void Score::addToTurnScore(int temp_score)
+<span style = "background-color:#dfd">{
+	temp_score_ += temp_score;
+}</span>
+
+int Score::getTurnScore() const
+<span style = "background-color:#dfd">{
+	return temp_score_;
+}</span>
+
+/**
+ * @brief resets points player has achieved (either temporary or all)
+ *
+ * @param isFinal reset depends on the situation, if game is over isFinal is set to true and all score is cleared
+ */
+void Score::reset(bool isFinal)
+<span style = "background-color:#dfd">{
+	temp_score_ = 0;
+	claim_ = 0;
+	if (isFinal) {
+		score_ = 0;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief set player's new claim, can be only higher than previous
+ * 
+ * @param claim new value to set
+ * @param isFinal set to true if it's final bid after regular bidding
+ */
+bool Score::setClaim(int claim, bool isFinal)
+<span style = "background-color:#dfd">{
+	if (isFinal) {</span>
+<span style = "background-color:#fdd">		if (claim &gt;= claim_) {
+			claim_ = claim;
+			return true;</span>
+		}
+	}
+<span style = "background-color:#dfd">	if (claim &gt; claim_ || claim == -1) {
+		claim_ = claim;
+		return true;</span>
+	}
+<span style = "background-color:#dfd">	else throw std::logic_error("Trying to claim lower or equal");
+}</span>
+
+int Score::getClaim() const
+<span style = "background-color:#dfd">{
+	return claim_;
+}</span>
+
+
+/**
+ * @brief calculates whether player achieved claimed bid value or not
+ */
+void Score::roundScore()
+<span style = "background-color:#dfd">{
+	if (claim_ != -1) {
+		if (temp_score_ &gt;= claim_) {
+			temp_score_ = claim_;</span>
+		}
+<span style = "background-color:#dfd">		else {
+			temp_score_ = (-1)*claim_;
+		}</span>
+	}
+<span style = "background-color:#dfd">	else if (score_ &gt;= NO_TAX_CAP) {</span>
+<span style = "background-color:#fdd">		temp_score_ = 0;</span>
+	}
+<span style = "background-color:#fdd">	else {</span>
+<span style = "background-color:#dfd">		temp_score_ = round(temp_score_);</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+/**
+ * @brief round turn score to value divisible by ten
+ */
+int Score::round(int number) const
+<span style = "background-color:#dfd">{
+	int temp = number % 10;
+	if (temp != 0) {
+		if (temp &gt;= 5) {
+			number += (10 - temp);</span>
+		}
+<span style = "background-color:#dfd">		else {
+			number -= temp;</span>
+		}
+	}
+<span style = "background-color:#dfd">	return number;
+}</span>
+</pre>
+	</body>
+</html>

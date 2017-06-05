@@ -1,0 +1,114 @@
+<html>
+	<head>
+	<link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+	<title>
+		adder.cpp
+	</title>
+	<body onload="prettyPrint()">
+        <h4></h4>
+		<pre class="prettyprint lang-cpp linenums">
+#include "adder.hpp"
+
+Adder::Adder(Deck&amp; deck, PlayersCollection&amp; players)
+<span style = "background-color:#dfd">	: Controller(deck, players)
+{}</span>
+
+Adder::~Adder()
+<span style = "background-color:#dfd">{}</span>
+
+/**
+ * @brief adds new player to a room
+ *
+ * @param msg add request sent by a player
+ * @param stage_ current server's stage
+ * @return new server's stage
+ */
+stage Adder::changeModel(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	std::string tmp = msg["data"];
+	if (!players_.addPlayer(msg["player"], tmp)) {
+		return FAIL;</span>
+	}
+<span style = "background-color:#dfd">	return ADDING;
+}</span>
+
+/**
+ * @brief creates messages updating player's information
+ about players in room
+ *
+ * @param msg add request sent to room by player
+ * @param stage_ current server's stage
+ * @return a vector of messages 
+ */
+request_type Adder::createMessages(const json&amp; msg, const stage stage_)
+<span style = "background-color:#dfd">{
+	json feedback;
+	request_type request;
+	request = informOtherPlayers(msg, stage_);
+	request.push_back(acceptNewPlayer(msg, stage_));
+	return request;
+}</span>
+
+
+bool Adder::isFull() const
+<span style = "background-color:#fdd">{
+	return (players_.getArray().size() == MAX_PLAYERS);
+}</span>
+
+/**
+ * @brief creates response for player's add request
+ *
+ * @param msg add request sent to room by player
+ * @param stage_ current server's stage
+ * @return a response for player's add request
+ */
+json Adder::acceptNewPlayer(const json&amp; msg, stage stage_) const
+<span style = "background-color:#dfd">{
+	json feedback;
+	request_type request, player_info = players_.getPlayerInfo();
+	feedback["who"] = msg["player"];
+	feedback["action"] = "add";
+	if (stage_ != FAIL) {
+		feedback["error"] = false;
+		for (auto&amp; i : player_info) {
+			feedback["data"].push_back(i);
+		}</span>
+	}
+<span style = "background-color:#dfd">	else {
+		feedback["error"] = true;</span>
+	}
+<span style = "background-color:#dfd">	return feedback;
+}</span>
+
+/**
+ * @brief creates message containing information about new player who joined the room
+ *
+ * @param msg an add request
+ * @param stage_ current server's stage
+ * @return a vector of messages that will update client side
+ */
+request_type Adder::informOtherPlayers(const json&amp; msg, stage stage_) const
+<span style = "background-color:#dfd">{
+	request_type request, player_info = players_.getPlayerInfo();
+	json feedback;
+	if (stage_ != FAIL) {
+		if (players_.getArray().size() &gt; 1) {
+			feedback.clear();
+			feedback["action"] = "new_player";
+			for (auto&amp; i : player_info) {
+				if (i["id"] != msg["player"]) {
+					feedback["who"].push_back(i["id"]);</span>
+				}
+<span style = "background-color:#dfd">				else {
+					feedback["data"] = i;
+				}
+			}
+			request.push_back(feedback);</span>
+		}
+	}
+<span style = "background-color:#dfd">	return request;
+}</span></pre>
+	</body>
+</html>

@@ -1,3 +1,3 @@
 # TysiacOnline
 
-Moze kiedys skonczymy
+Online card game in client-server architecture

@@ -6,7 +6,6 @@ using json = nlohmann::json;
 using players = std::vector<Player>;
 using request_type = std::vector<json>;
 
-const int MAX_PLAYERS = 3; /// max number of players per room
 
 enum iterators {
 	X = -1, /// want to find player based of his ID
@@ -35,3 +34,6 @@ private:
 	players players_; /// vector of Player class objects
 	std::vector<size_t> it_; /// vector of variables that are used to get proper player based on game's stage
 };
+
+
+const int MAX_PLAYERS = 3; /// max number of players per room

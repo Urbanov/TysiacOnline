@@ -25,9 +25,9 @@ private:
 	void createNewRoom(const json& msg);
 	bool useEmptyRoom(const json& msg);
 
-	std::vector<std::vector<size_t>> players_;
-	std::vector<PRoom> active_games_;
-	request_type feedback_;
-	req server_response_;
-	std::size_t room_counter_;
+	std::vector<std::vector<size_t>> players_; /// all connected players' IDs
+	std::vector<PRoom> active_games_; /// All rooms existing at the moment
+	request_type feedback_; /// vector of messages that need to be sent to players
+	req server_response_; /// vector of modified messages with removed "who" field and added separately vector of players to sent those messages to
+	std::size_t room_counter_; /// counts the number of rooms
 };

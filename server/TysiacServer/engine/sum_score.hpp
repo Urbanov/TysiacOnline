@@ -1,7 +1,6 @@
 #pragma once
 #include "controller.hpp"
 
-const int POINTS_WINNING_CAP = 1000; /// if any player gets this amount of points, game is over
 
 /**
  * @brief part of controller, class manages calculating and adding players' score, also creating score-type messages for players
@@ -24,4 +23,5 @@ private:
 	void createEndMessageBody(json& message, request_type& request);
 	request_type createMessage(stage stages_);
 	std::vector<PController>& controllers_;
+	const int POINTS_WINNING_CAP = 1000; /// if any player gets this amount of points, game is over
 };

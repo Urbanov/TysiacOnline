@@ -2,7 +2,6 @@
 #include "controller.hpp"
 #include "starter.hpp"
 
-const int MIN_RAISE = 10; ///minimum raise of claim 
 
 /**
  * @brief class manages bidding and gives cards to a player who bade the highest
@@ -33,5 +32,6 @@ private:
 	request_type createStarterMessages(const json& msg, stage stage_);
 
 	mutable json additional_cards_; /// cards which are given to bidding winner
-	Starter starter_; 
+	Starter starter_;  /// Manages ready-type messages and tarts the game
+	const int MIN_RAISE = 10; ///minimum raise of claim 
 };

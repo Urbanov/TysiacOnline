@@ -31,6 +31,6 @@ private:
 	bool findSameSuitHigherFigure(std::vector<int>& correct_cards, const Card& card, suits superior) const;
 	bool findCard(figures figure, suits suit) const;
 	
-	std::vector<Card> deck_;
-	std::size_t max_value_;
+	std::vector<Card> deck_; /// vector of cards representing player's cards
+	std::size_t max_value_; /// max theoretical value of player's cards
 };

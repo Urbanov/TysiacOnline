@@ -2,7 +2,6 @@
 #include "controller.hpp"
 #include "sum_score.hpp"
 
-const int MAX_TURNS = 8; /// number of turns each round
 
 /**
  * @brief part of controller, class handling gameplay. Handles all play-type messages from clients. Modifies model and creates update messages for players
@@ -37,10 +36,11 @@ private:
 	bool allPlayersPlayedCard();
 
 	Card findSuperiorCard();
-	SumScore score_;
-	std::vector<std::pair<int, Card>> vec_;
-	int turn_counter_;
-	int current_starting_player_;
-	suits super_suit_;
-	bool is_marriage_;
+	SumScore score_; /// representing player's score and claim
+	std::vector<std::pair<int, Card>> vec_; /// used when calculating the winner of a turn
+	int turn_counter_; /// counts up to 8, then round is over
+	int current_starting_player_; /// ID of current player to start a turn
+	suits super_suit_; /// representing current trumpsuit
+	bool is_marriage_; /// set to true if there is marriage, used only to produce game-type update messages for clients
+	const int MAX_TURNS = 8; /// number of turns each round
 };

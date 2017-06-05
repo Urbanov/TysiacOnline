@@ -1,7 +1,6 @@
 #pragma once
 #include <stdexcept>
 
-const int NO_TAX_CAP = 800;
 
 /**
  * @brief class representing player's score
@@ -24,4 +23,7 @@ private:
 	int score_; /// player's overall score
 	int temp_score_; /// player's turn score
 	int claim_; /// player's claim's value
+
 };
+
+const int NO_TAX_CAP = 800; /// If a player gets at least that amount of points, he can earn points only if he is the winner of bidding

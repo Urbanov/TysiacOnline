@@ -2,8 +2,12 @@
 #include "controller.hpp"
 #include "sum_score.hpp"
 
-const int MAX_TURNS = 8;
+const int MAX_TURNS = 8; /// number of turns each round
 
+/**
+ * @brief part of controller, class handling gameplay. Handles all play-type messages from clients. Modifies model and creates update messages for players
+ * @see Controller
+ */
 class Game : public Controller {
 public:
 	Game(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers);

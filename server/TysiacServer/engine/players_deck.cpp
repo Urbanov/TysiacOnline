@@ -13,7 +13,7 @@ std::vector<Card>& PlayersDeck::getDeck()
 }
 
 /**
- * @biref Adds a card to player's deck and set is an unused
+ * @brief Adds a card to player's deck and set is an unused
  *
  * @param card object added to player's deck
  */
@@ -24,7 +24,7 @@ void PlayersDeck::addCard(const Card& card)
 }
 
 /**
- * @biref gets player's deck for card with given index
+ * @brief gets player's deck for card with given index
  *
  * @param card_number index of card in card vector deck_
  * @return Card with found at given index
@@ -270,7 +270,7 @@ bool PlayersDeck::findCard(figures figure, suits suit) const
  * @brief check if card deck_card is higher than played
  *
  * @param played one of the cards in comparison
-
+ *
  */
 bool PlayersDeck::isHigher(const Card& played, const Card& deck_card, suits superior) const
 {

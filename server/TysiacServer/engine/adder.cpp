@@ -74,7 +74,7 @@ json Adder::acceptNewPlayer(const json& msg, stage stage_) const
 /**
  * @brief creates message containing information about new player who joined the room
  *
- * @parm msg an add request
+ * @param msg an add request
  * @param stage_ current server's stage
  * @return a vector of messages that will update client side
  */

@@ -103,7 +103,7 @@ json LeaveBuster::returnMessageHeader(const json& msg, request_type& request)
  * 
  * @param feedback message containing additional information
  * @param request vector of messages sent to players
- * @param stage current room's stage
+ * @param stage_ current room's stage
  */
 void LeaveBuster::messageIfGameHadStarted(json& feedback, request_type& request, const stage stage_)
 {

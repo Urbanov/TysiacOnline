@@ -12,7 +12,7 @@ Bidder::~Bidder()
  * @brief responsible for checking if player's bid is correct and executing it
  *
  * @param msg bid message from the most recent bidding player
- * @param stage current server's stage
+ * @param stage_ current server's stage
  * @return new server's stage
  */
 stage Bidder::bid(const json& msg, const stage stage_) const

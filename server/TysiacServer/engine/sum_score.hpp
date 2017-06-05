@@ -1,8 +1,7 @@
 #pragma once
 #include "controller.hpp"
 
-const int POINTS_WINNING_CAP = 1000;
-
+const int POINTS_WINNING_CAP = 1000; 
 class SumScore : public Controller {
 public:
 	SumScore(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers);

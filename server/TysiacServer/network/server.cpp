@@ -18,16 +18,15 @@ Server::~Server()
 
 
 /**
- * @brief starts the server on given address and port
+ * @brief starts the server on given port
  * 
- * @param address address of the server
  * @param port port of the server
  */
-void Server::run(const std::string& address, size_t port)
+void Server::run(size_t port)
 {
 	boost::system::error_code error_code;
 	boost::asio::ip::tcp::endpoint endpoint(
-		boost::asio::ip::address::from_string(address), static_cast<unsigned short>(port)
+		boost::asio::ip::tcp::v4(), static_cast<unsigned short>(port)
 	);
 	acceptor_.open(endpoint.protocol(), error_code);
 	acceptor_.set_option(boost::asio::socket_base::reuse_address(true), error_code);

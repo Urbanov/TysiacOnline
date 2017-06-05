@@ -18,7 +18,7 @@ private:
 	request_type createMessage(const json& msg) const;
 	json createFinalBidMessage() const;
 
-	int user_id_; /// keeps id of player that was recently given a card
-	int counter; /// counts how many cards have been given so far
-	const int TWO_CARDS = 2; ///max number f cards a player can give to others
+	int user_id_; ///< keeps id of player that was recently given a card
+	int counter; ///< counts how many cards have been given so far
+	const int TWO_CARDS = 2; ///<max number f cards a player can give to others
 };

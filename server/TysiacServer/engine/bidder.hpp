@@ -31,7 +31,7 @@ private:
 	request_type createCardDealingMessages() const;
 	request_type createStarterMessages(const json& msg, stage stage_);
 
-	mutable json additional_cards_; /// cards which are given to bidding winner
-	Starter starter_;  /// Manages ready-type messages and tarts the game
-	const int MIN_RAISE = 10; ///minimum raise of claim 
+	mutable json additional_cards_; ///< cards which are given to bidding winner
+	Starter starter_;  ///< Manages ready-type messages and tarts the game
+	const int MIN_RAISE = 10; ///<minimum raise of claim 
 };

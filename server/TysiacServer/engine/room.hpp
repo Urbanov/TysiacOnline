@@ -27,10 +27,10 @@ public:
 private:
 	void setNewRoomStage(stage temp_stage);
 	void stageEqualsSummingUp(const json& msg, request_type& tmp, request_type& request, stage temp_stage);
-	std::vector<PController> employees_; ///vector of all game controllers
-	GameManager& man_; /// manager that keeps all games and passes messages to them
-	size_t room_id_; ///unique id based on which game is identified
-	Deck deck_; ///deck used in this game
-	PlayersCollection players_; ///collection of players that enter the room
-	stage stage_; /// current game's stage
+	std::vector<PController> employees_; ///<vector of all game controllers
+	GameManager& man_; ///< manager that keeps all games and passes messages to them
+	size_t room_id_; ///<unique id based on which game is identified
+	Deck deck_; ///<deck used in this game
+	PlayersCollection players_; ///<collection of players that enter the room
+	stage stage_; ///< current game's stage
 };

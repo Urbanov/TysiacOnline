@@ -20,9 +20,9 @@ public:
 	bool getReady() const;
 	void setReady(bool ready);
 private:
-	bool ready_; /// is player ready to start game when room is full
-	Score score_; /// player's score
-	int player_id_; /// player's unique ID
-	std::string nick_; /// player's nickname
-	PlayersDeck players_deck_; /// class containing player's cards
+	bool ready_; ///< is player ready to start game when room is full
+	Score score_; ///< player's score
+	int player_id_; ///< player's unique ID
+	std::string nick_; ///< player's nickname
+	PlayersDeck players_deck_; ///< class containing player's cards
 };

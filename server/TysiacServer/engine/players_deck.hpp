@@ -2,7 +2,7 @@
 #include <vector>
 #include "card.hpp"
 
-const int MIN_VALUE = 120; /// value of full deck
+const int MIN_VALUE = 120; ///< value of full deck
 
 /**
  * @brief class representing player's cards, calculating cards's value and finding available cards given cards on the table
@@ -31,6 +31,6 @@ private:
 	bool findSameSuitHigherFigure(std::vector<int>& correct_cards, const Card& card, suits superior) const;
 	bool findCard(figures figure, suits suit) const;
 	
-	std::vector<Card> deck_; /// vector of cards representing player's cards
-	std::size_t max_value_; /// max theoretical value of player's cards
+	std::vector<Card> deck_; ///< vector of cards representing player's cards
+	std::size_t max_value_; ///< max theoretical value of player's cards
 };

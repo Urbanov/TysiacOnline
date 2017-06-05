@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+
 /**
  * @brief all figures present in Thousand game, and not_a_figure which is like a NULL value
  */
@@ -43,7 +44,7 @@ public:
 	const suits getSuit() const;
 	const Card& isBigger(const Card& other, suits suit) const;
 private:
-	mutable bool is_used_; /// cards are not deleted from user decks, this variable defines whether they are still in use, or not
-	suits suit_; /// card's parameter
-	figures figure_; /// card's parameter
+	mutable bool is_used_; ///< cards are not deleted from user decks, this variable defines whether they are still in use, or not
+	suits suit_; ///< card's parameter
+	figures figure_; ///< card's parameter
 };

@@ -17,5 +17,5 @@ private:
 	void messageIfGameHadStarted(json& feedback, request_type& request, const stage stage_);
 	stage newRoomStage(const stage stage_);
 	void resetIfGameHadStarted(const stage stage_);
-	std::vector<PController>& controllers_; ///reference on all controllers, used to allow class to reset the game
+	std::vector<PController>& controllers_; ///<reference on all controllers, used to allow class to reset the game
 };

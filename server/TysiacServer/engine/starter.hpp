@@ -18,5 +18,5 @@ public:
 private:
 	bool isReadyToStart() const;
 	void prepareToStart(stage stage_);
-	bool is_full_; /// set to true if room is full
+	bool is_full_; ///< set to true if room is full
 };

@@ -187,5 +187,11 @@
     <None Include="..\..\client\scripts\card.js">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\client\index.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\view.js">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

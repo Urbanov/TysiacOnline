@@ -323,7 +323,7 @@ class Controller {
 		}
 		this.game.round = 0;
 		if (msg.player == -1) {
-			var text = "jakis tchorz wyszedl i koniec gry :/";
+			var text = "Game has ended because one player left the room";
 		}
 		else {
 			var text = this.game.getPlayerById(msg.player).nick + " wins the game with " + msg.data + " points!";

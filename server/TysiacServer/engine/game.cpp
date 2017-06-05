@@ -159,7 +159,7 @@ std::vector<Card> Game::cardsOnTable()
  *
  * @param player playing card
  * @param feedback message to the player
- * @request vector of messages to players
+ * @param request vector of messages to players
  */
 void Game::createAdvancedMessage(Player& player, json& feedback, request_type& request)
 {

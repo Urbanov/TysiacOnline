@@ -130,7 +130,7 @@ void SumScore::resetAll()
 /**
  * @brief creates boddy for end-type message containing ID and points of winner
  *
- * @param end-type message heading that needs to be filled with data
+ * @param message end-type message heading that needs to be filled with data
  * @param request message container
  */
 void SumScore::createEndMessageBody(json& message, request_type& request)

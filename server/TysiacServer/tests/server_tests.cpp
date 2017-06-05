@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(StartAndStopServer)
 {
 	// start a server and check if its accepting new connections
 	Server server;
-	server.run("127.0.0.1", 2137);
+	server.run(2137);
 	BOOST_CHECK(server.isAccepting());
 
 	// stop and check again
@@ -128,12 +128,13 @@ BOOST_AUTO_TEST_CASE(StartAndStopServer)
 BOOST_AUTO_TEST_CASE(WriteAndReadWithWebsocket)
 {
 	Server server;
-	server.run("127.0.0.1", 2137);
+	server.run(2137);
 
 	// connect with one client and receive welcome message
 	Client client1;
 	client1.connect();
 	auto json = json::parse(client1.read().c_str());
+	BOOST_CHECK(json["action"] == "welcome");
 	
 	// connect with another client
 	Client client2;

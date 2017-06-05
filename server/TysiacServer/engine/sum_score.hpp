@@ -1,7 +1,12 @@
 #pragma once
 #include "controller.hpp"
 
-const int POINTS_WINNING_CAP = 1000; 
+const int POINTS_WINNING_CAP = 1000; /// if any player gets this amount of points, game is over
+
+/**
+ * @brief part of controller, class manages calculating and adding players' score, also creating score-type messages for players
+ * @see Controller
+ */
 class SumScore : public Controller {
 public:
 	SumScore(Deck& deck, PlayersCollection& players, std::vector<PController>& controllers);

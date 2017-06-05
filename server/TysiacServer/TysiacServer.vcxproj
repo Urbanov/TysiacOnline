@@ -295,7 +295,7 @@
     <ClInclude Include="network\session.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\client\client.html" />
+    <None Include="..\..\client\index.html" />
     <None Include="..\..\client\scripts\card.js" />
     <None Include="..\..\client\scripts\controller.js" />
     <None Include="..\..\client\scripts\main.js" />

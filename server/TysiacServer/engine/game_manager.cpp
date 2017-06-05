@@ -121,7 +121,7 @@ void GameManager::attachClientIdsToMessage()
 /**
  * @brief method used by rooms to pass messages to the manager
  *
- * @param vector of messages to be sent to players
+ * @param msg vector of messages to be sent to players
  */
 void GameManager::pushMessage(const request_type& msg)
 {
@@ -169,7 +169,7 @@ void GameManager::addPlayer(const json& msg)
 /**
  * @brief checks if received message is one of the following types: ADD, SHOW, or DISCONNECT
  *
- * @param player's message
+ * @param msg player's message
  * @return true if message is any of mentioned types, false otherwise
  */
 bool GameManager::runGame(const json& msg)

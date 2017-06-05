@@ -2,7 +2,7 @@
 #include "controller.hpp"
 
 /**
- *@ brief part of controller, responsible for broadcasting chat messages
+ * @brief part of controller, responsible for broadcasting chat messages
  */
 class ChatBox : public Controller {
 public:

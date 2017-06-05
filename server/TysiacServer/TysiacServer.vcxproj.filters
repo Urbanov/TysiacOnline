@@ -172,13 +172,13 @@
     <None Include="..\..\client\styles.css">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\client\client.html">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\client\scripts\main.js">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\client\scripts\player.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\client\scripts\view.js">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\client\scripts\controller.js">
@@ -190,7 +190,7 @@
     <None Include="..\..\client\scripts\card.js">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\client\scripts\view.js">
+    <None Include="..\..\client\index.html">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

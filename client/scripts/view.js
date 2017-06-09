@@ -287,7 +287,7 @@ class View {
 		$("#login_modal").on("shown.bs.modal", function () {
 			$("#nickname").focus();
 		});
-		$("#login").keypress($.proxy(function (event) {
+		$("#nickname").keypress($.proxy(function (event) {
 			if (event.keyCode == 13) {
 				event.preventDefault();
 				controller.login();

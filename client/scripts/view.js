@@ -40,8 +40,7 @@ class View {
 		var elem = $("<img/>", {
 			id: "card" + index,
 			src: this.path(card),
-			class: "card",
-			title: index
+			class: "card"
 		});
 		elem.click({ value: index }, $.proxy(controller.self.useCard, controller.self));
 		return elem;

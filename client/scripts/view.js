@@ -287,6 +287,11 @@ class View {
 		$("#login_modal").on("shown.bs.modal", function () {
 			$("#nickname").focus();
 		});
+		$("#login").keypress($.proxy(function (event) {
+			if (event.keyCode == 13) {
+				controller.login();
+			}
+		}, controller));
 		$("#login").click($.proxy(controller.login, controller));
 		$("#ready").click($.proxy(controller.sendReady, controller));
 		$("#win_modal .btn").click($.proxy(function () {
